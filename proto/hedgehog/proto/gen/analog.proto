@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package hedgehog.proto.gen;
+
+message AnalogRequest {
+    repeated uint32 sensors = 1;
+}
+
+message AnalogUpdate {
+    map<uint32, uint32> sensors = 1;
+}

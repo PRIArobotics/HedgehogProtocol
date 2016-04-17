@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hedgehog.proto.gen;
+
+import "hedgehog/proto/gen/analog.proto";
+
+message HedgehogMessage {
+    oneof command {
+        AnalogRequest analog_request = 1;
+        AnalogUpdate analog_update = 2;
+    }
+}
