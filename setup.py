@@ -36,7 +36,7 @@ setup(
         'Programming Language :: Python :: 3',
     ],
 
-    keywords='hedgehog robotics protobuf',
+    keywords='hedgehog robotics protobuf zmq',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -46,7 +46,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['protobuf>=3.0.*'],
+    install_requires=['protobuf>=3.0.*', 'pyzmq'],
 
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
