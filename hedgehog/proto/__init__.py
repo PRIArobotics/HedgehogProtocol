@@ -11,6 +11,11 @@ def _message_init(func):
 
 
 @_message_init
+def parse(msg, data):
+    msg.ParseFromString(data)
+
+
+@_message_init
 def AnalogRequest(msg, sensors):
     msg.analog_request.sensors.extend(sensors)
 
