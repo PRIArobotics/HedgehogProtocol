@@ -2,6 +2,14 @@ from . import messages
 
 
 class RouterWrapper:
+    """
+    A wrapper for ZMQ router sockets used to send Hedgehog Protobuf messages.
+
+    At this time, it is assumed that each message consists of one (opaque, binary) header part, and one message part
+    (a valid, Protobuf-encoded `HedgehogMessage`).
+    Therefore, `send` and `recv` take/return two values, respectively: a binary header, and a `HedgehogMessage` object.
+    The object is serialized/parsed before being sent to the underlying socket.
+    """
     def __init__(self, socket):
         self.socket = socket
 
@@ -18,6 +26,15 @@ class RouterWrapper:
 
 
 class DealerWrapper:
+    """
+    A wrapper for ZMQ dealer sockets used to send Hedgehog Protobuf messages.
+
+    At this time, it is assumed that each message consists of one message part (a valid, Protobuf-encoded
+    `HedgehogMessage`).
+    Therefore, `send` and `recv` take/return one value, respectively: a `HedgehogMessage` object.
+    The object is serialized/parsed before being sent to the underlying socket.
+    """
+
     def __init__(self, socket):
         self.socket = socket
 

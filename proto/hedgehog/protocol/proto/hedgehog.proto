@@ -4,9 +4,13 @@ package hedgehog.protocol.proto;
 
 import "hedgehog/protocol/proto/analog.proto";
 
+// `HedgehogMessage` represents a message of any kind of the Hedgehog protocol.
 message HedgehogMessage {
+    // Contains any one of the different Hedgehog commands.
     oneof command {
+        // Request for one or more analog sensor values
         AnalogRequest analog_request = 1;
+        // Update of one or more analog sensor values
         AnalogUpdate analog_update = 2;
     }
 }
