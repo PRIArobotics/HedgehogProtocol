@@ -1,4 +1,4 @@
-Protobuf message definitions for Hedgehog
-=========================================
+Protocol definitions for Hedgehog
+=================================
 
-This project contains Protobuf message definitions for the Hedgehog Educational Robotics Controller.
+This project contains protocol definitions for the Hedgehog Educational Robotics Controller.

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package hedgehog.proto.gen;
+package hedgehog.protocol.proto;
 
-import "hedgehog/proto/gen/analog.proto";
+import "hedgehog/protocol/proto/analog.proto";
 
 message HedgehogMessage {
     oneof command {

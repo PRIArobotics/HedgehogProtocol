@@ -1,5 +1,5 @@
-from .gen.analog_pb2 import *
-from .gen.hedgehog_pb2 import *
+from .proto.analog_pb2 import *
+from .proto.hedgehog_pb2 import *
 
 
 def _message_init(func):

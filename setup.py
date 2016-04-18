@@ -18,11 +18,11 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='hedgehog-proto',
+    name='hedgehog-protocol',
     version='0.0.0',
-    description='Protobuf message definitions for Hedgehog',
+    description='Protocol definitions for Hedgehog',
     long_description=long_description,
-    url="https://github.com/PRIArobotics/HedgehogProto",
+    url="https://github.com/PRIArobotics/HedgehogProtocol",
     author="Clemens Koza",
     author_email="koza@pria.at",
     license="AGPLv3+",
@@ -36,7 +36,7 @@ setup(
         'Programming Language :: Python :: 3',
     ],
 
-    keywords='hedgehog protobuf robotics',
+    keywords='hedgehog robotics protobuf',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

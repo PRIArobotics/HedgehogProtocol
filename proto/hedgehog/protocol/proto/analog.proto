@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package hedgehog.proto.gen;
+package hedgehog.protocol.proto;
 
 message AnalogRequest {
     repeated uint32 sensors = 1;
