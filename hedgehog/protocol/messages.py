@@ -29,3 +29,9 @@ def AnalogRequest(msg, sensors):
 def AnalogUpdate(msg, sensors):
     """Creates a `HedgehogMessage` object representing an `AnalogUpdate` command."""
     msg.analog_update.sensors.update(sensors)
+
+
+@_message_init
+def AnalogPullupAction(msg, sensors):
+    """Creates a `HedgehogMessage` object representing an `AnalogPullupAction` command."""
+    msg.analog_pullup_action.sensors.update(sensors)
