@@ -3,6 +3,7 @@ syntax = "proto3";
 package hedgehog.protocol.proto;
 
 import "hedgehog/protocol/proto/analog.proto";
+import "hedgehog/protocol/proto/digital.proto";
 
 // `HedgehogMessage` represents a message of any kind of the Hedgehog protocol.
 message HedgehogMessage {
@@ -13,5 +14,10 @@ message HedgehogMessage {
         AnalogRequest analog_request = 1;
         AnalogUpdate analog_update = 2;
         AnalogStateAction analog_state_action = 3;
+        // digital.proto
+        DigitalRequest digital_request = 4;
+        DigitalUpdate digital_update = 5;
+        DigitalStateAction digital_state_action = 6;
+        DigitalAction digital_action = 7;
     }
 }

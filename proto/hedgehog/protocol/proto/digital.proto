@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hedgehog.protocol.proto;
+
+// Request for one or more digital sensor values
+message DigitalRequest {
+    repeated uint32 sensors = 1;
+}
+
+// Update of one or more digital sensor values
+message DigitalUpdate {
+    map<uint32, bool> sensors = 1;
+}
+
+// Set one or more digital sensor states
+message DigitalStateAction {
+    message State {
+        bool pullup = 1;
+        bool output = 2;
+    }
+
+    map<uint32, State> sensors = 1;
+}
+
+// Set one or more digital output levels
+message DigitalAction {
+    map<uint32, bool> sensors = 1;
+}
