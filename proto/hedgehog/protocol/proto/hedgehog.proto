@@ -4,6 +4,7 @@ package hedgehog.protocol.proto;
 
 import "hedgehog/protocol/proto/analog.proto";
 import "hedgehog/protocol/proto/digital.proto";
+import "hedgehog/protocol/proto/motor.proto";
 
 // `HedgehogMessage` represents a message of any kind of the Hedgehog protocol.
 message HedgehogMessage {
@@ -19,5 +20,11 @@ message HedgehogMessage {
         DigitalUpdate digital_update = 5;
         DigitalStateAction digital_state_action = 6;
         DigitalAction digital_action = 7;
+        // motor.proto
+        MotorAction motor_action = 8;
+        MotorRequest motor_request = 9;
+        MotorUpdate motor_update = 10;
+        MotorStateUpdate motor_state_update = 11;
+        MotorSetPositionAction motor_set_position_action = 12;
     }
 }
