@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hedgehog.protocol.proto;
+
+// Set one servo target position
+message ServoAction {
+    uint32 port = 1;
+    uint32 position = 2;
+}
+
+// Set one servo state
+message ServoStateAction {
+    uint32 port = 1;
+    bool active = 2;
+}

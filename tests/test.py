@@ -1,6 +1,6 @@
 import unittest
 from hedgehog.protocol import messages
-from hedgehog.protocol.messages import analog, digital, motor
+from hedgehog.protocol.messages import analog, digital, motor, servo
 
 
 class TestMessages(unittest.TestCase):
@@ -78,6 +78,18 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.position, old.position)
+
+    def test_servo_action(self):
+        old = messages.servo.Action(0, 512)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.position, old.position)
+
+    def test_servo_state_action(self):
+        old = messages.servo.StateAction(0, True)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.active, old.active)
 
 
 if __name__ == '__main__':
