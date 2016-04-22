@@ -22,28 +22,28 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(new.pullup, old.pullup)
 
     def test_digital_request(self):
-        payload = [0, 1]
-
-        msg = messages.digital.Request(payload)
-        msg = messages.parse(msg.serialize())
-        self.assertEqual(msg.sensors, payload)
+        old = messages.digital.Request(0)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
 
     def test_digital_update(self):
-        payload = {0: True, 1: False}
-
-        msg = messages.digital.Update(payload)
-        msg = messages.parse(msg.serialize())
-        self.assertEqual(msg.sensors, payload)
+        old = messages.digital.Update(0, True)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.value, old.value)
 
     def test_digital_state_action(self):
-        payload = {
-            0: messages.digital.StateAction.State(True, False),
-            1: messages.digital.StateAction.State(False, True),
-        }
+        old = messages.digital.StateAction(0, True, False)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.pullup, old.pullup)
+        self.assertEqual(new.output, old.output)
 
-        msg = messages.digital.StateAction(payload)
-        msg = messages.parse(msg.serialize())
-        self.assertEqual(msg.sensors, payload)
+    def test_digital_action(self):
+        old = messages.digital.Action(0, True)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.level, old.level)
 
 
 if __name__ == '__main__':
