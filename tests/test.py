@@ -5,28 +5,21 @@ from hedgehog.protocol.messages import analog, digital
 
 class TestMessages(unittest.TestCase):
     def test_analog_request(self):
-        payload = [0, 1]
-
-        msg = messages.analog.Request(payload)
-        msg = messages.parse(msg.serialize())
-        self.assertEqual(msg.sensors, payload)
+        old = messages.analog.Request(0)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
 
     def test_analog_update(self):
-        payload = {0: 2, 1: 1000}
-
-        msg = messages.analog.Update(payload)
-        msg = messages.parse(msg.serialize())
-        self.assertEqual(msg.sensors, payload)
+        old = messages.analog.Update(0, 2)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.value, old.value)
 
     def test_analog_state_action(self):
-        payload = {
-            0: messages.analog.StateAction.State(True),
-            1: messages.analog.StateAction.State(False),
-        }
-
-        msg = messages.analog.StateAction(payload)
-        msg = messages.parse(msg.serialize())
-        self.assertEqual(msg.sensors, payload)
+        old = messages.analog.StateAction(0, True)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.pullup, old.pullup)
 
     def test_digital_request(self):
         payload = [0, 1]

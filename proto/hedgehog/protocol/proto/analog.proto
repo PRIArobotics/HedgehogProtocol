@@ -2,21 +2,19 @@ syntax = "proto3";
 
 package hedgehog.protocol.proto;
 
-// Request for one or more analog sensor values
+// Request for one analog sensor value
 message AnalogRequest {
-    repeated uint32 sensors = 1;
+    uint32 port = 1;
 }
 
-// Update of one or more analog sensor values
+// Update of one analog sensor value
 message AnalogUpdate {
-    map<uint32, uint32> sensors = 1;
+    uint32 port = 1;
+    uint32 value = 2;
 }
 
-// Set one or more analog sensor states
+// Set one analog sensor state
 message AnalogStateAction {
-    message State {
-        bool pullup = 1;
-    }
-
-    map<uint32, State> sensors = 1;
+    uint32 port = 1;
+    bool pullup = 2;
 }

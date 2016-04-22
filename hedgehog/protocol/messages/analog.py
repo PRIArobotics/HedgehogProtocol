@@ -6,45 +6,46 @@ from . import Message, register
 class Request(Message):
     _command_oneof = 'analog_request'
 
-    def __init__(self, sensors):
-        self.sensors = sensors
+    def __init__(self, port):
+        self.port = port
 
     @classmethod
     def _parse(cls, msg):
-        return cls([port for port in msg.sensors])
+        return cls(msg.port)
 
     def _serialize(self, msg):
-        msg.sensors.extend(self.sensors)
+        msg.port = self.port
 
 
 @register
 class Update(Message):
     _command_oneof = 'analog_update'
 
-    def __init__(self, sensors):
-        self.sensors = sensors
+    def __init__(self, port, value):
+        self.port = port
+        self.value = value
 
     @classmethod
     def _parse(cls, msg):
-        return cls({port: value for port, value in msg.sensors.items()})
+        return cls(msg.port, msg.value)
 
     def _serialize(self, msg):
-        msg.sensors.update(self.sensors)
+        msg.port = self.port
+        msg.value = self.value
 
 
 @register
 class StateAction(Message):
-    State = collections.namedtuple('State', ('pullup',))
-
     _command_oneof = 'analog_state_action'
 
-    def __init__(self, sensors):
-        self.sensors = sensors
+    def __init__(self, port, pullup):
+        self.port = port
+        self.pullup = pullup
 
     @classmethod
     def _parse(cls, msg):
-        return cls({port: StateAction.State(state.pullup) for port, state in msg.sensors.items()})
+        return cls(msg.port, msg.pullup)
 
     def _serialize(self, msg):
-        for port, state in self.sensors.items():
-            msg.sensors[port].pullup = state.pullup
+        msg.port = self.port
+        msg.pullup = self.pullup
