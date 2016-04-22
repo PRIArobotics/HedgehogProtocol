@@ -1,45 +1,56 @@
 import unittest
 from hedgehog.protocol import messages
+from hedgehog.protocol.messages import analog, digital
 
 
 class TestMessages(unittest.TestCase):
     def test_analog_request(self):
-        msg = messages.AnalogRequest([0, 1])
-        self.assertEqual(msg.WhichOneof('command'), 'analog_request')
-        self.assertEqual(msg.analog_request.sensors, [0, 1])
+        payload = [0, 1]
+
+        msg = messages.analog.Request(payload)
+        msg = messages.parse(msg.serialize())
+        self.assertEqual(msg.sensors, payload)
 
     def test_analog_update(self):
-        msg = messages.AnalogUpdate({0: 2, 1: 1000})
-        self.assertEqual(msg.WhichOneof('command'), 'analog_update')
-        self.assertEqual(msg.analog_update.sensors, {0: 2, 1: 1000})
+        payload = {0: 2, 1: 1000}
+
+        msg = messages.analog.Update(payload)
+        msg = messages.parse(msg.serialize())
+        self.assertEqual(msg.sensors, payload)
 
     def test_analog_state_action(self):
-        msg = messages.AnalogStateAction({0: messages.AnalogState(True)})
-        self.assertEqual(msg.WhichOneof('command'), 'analog_state_action')
-        self.assertEqual(len(msg.analog_state_action.sensors), 1)
-        self.assertEqual(msg.analog_state_action.sensors.get(0).pullup, True)
+        payload = {
+            0: messages.analog.StateAction.State(True),
+            1: messages.analog.StateAction.State(False),
+        }
+
+        msg = messages.analog.StateAction(payload)
+        msg = messages.parse(msg.serialize())
+        self.assertEqual(msg.sensors, payload)
 
     def test_digital_request(self):
-        msg = messages.DigitalRequest([0, 1])
-        self.assertEqual(msg.WhichOneof('command'), 'digital_request')
-        self.assertEqual(msg.digital_request.sensors, [0, 1])
+        payload = [0, 1]
+
+        msg = messages.digital.Request(payload)
+        msg = messages.parse(msg.serialize())
+        self.assertEqual(msg.sensors, payload)
 
     def test_digital_update(self):
-        msg = messages.DigitalUpdate({0: True, 1: False})
-        self.assertEqual(msg.WhichOneof('command'), 'digital_update')
-        self.assertEqual(msg.digital_update.sensors, {0: True, 1: False})
+        payload = {0: True, 1: False}
+
+        msg = messages.digital.Update(payload)
+        msg = messages.parse(msg.serialize())
+        self.assertEqual(msg.sensors, payload)
 
     def test_digital_state_action(self):
-        msg = messages.DigitalStateAction({0: messages.DigitalState(True, False)})
-        self.assertEqual(msg.WhichOneof('command'), 'digital_state_action')
-        self.assertEqual(len(msg.digital_state_action.sensors), 1)
-        self.assertEqual(msg.digital_state_action.sensors.get(0).pullup, True)
-        self.assertEqual(msg.digital_state_action.sensors.get(0).output, False)
+        payload = {
+            0: messages.digital.StateAction.State(True, False),
+            1: messages.digital.StateAction.State(False, True),
+        }
 
-    def test_digital_action(self):
-        msg = messages.DigitalAction({0: True, 1: False})
-        self.assertEqual(msg.WhichOneof('command'), 'digital_action')
-        self.assertEqual(msg.digital_action.sensors, {0: True, 1: False})
+        msg = messages.digital.StateAction(payload)
+        msg = messages.parse(msg.serialize())
+        self.assertEqual(msg.sensors, payload)
 
 
 if __name__ == '__main__':
