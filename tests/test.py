@@ -1,5 +1,6 @@
 import unittest
-from hedgehog.protocol import messages
+import zmq
+from hedgehog.protocol import messages, sockets
 from hedgehog.protocol.messages import analog, digital, motor, servo
 
 
@@ -90,6 +91,32 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.active, old.active)
+
+
+class TestSockets(unittest.TestCase):
+    def test_sockets(self):
+        context = zmq.Context()
+        endpoint = "inproc://test"
+        router = context.socket(zmq.ROUTER)
+        router.bind(endpoint)
+        router = sockets.RouterWrapper(router)
+        dealer = context.socket(zmq.DEALER)
+        dealer.connect(endpoint)
+        dealer = sockets.DealerWrapper(dealer)
+
+        old = messages.analog.Request(0)
+        dealer.send(old)
+        header, new = router.recv()
+        self.assertEqual(new.port, old.port)
+
+        old = messages.analog.Update(0, 100)
+        router.send(header, old)
+        new = dealer.recv()
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.value, old.value)
+
+        router.close()
+        dealer.close()
 
 
 if __name__ == '__main__':

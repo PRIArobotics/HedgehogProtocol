@@ -14,7 +14,7 @@ class RouterWrapper:
         self.socket = socket
 
     def send(self, header, message):
-        parts = [header, message.SerializeToString()]
+        parts = [header, message.serialize()]
         self.socket.send_multipart(parts)
 
     def recv(self):
@@ -39,7 +39,7 @@ class DealerWrapper:
         self.socket = socket
 
     def send(self, message):
-        self.socket.send(message.SerializeToString())
+        self.socket.send(message.serialize())
 
     def recv(self):
         return messages.parse(self.socket.recv())
