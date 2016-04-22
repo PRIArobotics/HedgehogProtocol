@@ -10,7 +10,9 @@ def register(class_):
     return class_
 
 
-def parse(msg):
+def parse(data):
+    msg = hedgehog.protocol.proto.hedgehog_pb2.HedgehogMessage()
+    msg.ParseFromString(data)
     return registry[msg.WhichOneof('command')].parse(msg)
 
 
@@ -35,4 +37,4 @@ class Message:
     def serialize(self):
         msg = hedgehog.protocol.proto.hedgehog_pb2.HedgehogMessage()
         self._serialize(self._get_oneof(msg))
-        return msg
+        return msg.SerializeToString()
