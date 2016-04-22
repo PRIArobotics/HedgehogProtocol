@@ -14,55 +14,51 @@ enum MotorState {
     FREEZE = 2;
 }
 
-// Set one or more actions for motors
+// Set one motor action
 message MotorAction {
-    message Action {
-        // the state to set
-        MotorState state = 1;
-        // the amount (power, velocity) to set for the action
-        sint32 amount = 2;
-        // set one of these to run the action until a goal position is reached
-        oneof position {
-            sint32 relative = 3;
-            sint32 absolute = 4;
-        }
-        // if a goal position was given, upon reaching the position,
-        // the motor will go into this state (with amount = 0 if relevant), i.e.:
-        // POWER: turn off
-        // VELOCITY: brake
-        // FREEZE: freeze
-        MotorState reached_state = 5;
+    uint32 port = 1;
+    // the state to set
+    MotorState state = 2;
+    // the amount (power, velocity) to set for the action
+    sint32 amount = 3;
+    // if a goal position is given, upon reaching the position,
+    // the motor will go into this state (with amount = 0 if relevant), i.e.:
+    // POWER: turn off
+    // VELOCITY: brake
+    // FREEZE: freeze
+    MotorState reached_state = 4;
+    // set one of these to run the action until a goal position is reached
+    oneof position {
+        sint32 relative = 5;
+        sint32 absolute = 6;
     }
-
-    map<uint32, Action> motors = 1;
 }
 
-// Request for one or more motor states
+// Request for one motor state
 message MotorRequest {
-    repeated uint32 motors = 1;
+    uint32 port = 1;
 }
 
-// Update of one or more motor states
+// Update of one motor state
 // Only velocity and position can change on their own
 // If the current command is a position command, the state can change as well;
-// that change is signaled by MotorStateUpdate
+// that change is signaled separately by MotorStateUpdate
 message MotorUpdate {
-    message Update {
-        sint32 velocity = 1;
-        sint32 position = 2;
-    }
-
-    map<uint32, Update> motors = 1;
+    uint32 port = 1;
+    sint32 velocity = 2;
+    sint32 position = 3;
 }
 
-// Update of one or more motor states
+// Update of one motor state
 // This update is only triggered when a motor's command had a goal position
 // and that position was reached.
 message MotorStateUpdate {
-    map<uint32, MotorState> motors = 1;
+    uint32 port = 1;
+    MotorState state = 2;
 }
 
-// Set one or more motors' position counters
+// Set one motor's position counter
 message MotorSetPositionAction {
-    map<uint32, sint32> motors = 1;
+    uint32 port = 1;
+    sint32 position = 2;
 }

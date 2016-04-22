@@ -1,6 +1,6 @@
 import unittest
 from hedgehog.protocol import messages
-from hedgehog.protocol.messages import analog, digital
+from hedgehog.protocol.messages import analog, digital, motor
 
 
 class TestMessages(unittest.TestCase):
@@ -44,6 +44,40 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.level, old.level)
+
+    def test_motor_action(self):
+        old = messages.motor.Action(0, messages.motor.POWER, 0, relative=-100)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.state, old.state)
+        self.assertEqual(new.amount, old.amount)
+        self.assertEqual(new.reached_state, old.reached_state)
+        self.assertEqual(new.relative, old.relative)
+        self.assertEqual(new.absolute, old.absolute)
+
+    def test_motor_request(self):
+        old = messages.motor.Request(0)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+
+    def test_motor_update(self):
+        old = messages.motor.Update(0, 100, 1000)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.velocity, old.velocity)
+        self.assertEqual(new.position, old.position)
+
+    def test_motor_state_update(self):
+        old = messages.motor.StateUpdate(0, messages.motor.POWER)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.state, old.state)
+
+    def test_motor_set_position_action(self):
+        old = messages.motor.SetPositionAction(0, 0)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.position, old.position)
 
 
 if __name__ == '__main__':
