@@ -1,4 +1,3 @@
-import collections
 from . import Message, register
 
 
