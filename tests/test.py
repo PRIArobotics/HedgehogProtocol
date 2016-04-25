@@ -1,7 +1,7 @@
 import unittest
 import zmq
 from hedgehog.protocol import messages, sockets
-from hedgehog.protocol.messages import analog, digital, motor, servo
+from hedgehog.protocol.messages import analog, digital, motor, servo, process
 
 
 class TestMessages(unittest.TestCase):
@@ -91,6 +91,32 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.active, old.active)
+
+    def test_process_execute_request(self):
+        old = messages.process.ExecuteRequest('cat', working_dir='/home/hedgehog')
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.args, old.args)
+        self.assertEqual(new.working_dir, old.working_dir)
+
+    def test_process_stream_action(self):
+        old = messages.process.StreamAction(123, messages.process.STDIN, b'abc')
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.pid, old.pid)
+        self.assertEqual(new.fileno, old.fileno)
+        self.assertEqual(new.chunk, old.chunk)
+
+    def test_process_stream_update(self):
+        old = messages.process.StreamUpdate(123, messages.process.STDIN, b'abc')
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.pid, old.pid)
+        self.assertEqual(new.fileno, old.fileno)
+        self.assertEqual(new.chunk, old.chunk)
+
+    def test_process_exit_update(self):
+        old = messages.process.ExitUpdate(123, 0)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.pid, old.pid)
+        self.assertEqual(new.exit_code, old.exit_code)
 
 
 class TestSockets(unittest.TestCase):

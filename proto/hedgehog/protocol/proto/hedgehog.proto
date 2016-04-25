@@ -6,6 +6,7 @@ import "hedgehog/protocol/proto/analog.proto";
 import "hedgehog/protocol/proto/digital.proto";
 import "hedgehog/protocol/proto/motor.proto";
 import "hedgehog/protocol/proto/servo.proto";
+import "hedgehog/protocol/proto/process.proto";
 
 // `HedgehogMessage` represents a message of any kind of the Hedgehog protocol.
 message HedgehogMessage {
@@ -30,5 +31,11 @@ message HedgehogMessage {
         // servo.proto
         ServoAction servo_action = 13;
         ServoStateAction servo_state_action = 14;
+        // process.proto
+        ProcessExecuteRequest process_execute_request = 15;
+        ProcessExecuteReply process_execute_reply = 16;
+        ProcessStreamAction process_stream_action = 17;
+        ProcessStreamUpdate process_stream_update = 18;
+        ProcessExitUpdate process_exit_update = 19;
     }
 }
