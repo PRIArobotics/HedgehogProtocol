@@ -1,2 +1,4 @@
 # Include the license file
 include LICENSE
+# Include protoc-generated source files
+include hedgehog/protocol/proto/*.py
