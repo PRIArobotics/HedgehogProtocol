@@ -1,5 +1,5 @@
 from . import Message, register
-from hedgehog.protocol.proto.motor_pb2 import POWER, VELOCITY, FREEZE
+from hedgehog.protocol.proto.motor_pb2 import POWER, VELOCITY, BRAKE
 
 
 @register
