@@ -6,12 +6,13 @@ enum MotorState {
     // The motor receives constant power
     // set amount to 0 (or skip it) to turn the motor off
     POWER = 0;
-    // The motor is controlled to have a constant velocity
-    // set amount to 0 (or skip it) to do active braking
-    VELOCITY = 1;
     // The motor is braked by connecting its two pins
     // The amount field specifies the duty cycle with which the motor is braked
-    BRAKE = 2;
+    // setting amount to 0 (or skipping it) is equivalent to a full brake
+    BRAKE = 1;
+    // The motor is controlled to have a constant velocity
+    // set amount to 0 (or skip it) to actively keeping in one position
+    VELOCITY = 2;
 }
 
 // Set one motor action
@@ -24,8 +25,8 @@ message MotorAction {
     // if a goal position is given, upon reaching the position,
     // the motor will go into this state (with amount = 0 if relevant), i.e.:
     // POWER: turn off
+    // BRAKE: full brake
     // VELOCITY: freeze
-    // BRAKE: brake
     MotorState reached_state = 4;
     // set one of these to run the action until a goal position is reached
     oneof position {
