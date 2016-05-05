@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hedgehog.protocol.proto;
 
+import "hedgehog/protocol/proto/ack.proto";
 import "hedgehog/protocol/proto/analog.proto";
 import "hedgehog/protocol/proto/digital.proto";
 import "hedgehog/protocol/proto/motor.proto";
@@ -13,29 +14,31 @@ message HedgehogMessage {
     // Contains any one of the different Hedgehog commands.
     // See their respective files for command information.
     oneof command {
+        // ack.proto
+        Acknowledgement acknowledgement = 1;
         // analog.proto
-        AnalogRequest analog_request = 1;
-        AnalogUpdate analog_update = 2;
-        AnalogStateAction analog_state_action = 3;
+        AnalogRequest analog_request = 2;
+        AnalogUpdate analog_update = 3;
+        AnalogStateAction analog_state_action = 4;
         // digital.proto
-        DigitalRequest digital_request = 4;
-        DigitalUpdate digital_update = 5;
-        DigitalStateAction digital_state_action = 6;
-        DigitalAction digital_action = 7;
+        DigitalRequest digital_request = 5;
+        DigitalUpdate digital_update = 6;
+        DigitalStateAction digital_state_action = 7;
+        DigitalAction digital_action = 8;
         // motor.proto
-        MotorAction motor_action = 8;
-        MotorRequest motor_request = 9;
-        MotorUpdate motor_update = 10;
-        MotorStateUpdate motor_state_update = 11;
-        MotorSetPositionAction motor_set_position_action = 12;
+        MotorAction motor_action = 9;
+        MotorRequest motor_request = 10;
+        MotorUpdate motor_update = 11;
+        MotorStateUpdate motor_state_update = 12;
+        MotorSetPositionAction motor_set_position_action = 13;
         // servo.proto
-        ServoAction servo_action = 13;
-        ServoStateAction servo_state_action = 14;
+        ServoAction servo_action = 14;
+        ServoStateAction servo_state_action = 15;
         // process.proto
-        ProcessExecuteRequest process_execute_request = 15;
-        ProcessExecuteReply process_execute_reply = 16;
-        ProcessStreamAction process_stream_action = 17;
-        ProcessStreamUpdate process_stream_update = 18;
-        ProcessExitUpdate process_exit_update = 19;
+        ProcessExecuteRequest process_execute_request = 16;
+        ProcessExecuteReply process_execute_reply = 17;
+        ProcessStreamAction process_stream_action = 18;
+        ProcessStreamUpdate process_stream_update = 19;
+        ProcessExitUpdate process_exit_update = 20;
     }
 }

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hedgehog.protocol.proto;
+
+//Acknowledgement codes for commands that have no other response
+enum AcknowledgementCode {
+    OK = 0;
+}
+
+message Acknowledgement {
+    AcknowledgementCode code = 1;
+    string message = 2;
+}
