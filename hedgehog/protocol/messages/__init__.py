@@ -18,6 +18,7 @@ def parse(data):
 
 class Message:
     _command_oneof = None
+    async = False
 
     @classmethod
     def _get_oneof(cls, msg):

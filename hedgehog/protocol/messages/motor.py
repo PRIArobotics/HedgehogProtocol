@@ -70,6 +70,7 @@ class Update(Message):
 @register
 class StateUpdate(Message):
     _command_oneof = 'motor_state_update'
+    async = True
 
     def __init__(self, port, state):
         self.port = port
