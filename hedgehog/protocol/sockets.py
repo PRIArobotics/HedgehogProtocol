@@ -1,48 +1,77 @@
 from . import messages
 
 
-class RouterWrapper:
-    """
-    A wrapper for ZMQ router sockets used to send Hedgehog Protobuf messages.
+def _rindex(mylist, elem):
+    return len(mylist) - mylist[::-1].index(elem) - 1
 
-    At this time, it is assumed that each message consists of one (opaque, binary) header part, and one message part
-    (a valid, Protobuf-encoded `HedgehogMessage`).
-    Therefore, `send` and `recv` take/return two values, respectively: a binary header, and a `HedgehogMessage` object.
-    The object is serialized/parsed before being sent to the underlying socket.
+
+class DealerRouterWrapper:
+    """
+    A wrapper for ZMQ dealer & router sockets used to send Hedgehog Protobuf messages.
+
+    Each message consists of zero or more (opaque, binary) header frames, one (empty) delimiter frame,
+    and one or more command frames (valid, Protobuf-encoded `HedgehogMessage`s).
+    Serializing/parsing is handled by this class.
+
+    Therefore, `send` and `recv` take/return the headers, and one `HedgehogMessage` object.
+    The `_multipart` variants take/return the headers, and a list of `HedgehogMessage` objects.
     """
     def __init__(self, socket):
         self.socket = socket
 
-    def send(self, header, message):
-        parts = [header, message.serialize()]
-        self.socket.send_multipart(parts)
+    def send(self, header, msg):
+        self.send_multipart(header, [msg])
 
     def recv(self):
-        header, payload = self.socket.recv_multipart()
-        return header, messages.parse(payload)
+        header, msgs = self.recv_multipart()
+        assert len(msgs) == 1
+        return header, msgs[0]
+
+    def send_multipart(self, header, msgs):
+        parts = header + [b''] + [msg.serialize() for msg in msgs]
+        self.socket.send_multipart(parts)
+
+    def recv_multipart(self):
+        parts = self.socket.recv_multipart()
+        delim = _rindex(parts, b'')
+        header, msgs = parts[:delim], [messages.parse(msg) for msg in parts[delim + 1:]]
+        return header, msgs
 
     def close(self):
         self.socket.close()
 
 
-class DealerWrapper:
+class ReqWrapper:
     """
-    A wrapper for ZMQ dealer sockets used to send Hedgehog Protobuf messages.
+    A wrapper for ZMQ req sockets used to send Hedgehog Protobuf messages.
 
-    At this time, it is assumed that each message consists of one message part (a valid, Protobuf-encoded
-    `HedgehogMessage`).
-    Therefore, `send` and `recv` take/return one value, respectively: a `HedgehogMessage` object.
-    The object is serialized/parsed before being sent to the underlying socket.
+    Each message consists of one (empty) delimiter frame,
+    and one or more command frames (valid, Protobuf-encoded `HedgehogMessage`s).
+    Serializing/parsing is handled by this class.
+
+    Therefore, `send` and `recv` take/return one `HedgehogMessage` object.
+    The `_multipart` variants take/return a list of `HedgehogMessage` objects.
     """
 
     def __init__(self, socket):
         self.socket = socket
 
-    def send(self, message):
-        self.socket.send(message.serialize())
+    def send(self, msg):
+        self.send_multipart([msg])
 
     def recv(self):
-        return messages.parse(self.socket.recv())
+        msgs = self.recv_multipart()
+        assert len(msgs) == 1
+        return msgs[0]
+
+    def send_multipart(self, msgs):
+        parts = [msg.serialize() for msg in msgs]
+        self.socket.send_multipart(parts)
+
+    def recv_multipart(self):
+        parts = self.socket.recv_multipart()
+        msgs = [messages.parse(msg) for msg in parts]
+        return msgs
 
     def close(self):
         self.socket.close()

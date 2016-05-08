@@ -131,24 +131,27 @@ class TestSockets(unittest.TestCase):
         endpoint = "inproc://test"
         router = context.socket(zmq.ROUTER)
         router.bind(endpoint)
-        router = sockets.RouterWrapper(router)
-        dealer = context.socket(zmq.DEALER)
-        dealer.connect(endpoint)
-        dealer = sockets.DealerWrapper(dealer)
+        router = sockets.DealerRouterWrapper(router)
+        req = context.socket(zmq.REQ)
+        req.connect(endpoint)
+        req = sockets.ReqWrapper(req)
 
-        old = analog.Request(0)
-        dealer.send(old)
-        header, new = router.recv()
-        self.assertEqual(new.port, old.port)
+        old = [analog.Request(0), digital.Request(0)]
+        req.send_multipart(old)
+        header, new = router.recv_multipart()
+        self.assertEqual(new[0].port, old[0].port)
+        self.assertEqual(new[1].port, old[1].port)
 
-        old = analog.Update(0, 100)
-        router.send(header, old)
-        new = dealer.recv()
-        self.assertEqual(new.port, old.port)
-        self.assertEqual(new.value, old.value)
+        old = [analog.Update(0, 100), digital.Update(0, True)]
+        router.send_multipart(header, old)
+        new = req.recv_multipart()
+        self.assertEqual(new[0].port, old[0].port)
+        self.assertEqual(new[0].value, old[0].value)
+        self.assertEqual(new[1].port, old[1].port)
+        self.assertEqual(new[1].value, old[1].value)
 
         router.close()
-        dealer.close()
+        req.close()
 
 
 if __name__ == '__main__':
