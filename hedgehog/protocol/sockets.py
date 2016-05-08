@@ -15,6 +15,7 @@ class DealerRouterWrapper:
 
     Therefore, `send` and `recv` take/return the headers, and one `HedgehogMessage` object.
     The `_multipart` variants take/return the headers, and a list of `HedgehogMessage` objects.
+    The `_raw` variants work on binary messages instead of `HedgehogMessage` objects.
     """
     def __init__(self, socket):
         self.socket = socket
@@ -27,15 +28,31 @@ class DealerRouterWrapper:
         assert len(msgs) == 1
         return header, msgs[0]
 
+    def send_raw(self, header, msg_raw):
+        self.send_multipart_raw(header, [msg_raw])
+
+    def recv_raw(self):
+        header, msgs_raw = self.recv_multipart_raw()
+        assert len(msgs_raw) == 1
+        return header, msgs_raw[0]
+
     def send_multipart(self, header, msgs):
-        parts = header + [b''] + [msg.serialize() for msg in msgs]
-        self.socket.send_multipart(parts)
+        msgs_raw = [msg.serialize() for msg in msgs]
+        self.send_multipart_raw(header, msgs_raw)
 
     def recv_multipart(self):
+        header, msgs_raw = self.recv_multipart_raw()
+        return header, [messages.parse(msg) for msg in msgs_raw]
+
+    def send_multipart_raw(self, header, msgs_raw):
+        parts = header + [b''] + msgs_raw
+        self.socket.send_multipart(parts)
+
+    def recv_multipart_raw(self):
         parts = self.socket.recv_multipart()
         delim = _rindex(parts, b'')
-        header, msgs = parts[:delim], [messages.parse(msg) for msg in parts[delim + 1:]]
-        return header, msgs
+        header, msgs_raw = parts[:delim], parts[delim + 1:]
+        return header, msgs_raw
 
     def close(self):
         self.socket.close()
@@ -51,6 +68,7 @@ class ReqWrapper:
 
     Therefore, `send` and `recv` take/return one `HedgehogMessage` object.
     The `_multipart` variants take/return a list of `HedgehogMessage` objects.
+    The `_raw` variants work on binary messages instead of `HedgehogMessage` objects.
     """
 
     def __init__(self, socket):
@@ -64,14 +82,29 @@ class ReqWrapper:
         assert len(msgs) == 1
         return msgs[0]
 
+    def send_raw(self, msg_raw):
+        self.send_multipart_raw([msg_raw])
+
+    def recv_raw(self):
+        msgs_raw = self.recv_multipart_raw()
+        assert len(msgs_raw) == 1
+        return msgs_raw[0]
+
     def send_multipart(self, msgs):
         parts = [msg.serialize() for msg in msgs]
-        self.socket.send_multipart(parts)
+        self.send_multipart_raw(parts)
 
     def recv_multipart(self):
-        parts = self.socket.recv_multipart()
+        parts = self.recv_multipart_raw()
         msgs = [messages.parse(msg) for msg in parts]
         return msgs
+
+    def send_multipart_raw(self, msgs_raw):
+        self.socket.send_multipart(msgs_raw)
+
+    def recv_multipart_raw(self):
+        msgs_raw = self.socket.recv_multipart()
+        return msgs_raw
 
     def close(self):
         self.socket.close()
