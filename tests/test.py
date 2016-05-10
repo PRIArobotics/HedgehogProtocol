@@ -74,16 +74,11 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(new.position, old.position)
 
     def test_servo_action(self):
-        old = servo.Action(0, 512)
-        new = messages.parse(old.serialize())
-        self.assertEqual(new.port, old.port)
-        self.assertEqual(new.position, old.position)
-
-    def test_servo_state_action(self):
-        old = servo.StateAction(0, True)
+        old = servo.Action(0, True, 512)
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.active, old.active)
+        self.assertEqual(new.position, old.position)
 
     def test_process_execute_request(self):
         old = process.ExecuteRequest('cat', working_dir='/home/hedgehog')

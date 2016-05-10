@@ -29,12 +29,11 @@ message HedgehogMessage {
         MotorSetPositionAction motor_set_position_action = 11;
         // servo.proto
         ServoAction servo_action = 12;
-        ServoStateAction servo_state_action = 13;
         // process.proto
-        ProcessExecuteRequest process_execute_request = 14;
-        ProcessExecuteReply process_execute_reply = 15;
-        ProcessStreamAction process_stream_action = 16;
-        ProcessStreamUpdate process_stream_update = 17;
-        ProcessExitUpdate process_exit_update = 18;
+        ProcessExecuteRequest process_execute_request = 13;
+        ProcessExecuteReply process_execute_reply = 14;
+        ProcessStreamAction process_stream_action = 15;
+        ProcessStreamUpdate process_stream_update = 16;
+        ProcessExitUpdate process_exit_update = 17;
     }
 }
