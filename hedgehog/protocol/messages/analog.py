@@ -31,20 +31,3 @@ class Update(Message):
     def _serialize(self, msg):
         msg.port = self.port
         msg.value = self.value
-
-
-@register
-class StateAction(Message):
-    _command_oneof = 'analog_state_action'
-
-    def __init__(self, port, pullup):
-        self.port = port
-        self.pullup = pullup
-
-    @classmethod
-    def _parse(cls, msg):
-        return cls(msg.port, msg.pullup)
-
-    def _serialize(self, msg):
-        msg.port = self.port
-        msg.pullup = self.pullup

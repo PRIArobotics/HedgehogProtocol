@@ -1,7 +1,7 @@
 import unittest
 import zmq
 from hedgehog.protocol import messages, sockets
-from hedgehog.protocol.messages import ack, analog, digital, motor, servo, process
+from hedgehog.protocol.messages import ack, io, analog, digital, motor, servo, process
 
 
 class TestMessages(unittest.TestCase):
@@ -10,6 +10,12 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new.code, old.code)
         self.assertEqual(new.message, old.message)
+
+    def test_io_state_action(self):
+        old = io.StateAction(0, io.ANALOG_PULLDOWN)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new.port, old.port)
+        self.assertEqual(new.flags, old.flags)
 
     def test_analog_request(self):
         old = analog.Request(0)
@@ -22,12 +28,6 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.value, old.value)
 
-    def test_analog_state_action(self):
-        old = analog.StateAction(0, True)
-        new = messages.parse(old.serialize())
-        self.assertEqual(new.port, old.port)
-        self.assertEqual(new.pullup, old.pullup)
-
     def test_digital_request(self):
         old = digital.Request(0)
         new = messages.parse(old.serialize())
@@ -38,19 +38,6 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.value, old.value)
-
-    def test_digital_state_action(self):
-        old = digital.StateAction(0, True, False)
-        new = messages.parse(old.serialize())
-        self.assertEqual(new.port, old.port)
-        self.assertEqual(new.pullup, old.pullup)
-        self.assertEqual(new.output, old.output)
-
-    def test_digital_action(self):
-        old = digital.Action(0, True)
-        new = messages.parse(old.serialize())
-        self.assertEqual(new.port, old.port)
-        self.assertEqual(new.level, old.level)
 
     def test_motor_action(self):
         old = motor.Action(0, motor.POWER, 0, relative=-100)
