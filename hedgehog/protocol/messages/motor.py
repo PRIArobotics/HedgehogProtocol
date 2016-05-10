@@ -1,4 +1,5 @@
 from . import Message, register
+from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
 
 
@@ -7,7 +8,17 @@ class Action(Message):
     _command_oneof = 'motor_action'
 
     def __init__(self, port, state, amount=0, reached_state=POWER, relative=None, absolute=None):
-        assert relative is None or absolute is None, "only one of absolute and relative may be set"
+        if relative is not None and absolute is not None:
+            raise InvalidCommandError("relative and absolute are mutually exclusive")
+        if relative is None and absolute is None:
+            if reached_state != 0:
+                raise InvalidCommandError(
+                    "reached_state must be kept at its default value for non-positional motor commands")
+        else:
+            if state == BRAKE:
+                raise InvalidCommandError("state can't be BRAKE for positional motor commands")
+            if amount <= 0:
+                raise InvalidCommandError("velocity/power must be positive for positional motor commands")
         self.port = port
         self.state = state
         self.amount = amount

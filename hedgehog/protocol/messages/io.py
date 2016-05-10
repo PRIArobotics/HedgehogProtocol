@@ -1,4 +1,5 @@
 from . import Message, register
+from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.io_pb2 import DIGITAL_FLOATING, DIGITAL_PULLUP, DIGITAL_PULLDOWN
 from hedgehog.protocol.proto.io_pb2 import ANALOG_FLOATING, ANALOG_PULLUP, ANALOG_PULLDOWN
 from hedgehog.protocol.proto.io_pb2 import OUTPUT_OFF, OUTPUT_ON
@@ -11,6 +12,14 @@ class StateAction(Message):
     _command_oneof = 'io_state_action'
 
     def __init__(self, port, flags):
+        if flags & OUTPUT and flags & ANALOG:
+            raise InvalidCommandError("only input ports can be set to analog")
+        if flags & OUTPUT and flags & (PULLUP | PULLDOWN):
+            raise InvalidCommandError("only input ports can be set to pullup or pulldown")
+        if not flags & OUTPUT and flags & LEVEL:
+            raise InvalidCommandError("only output ports can be set to on")
+        if flags & PULLUP and flags & PULLDOWN:
+            raise InvalidCommandError("pullup and pulldown are mutually exclusive")
         self.port = port
         self.flags = flags
 

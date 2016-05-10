@@ -1,5 +1,6 @@
 import collections
-import hedgehog.protocol.proto.hedgehog_pb2
+from hedgehog.protocol.errors import UnknownCommandError
+from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 
 
 registry = {}
@@ -11,9 +12,15 @@ def register(class_):
 
 
 def parse(data):
-    msg = hedgehog.protocol.proto.hedgehog_pb2.HedgehogMessage()
+    msg = HedgehogMessage()
     msg.ParseFromString(data)
-    return registry[msg.WhichOneof('command')].parse(msg)
+    key = msg.WhichOneof('command')
+    try:
+        msg_type = registry[key]
+    except KeyError as err:
+        raise UnknownCommandError(key)
+    else:
+        return msg_type.parse(msg)
 
 
 class Message:
@@ -36,6 +43,6 @@ class Message:
         return cls._parse(cls._get_oneof(msg))
 
     def serialize(self):
-        msg = hedgehog.protocol.proto.hedgehog_pb2.HedgehogMessage()
+        msg = HedgehogMessage()
         self._serialize(self._get_oneof(msg))
         return msg.SerializeToString()

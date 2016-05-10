@@ -40,7 +40,7 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(new.value, old.value)
 
     def test_motor_action(self):
-        old = motor.Action(0, motor.POWER, 0, relative=-100)
+        old = motor.Action(0, motor.POWER, 100, relative=-100)
         new = messages.parse(old.serialize())
         self.assertEqual(new.port, old.port)
         self.assertEqual(new.state, old.state)

@@ -1,5 +1,5 @@
 from . import Message, register
-from hedgehog.protocol.proto.ack_pb2 import OK
+from hedgehog.protocol.proto.ack_pb2 import OK, UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
 
 @register
