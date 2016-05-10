@@ -4,6 +4,10 @@ from .proto.ack_pb2 import UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND
 class HedgehogCommandError(Exception):
     code = None
 
+    def to_message(self):
+        from .messages import ack
+        return ack.Acknowledgement(self.code, self.args[0])
+
 
 class UnknownCommandError(HedgehogCommandError):
     code = UNKNOWN_COMMAND
