@@ -19,3 +19,15 @@ class UnsupportedCommandError(HedgehogCommandError):
 
 class FailedCommandError(HedgehogCommandError):
     code = FAILED_COMMAND
+
+
+_errors = {
+    UNKNOWN_COMMAND: UnknownCommandError,
+    INVALID_COMMAND: InvalidCommandError,
+    UNSUPPORTED_COMMAND: UnsupportedCommandError,
+    FAILED_COMMAND: FailedCommandError,
+}
+
+
+def error(code, *args, **kwargs):
+    return _errors[code](*args, **kwargs)
