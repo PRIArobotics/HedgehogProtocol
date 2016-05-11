@@ -1,6 +1,6 @@
 import unittest
 import zmq
-from hedgehog.protocol import messages, sockets
+from hedgehog.protocol import errors, messages, sockets
 from hedgehog.protocol.messages import ack, io, analog, digital, motor, servo, process
 
 
@@ -10,10 +10,29 @@ class TestMessages(unittest.TestCase):
         new = messages.parse(old.serialize())
         self.assertEqual(new, old)
 
+        old = ack.Acknowledgement(ack.FAILED_COMMAND, 'something went wrong')
+        new = messages.parse(old.serialize())
+        self.assertEqual(new, old)
+
     def test_io_state_action(self):
         old = io.StateAction(0, io.ANALOG_PULLDOWN)
         new = messages.parse(old.serialize())
         self.assertEqual(new, old)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            io.StateAction(0, io.OUTPUT | io.ANALOG)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            io.StateAction(0, io.OUTPUT | io.PULLUP)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            io.StateAction(0, io.OUTPUT | io.PULLDOWN)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            io.StateAction(0, io.LEVEL)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            io.StateAction(0, io.PULLUP | io.PULLDOWN)
 
     def test_analog_request(self):
         old = analog.Request(0)
@@ -36,9 +55,36 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(new, old)
 
     def test_motor_action(self):
+        old = motor.Action(0, motor.POWER)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new, old)
+
+        old = motor.Action(0, motor.VELOCITY, 100)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new, old)
+
         old = motor.Action(0, motor.POWER, 100, relative=-100)
         new = messages.parse(old.serialize())
         self.assertEqual(new, old)
+
+        old = motor.Action(0, motor.VELOCITY, 100, absolute=-100)
+        new = messages.parse(old.serialize())
+        self.assertEqual(new, old)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            motor.Action(0, motor.POWER, 100, relative=100, absolute=100)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            motor.Action(0, motor.POWER, 100, reached_state=motor.BRAKE)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            motor.Action(0, motor.BRAKE, 100, absolute=100)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            motor.Action(0, motor.POWER, -100, absolute=100)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            motor.Action(0, motor.POWER, 0, relative=100)
 
     def test_motor_request(self):
         old = motor.Request(0)
