@@ -58,5 +58,6 @@ class Message:
         return True
 
     def __repr__(self):
-        field_reprs = ('{}={}'.format(field, repr(getattr(self, field))) for field in self.fields)
+        field_pairs = ((field, getattr(self, field)) for field in self.fields)
+        field_reprs = ('{}={}'.format(field, repr(value)) for field, value in field_pairs if value)
         return '{}({})'.format(self.name, ', '.join(field_reprs))
