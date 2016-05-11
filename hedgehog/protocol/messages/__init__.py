@@ -25,6 +25,8 @@ def parse(data):
 
 class Message:
     _command_oneof = None
+    name = None
+    fields = None
     async = False
 
     @classmethod
@@ -46,3 +48,15 @@ class Message:
         msg = HedgehogMessage()
         self._serialize(self._get_oneof(msg))
         return msg.SerializeToString()
+
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        for field in self.fields:
+            if getattr(self, field) != getattr(other, field):
+                return False
+        return True
+
+    def __repr__(self):
+        field_reprs = ('{}={}'.format(field, repr(getattr(self, field))) for field in self.fields)
+        return '{}({})'.format(self.name, ', '.join(field_reprs))

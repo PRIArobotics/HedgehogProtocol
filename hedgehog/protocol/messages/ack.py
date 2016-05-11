@@ -5,6 +5,8 @@ from hedgehog.protocol.proto.ack_pb2 import OK, UNKNOWN_COMMAND, INVALID_COMMAND
 @register
 class Acknowledgement(Message):
     _command_oneof = 'acknowledgement'
+    name = 'Acknowledgement'
+    fields = ('code', 'message')
 
     def __init__(self, code=OK, message=''):
         self.code = code

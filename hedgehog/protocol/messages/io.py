@@ -10,6 +10,8 @@ from hedgehog.protocol.proto.io_pb2 import OUTPUT, ANALOG, PULLUP, PULLDOWN, LEV
 @register
 class StateAction(Message):
     _command_oneof = 'io_state_action'
+    name = 'IOStateAction'
+    fields = ('port', 'flags')
 
     def __init__(self, port, flags):
         if flags & OUTPUT and flags & ANALOG:

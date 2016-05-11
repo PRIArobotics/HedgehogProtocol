@@ -4,6 +4,8 @@ from . import Message, register
 @register
 class Request(Message):
     _command_oneof = 'digital_request'
+    name = 'DigitalRequest'
+    fields = ('port',)
 
     def __init__(self, port):
         self.port = port
@@ -19,6 +21,8 @@ class Request(Message):
 @register
 class Update(Message):
     _command_oneof = 'digital_update'
+    name = 'DigitalUpdate'
+    fields = ('port', 'value')
 
     def __init__(self, port, value):
         self.port = port

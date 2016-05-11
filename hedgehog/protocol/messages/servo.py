@@ -4,6 +4,8 @@ from . import Message, register
 @register
 class Action(Message):
     _command_oneof = 'servo_action'
+    name = 'ServoAction'
+    fields = ('port', 'active', 'position')
 
     def __init__(self, port, active, position):
         self.port = port

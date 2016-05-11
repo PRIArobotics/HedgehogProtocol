@@ -5,6 +5,8 @@ from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 @register
 class ExecuteRequest(Message):
     _command_oneof = 'process_execute_request'
+    name = 'ProcessExecuteRequest'
+    fields = ('args', 'working_dir')
 
     def __init__(self, *args, working_dir=None):
         self.working_dir = working_dir
@@ -25,6 +27,8 @@ class ExecuteRequest(Message):
 @register
 class ExecuteReply(Message):
     _command_oneof = 'process_execute_reply'
+    name = 'ProcessExecuteReply'
+    fields = ('pid')
 
     def __init__(self, pid):
         self.pid = pid
@@ -40,6 +44,8 @@ class ExecuteReply(Message):
 @register
 class StreamAction(Message):
     _command_oneof = 'process_stream_action'
+    name = 'ProcessStreamAction'
+    fields = ('pid', 'fileno', 'chunk')
 
     def __init__(self, pid, fileno, chunk=b''):
         self.pid = pid
@@ -59,6 +65,8 @@ class StreamAction(Message):
 @register
 class StreamUpdate(Message):
     _command_oneof = 'process_stream_update'
+    name = 'ProcessStreamUpdate'
+    fields = ('pid', 'fileno', 'chunk')
     async = True
 
     def __init__(self, pid, fileno, chunk=b''):
@@ -79,6 +87,8 @@ class StreamUpdate(Message):
 @register
 class ExitUpdate(Message):
     _command_oneof = 'process_exit_update'
+    name = 'ProcessExitUpdate'
+    fields = ('pid', 'exit_code')
     async = True
 
     def __init__(self, pid, exit_code):

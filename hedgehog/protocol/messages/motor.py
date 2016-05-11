@@ -6,6 +6,8 @@ from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
 @register
 class Action(Message):
     _command_oneof = 'motor_action'
+    name = 'MotorAction'
+    fields = ('port', 'state', 'amount', 'reached_state', 'relative', 'absolute')
 
     def __init__(self, port, state, amount=0, reached_state=POWER, relative=None, absolute=None):
         if relative is not None and absolute is not None:
@@ -47,6 +49,8 @@ class Action(Message):
 @register
 class Request(Message):
     _command_oneof = 'motor_request'
+    name = 'MotorRequest'
+    fields = ('port',)
 
     def __init__(self, port):
         self.port = port
@@ -62,6 +66,8 @@ class Request(Message):
 @register
 class Update(Message):
     _command_oneof = 'motor_update'
+    name = 'MotorUpdate'
+    fields = ('port', 'velocity', 'position')
 
     def __init__(self, port, velocity, position):
         self.port = port
@@ -81,6 +87,8 @@ class Update(Message):
 @register
 class StateUpdate(Message):
     _command_oneof = 'motor_state_update'
+    name = 'MotorStateUpdate'
+    fields = ('port', 'state')
     async = True
 
     def __init__(self, port, state):
@@ -99,6 +107,8 @@ class StateUpdate(Message):
 @register
 class SetPositionAction(Message):
     _command_oneof = 'motor_set_position_action'
+    name = 'MotorSetPositionAction'
+    fields = ('port', 'position')
 
     def __init__(self, port, position):
         self.port = port
