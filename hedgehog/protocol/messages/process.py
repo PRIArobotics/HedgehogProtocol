@@ -1,13 +1,10 @@
-from . import Message, register
+from . import Msg, Message
+from hedgehog.protocol.proto import process_pb2
 from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 
 
-@register
+@Msg.register(process_pb2.ProcessExecuteRequest, 'process_execute_request')
 class ExecuteRequest(Message):
-    _command_oneof = 'process_execute_request'
-    name = 'ProcessExecuteRequest'
-    fields = ('args', 'working_dir')
-
     def __init__(self, *args, working_dir=None):
         self.working_dir = working_dir
         self.args = args
@@ -24,12 +21,8 @@ class ExecuteRequest(Message):
         msg.args.extend(self.args)
 
 
-@register
+@Msg.register(process_pb2.ProcessExecuteReply, 'process_execute_reply')
 class ExecuteReply(Message):
-    _command_oneof = 'process_execute_reply'
-    name = 'ProcessExecuteReply'
-    fields = ('pid')
-
     def __init__(self, pid):
         self.pid = pid
 
@@ -41,12 +34,8 @@ class ExecuteReply(Message):
         msg.pid = self.pid
 
 
-@register
+@Msg.register(process_pb2.ProcessStreamAction, 'process_stream_action')
 class StreamAction(Message):
-    _command_oneof = 'process_stream_action'
-    name = 'ProcessStreamAction'
-    fields = ('pid', 'fileno', 'chunk')
-
     def __init__(self, pid, fileno, chunk=b''):
         self.pid = pid
         self.fileno = fileno
@@ -62,11 +51,8 @@ class StreamAction(Message):
         msg.chunk = self.chunk
 
 
-@register
+@Msg.register(process_pb2.ProcessStreamUpdate, 'process_stream_update')
 class StreamUpdate(Message):
-    _command_oneof = 'process_stream_update'
-    name = 'ProcessStreamUpdate'
-    fields = ('pid', 'fileno', 'chunk')
     async = True
 
     def __init__(self, pid, fileno, chunk=b''):
@@ -84,11 +70,8 @@ class StreamUpdate(Message):
         msg.chunk = self.chunk
 
 
-@register
+@Msg.register(process_pb2.ProcessExitUpdate, 'process_exit_update')
 class ExitUpdate(Message):
-    _command_oneof = 'process_exit_update'
-    name = 'ProcessExitUpdate'
-    fields = ('pid', 'exit_code')
     async = True
 
     def __init__(self, pid, exit_code):

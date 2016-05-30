@@ -12,7 +12,7 @@ import "hedgehog/protocol/proto/process.proto";
 message HedgehogMessage {
     // Contains any one of the different Hedgehog commands.
     // See their respective files for command information.
-    oneof command {
+    oneof payload {
         // ack.proto
         Acknowledgement acknowledgement = 1;
         // io.proto

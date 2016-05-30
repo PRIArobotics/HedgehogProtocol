@@ -1,12 +1,9 @@
-from . import Message, register
+from . import Msg, Message
+from hedgehog.protocol.proto import servo_pb2
 
 
-@register
+@Msg.register(servo_pb2.ServoAction, 'servo_action')
 class Action(Message):
-    _command_oneof = 'servo_action'
-    name = 'ServoAction'
-    fields = ('port', 'active', 'position')
-
     def __init__(self, port, active, position):
         self.port = port
         self.active = active

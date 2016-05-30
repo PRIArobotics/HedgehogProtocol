@@ -1,63 +1,21 @@
-import collections
+from hedgehog.utils import protobuf
 from hedgehog.protocol.errors import UnknownCommandError
-from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
+from ..proto import hedgehog_pb2
 
 
-registry = {}
+Msg = protobuf.MessageType(hedgehog_pb2.HedgehogMessage)
 
 
-def register(class_):
-    registry[class_._command_oneof] = class_
-    return class_
+class Message(protobuf.Message):
+    async = False
 
 
 def parse(data):
-    msg = HedgehogMessage()
-    msg.ParseFromString(data)
-    key = msg.WhichOneof('command')
     try:
-        msg_type = registry[key]
+        return Msg.parse(data)
     except KeyError as err:
-        raise UnknownCommandError(key)
-    else:
-        return msg_type.parse(msg)
+        raise UnknownCommandError
 
 
-class Message:
-    _command_oneof = None
-    name = None
-    fields = None
-    async = False
-
-    @classmethod
-    def _get_oneof(cls, msg):
-        return getattr(msg, cls._command_oneof)
-
-    @classmethod
-    def _parse(cls, msg):
-        raise NotImplementedError
-
-    def _serialize(self, msg):
-        raise NotImplementedError
-
-    @classmethod
-    def parse(cls, msg):
-        return cls._parse(cls._get_oneof(msg))
-
-    def serialize(self):
-        msg = HedgehogMessage()
-        self._serialize(self._get_oneof(msg))
-        return msg.SerializeToString()
-
-    def __eq__(self, other):
-        if type(other) != type(self):
-            return False
-        for field in self.fields:
-            if getattr(self, field) != getattr(other, field):
-                return False
-        return True
-
-    def __repr__(self):
-        field_pairs = ((field, getattr(self, field)) for field in self.fields)
-        field_reprs = ('{}={}'.format(field, repr(value)) for field, value in field_pairs if value)
-        return '{}({})'.format(self.name, ', '.join(field_reprs))
+def serialize(msg):
+    return Msg.serialize(msg)

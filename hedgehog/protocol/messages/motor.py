@@ -1,14 +1,11 @@
-from . import Message, register
+from . import Msg, Message
 from hedgehog.protocol.errors import InvalidCommandError
+from hedgehog.protocol.proto import motor_pb2
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
 
 
-@register
+@Msg.register(motor_pb2.MotorAction, 'motor_action')
 class Action(Message):
-    _command_oneof = 'motor_action'
-    name = 'MotorAction'
-    fields = ('port', 'state', 'amount', 'reached_state', 'relative', 'absolute')
-
     def __init__(self, port, state, amount=0, reached_state=POWER, relative=None, absolute=None):
         if relative is not None and absolute is not None:
             raise InvalidCommandError("relative and absolute are mutually exclusive")
@@ -46,12 +43,8 @@ class Action(Message):
         if self.absolute is not None: msg.absolute = self.absolute
 
 
-@register
+@Msg.register(motor_pb2.MotorRequest, 'motor_request')
 class Request(Message):
-    _command_oneof = 'motor_request'
-    name = 'MotorRequest'
-    fields = ('port',)
-
     def __init__(self, port):
         self.port = port
 
@@ -63,12 +56,8 @@ class Request(Message):
         msg.port = self.port
 
 
-@register
+@Msg.register(motor_pb2.MotorUpdate, 'motor_update')
 class Update(Message):
-    _command_oneof = 'motor_update'
-    name = 'MotorUpdate'
-    fields = ('port', 'velocity', 'position')
-
     def __init__(self, port, velocity, position):
         self.port = port
         self.velocity = velocity
@@ -84,11 +73,8 @@ class Update(Message):
         msg.position = self.position
 
 
-@register
+@Msg.register(motor_pb2.MotorStateUpdate, 'motor_state_update')
 class StateUpdate(Message):
-    _command_oneof = 'motor_state_update'
-    name = 'MotorStateUpdate'
-    fields = ('port', 'state')
     async = True
 
     def __init__(self, port, state):
@@ -104,12 +90,8 @@ class StateUpdate(Message):
         msg.state = self.state
 
 
-@register
+@Msg.register(motor_pb2.MotorSetPositionAction, 'motor_set_position_action')
 class SetPositionAction(Message):
-    _command_oneof = 'motor_set_position_action'
-    name = 'MotorSetPositionAction'
-    fields = ('port', 'position')
-
     def __init__(self, port, position):
         self.port = port
         self.position = position

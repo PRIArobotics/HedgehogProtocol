@@ -1,12 +1,9 @@
-from . import Message, register
+from . import Msg, Message
+from hedgehog.protocol.proto import io_pb2
 
 
-@register
+@Msg.register(io_pb2.AnalogRequest, 'analog_request')
 class Request(Message):
-    _command_oneof = 'analog_request'
-    name = 'AnalogRequest'
-    fields = ('port',)
-
     def __init__(self, port):
         self.port = port
 
@@ -18,12 +15,8 @@ class Request(Message):
         msg.port = self.port
 
 
-@register
+@Msg.register(io_pb2.AnalogUpdate, 'analog_update')
 class Update(Message):
-    _command_oneof = 'analog_update'
-    name = 'AnalogUpdate'
-    fields = ('port', 'value')
-
     def __init__(self, port, value):
         self.port = port
         self.value = value

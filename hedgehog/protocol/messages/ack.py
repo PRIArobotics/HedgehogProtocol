@@ -1,13 +1,10 @@
-from . import Message, register
+from . import Msg, Message
+from hedgehog.protocol.proto import ack_pb2
 from hedgehog.protocol.proto.ack_pb2 import OK, UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
 
-@register
+@Msg.register(ack_pb2.Acknowledgement, 'acknowledgement')
 class Acknowledgement(Message):
-    _command_oneof = 'acknowledgement'
-    name = 'Acknowledgement'
-    fields = ('code', 'message')
-
     def __init__(self, code=OK, message=''):
         self.code = code
         self.message = message
