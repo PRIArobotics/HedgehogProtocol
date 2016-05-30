@@ -24,17 +24,15 @@ class DealerRouterWrapper:
         self.send_multipart(header, [msg])
 
     def recv(self):
-        header, msgs = self.recv_multipart()
-        assert len(msgs) == 1
-        return header, msgs[0]
+        header, [msg] = self.recv_multipart()
+        return header, msg
 
     def send_raw(self, header, msg_raw):
         self.send_multipart_raw(header, [msg_raw])
 
     def recv_raw(self):
-        header, msgs_raw = self.recv_multipart_raw()
-        assert len(msgs_raw) == 1
-        return header, msgs_raw[0]
+        header, [msg_raw] = self.recv_multipart_raw()
+        return header, msg_raw
 
     def send_multipart(self, header, msgs):
         msgs_raw = [msg.serialize() for msg in msgs]
@@ -78,17 +76,15 @@ class ReqWrapper:
         self.send_multipart([msg])
 
     def recv(self):
-        msgs = self.recv_multipart()
-        assert len(msgs) == 1
-        return msgs[0]
+        [msg] = self.recv_multipart()
+        return msg
 
     def send_raw(self, msg_raw):
         self.send_multipart_raw([msg_raw])
 
     def recv_raw(self):
-        msgs_raw = self.recv_multipart_raw()
-        assert len(msgs_raw) == 1
-        return msgs_raw[0]
+        [msg_raw] = self.recv_multipart_raw()
+        return msg_raw
 
     def send_multipart(self, msgs):
         parts = [msg.serialize() for msg in msgs]

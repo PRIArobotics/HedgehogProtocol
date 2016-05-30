@@ -133,27 +133,99 @@ class TestMessages(unittest.TestCase):
 
 
 class TestSockets(unittest.TestCase):
-    def test_sockets(self):
+    def test_sockets_multipart(self):
         context = zmq.Context()
         endpoint = "inproc://test"
+
         router = context.socket(zmq.ROUTER)
         router.bind(endpoint)
         router = sockets.DealerRouterWrapper(router)
+
         req = context.socket(zmq.REQ)
         req.connect(endpoint)
         req = sockets.ReqWrapper(req)
 
-        old = [analog.Request(0), digital.Request(0)]
-        req.send_multipart(old)
-        header, new = router.recv_multipart()
-        self.assertEqual(new[0], old[0])
-        self.assertEqual(new[1], old[1])
+        olds = [analog.Request(0), digital.Request(0)]
+        req.send_multipart(olds)
+        header, news = router.recv_multipart()
+        for old, new in zip(olds, news):
+            self.assertEqual(new, old)
 
-        old = [analog.Update(0, 100), digital.Update(0, True)]
-        router.send_multipart(header, old)
-        new = req.recv_multipart()
-        self.assertEqual(new[0], old[0])
-        self.assertEqual(new[1], old[1])
+        olds = [analog.Update(0, 100), digital.Update(0, True)]
+        router.send_multipart(header, olds)
+        news = req.recv_multipart()
+        for old, new in zip(olds, news):
+            self.assertEqual(new, old)
+
+    def test_sockets_singlepart(self):
+        context = zmq.Context()
+        endpoint = "inproc://test"
+
+        router = context.socket(zmq.ROUTER)
+        router.bind(endpoint)
+        router = sockets.DealerRouterWrapper(router)
+
+        req = context.socket(zmq.REQ)
+        req.connect(endpoint)
+        req = sockets.ReqWrapper(req)
+
+        old = analog.Request(1)
+        req.send(old)
+        header, new = router.recv()
+        self.assertEqual(new, old)
+
+        old = analog.Update(1, 200)
+        router.send(header, old)
+        new = req.recv()
+        self.assertEqual(new, old)
+
+        router.close()
+        req.close()
+    def test_sockets_multipart_raw(self):
+        context = zmq.Context()
+        endpoint = "inproc://test"
+
+        router = context.socket(zmq.ROUTER)
+        router.bind(endpoint)
+        router = sockets.DealerRouterWrapper(router)
+
+        req = context.socket(zmq.REQ)
+        req.connect(endpoint)
+        req = sockets.ReqWrapper(req)
+
+        olds = [b'as', b'df']
+        req.send_multipart_raw(olds)
+        header, news = router.recv_multipart_raw()
+        for old, new in zip(olds, news):
+            self.assertEqual(new, old)
+
+        olds = [b'fd', b'sa']
+        router.send_multipart_raw(header, olds)
+        news = req.recv_multipart_raw()
+        for old, new in zip(olds, news):
+            self.assertEqual(new, old)
+
+    def test_sockets_singlepart_raw(self):
+        context = zmq.Context()
+        endpoint = "inproc://test"
+
+        router = context.socket(zmq.ROUTER)
+        router.bind(endpoint)
+        router = sockets.DealerRouterWrapper(router)
+
+        req = context.socket(zmq.REQ)
+        req.connect(endpoint)
+        req = sockets.ReqWrapper(req)
+
+        old = b'as'
+        req.send_raw(old)
+        header, new = router.recv_raw()
+        self.assertEqual(new, old)
+
+        old = b'df'
+        router.send_raw(header, old)
+        new = req.recv_raw()
+        self.assertEqual(new, old)
 
         router.close()
         req.close()
