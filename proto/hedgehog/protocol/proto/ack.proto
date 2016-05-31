@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package hedgehog.protocol.proto;
 
+option java_package = "at.pria.hedgehog.protocol.proto";
+option java_outer_classname = "AckP";
+
 // Acknowledgement codes
 enum AcknowledgementCode {
     // the command completed successfully
