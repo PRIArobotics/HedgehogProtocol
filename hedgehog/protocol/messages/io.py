@@ -1,18 +1,15 @@
 from . import Msg, Message
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import io_pb2
-from hedgehog.protocol.proto.io_pb2 import DIGITAL_FLOATING, DIGITAL_PULLUP, DIGITAL_PULLDOWN
-from hedgehog.protocol.proto.io_pb2 import ANALOG_FLOATING, ANALOG_PULLUP, ANALOG_PULLDOWN
+from hedgehog.protocol.proto.io_pb2 import INPUT_FLOATING, INPUT_PULLUP, INPUT_PULLDOWN
 from hedgehog.protocol.proto.io_pb2 import OUTPUT_OFF, OUTPUT_ON
 
-from hedgehog.protocol.proto.io_pb2 import OUTPUT, ANALOG, PULLUP, PULLDOWN, LEVEL
+from hedgehog.protocol.proto.io_pb2 import OUTPUT, PULLUP, PULLDOWN, LEVEL
 
 
 @Msg.register(io_pb2.IOStateAction, 'io_state_action')
 class StateAction(Message):
     def __init__(self, port, flags):
-        if flags & OUTPUT and flags & ANALOG:
-            raise InvalidCommandError("only input ports can be set to analog")
         if flags & OUTPUT and flags & (PULLUP | PULLDOWN):
             raise InvalidCommandError("only input ports can be set to pullup or pulldown")
         if not flags & OUTPUT and flags & LEVEL:
@@ -25,10 +22,6 @@ class StateAction(Message):
     @property
     def output(self):
         return (self.flags & OUTPUT) != 0
-
-    @property
-    def analog(self):
-        return (self.flags & ANALOG) != 0
 
     @property
     def pullup(self):

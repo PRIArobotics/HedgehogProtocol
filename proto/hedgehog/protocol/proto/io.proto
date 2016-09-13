@@ -9,20 +9,16 @@ option java_outer_classname = "IOP";
 enum IOStateFlags {
     option allow_alias = true;
     // flag combinations (first because 0x00 needs to be first)
-    DIGITAL_FLOATING = 0x00;
-    DIGITAL_PULLUP = 0x04;
-    DIGITAL_PULLDOWN = 0x08;
-    ANALOG_FLOATING = 0x02;
-    ANALOG_PULLUP = 0x06;
-    ANALOG_PULLDOWN = 0x0A;
+    INPUT_FLOATING = 0x00;
+    INPUT_PULLUP = 0x02;
+    INPUT_PULLDOWN = 0x04;
     OUTPUT_OFF = 0x01;
-    OUTPUT_ON = 0x11;
+    OUTPUT_ON = 0x09;
     // flags
     OUTPUT = 0x01; // output/input
-    ANALOG = 0x02; // analog/digital
-    PULLUP = 0x04; // pullup/no pullup
-    PULLDOWN = 0x08; // pulldown/no pulldown
-    LEVEL = 0x10; // on/off
+    PULLUP = 0x02; // pullup/no pullup
+    PULLDOWN = 0x04; // pulldown/no pulldown
+    LEVEL = 0x08; // on/off
 }
 
 // Set one sensor state.

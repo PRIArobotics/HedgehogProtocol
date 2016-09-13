@@ -15,12 +15,9 @@ class TestMessages(unittest.TestCase):
         self.assertEqual(new, old)
 
     def test_io_state_action(self):
-        old = io.StateAction(0, io.ANALOG_PULLDOWN)
+        old = io.StateAction(0, io.INPUT_PULLDOWN)
         new = Msg.parse(Msg.serialize(old))
         self.assertEqual(new, old)
-
-        with self.assertRaises(errors.InvalidCommandError):
-            io.StateAction(0, io.OUTPUT | io.ANALOG)
 
         with self.assertRaises(errors.InvalidCommandError):
             io.StateAction(0, io.OUTPUT | io.PULLUP)
