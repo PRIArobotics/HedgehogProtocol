@@ -19,7 +19,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='hedgehog-protocol',
-    version='0.0.0',
+    version='0.1.0',
     description='Protocol definitions for Hedgehog',
     long_description=long_description,
     url="https://github.com/PRIArobotics/HedgehogProtocol",
@@ -29,14 +29,14 @@ setup(
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Topic :: Software Development',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Programming Language :: Python :: 3',
     ],
 
-    keywords='hedgehog robotics protobuf zmq',
+    keywords='hedgehog robotics protobuf zmq protocol',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
