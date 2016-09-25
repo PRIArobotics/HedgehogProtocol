@@ -19,7 +19,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='hedgehog-protocol',
-    version='0.1.0',
+    version='0.1.1',
     description='Protocol definitions for Hedgehog',
     long_description=long_description,
     url="https://github.com/PRIArobotics/HedgehogProtocol",
@@ -46,7 +46,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['protobuf>=3.0.*', 'pyzmq'],
+    install_requires=['hedgehog-utils[protobuf,zmq]'],
 
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
