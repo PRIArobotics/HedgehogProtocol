@@ -1,10 +1,24 @@
+"""
+Errors that may be caused by Hedgehog commands.
+
+Every error corresponds to one acknowledge code from ack.proto; the `OK` code naturally has no corresponding error.
+"""
+
 from .proto.ack_pb2 import UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
 
 class HedgehogCommandError(Exception):
+    """Superclass of all errors caused by Hedgehog commands."""
     code = None
+    """Class property containing the acknowledgement code"""
 
     def to_message(self):
+        """
+        Creates an error Acknowledgement message.
+        The message's code and message are taken from this exception.
+
+        :return: the message representing this exception
+        """
         from .messages import ack
         return ack.Acknowledgement(self.code, self.args[0])
 
@@ -34,4 +48,12 @@ _errors = {
 
 
 def error(code, *args, **kwargs):
+    """
+    Creates an error from the given code, and args and kwargs.
+
+    :param code: The acknowledgement code
+    :param args: Exception args
+    :param kwargs: Exception kwargs
+    :return: the error for the given acknowledgement code
+    """
     return _errors[code](*args, **kwargs)

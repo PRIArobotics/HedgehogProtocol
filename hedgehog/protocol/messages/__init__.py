@@ -11,6 +11,7 @@ class Message(protobuf.Message):
 
 
 def parse(data):
+    """Parses a binary protobuf message into a Message object."""
     try:
         return Msg.parse(data)
     except KeyError as err:
@@ -18,4 +19,5 @@ def parse(data):
 
 
 def serialize(msg):
+    """Serializes a Message object into a binary protobuf message"""
     return Msg.serialize(msg)

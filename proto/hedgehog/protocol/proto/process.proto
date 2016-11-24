@@ -5,6 +5,9 @@ package hedgehog.protocol.proto;
 option java_package = "at.pria.hedgehog.protocol.proto";
 option java_outer_classname = "ProcessP";
 
+// TODO send signals (SIGINT etc.), return signal on process exit
+// TODO allow environment variables
+
 enum ProcessFileno {
     STDIN = 0;
     STDOUT = 1;
