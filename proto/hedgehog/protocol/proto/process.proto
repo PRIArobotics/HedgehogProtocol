@@ -51,5 +51,5 @@ message ProcessSignalAction {
 // Signals that the process has exited
 message ProcessExitUpdate {
     uint32 pid = 1;
-    uint32 exit_code = 2;
+    int32 exit_code = 2;
 }
