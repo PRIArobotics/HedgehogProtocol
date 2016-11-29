@@ -123,6 +123,11 @@ class TestMessages(unittest.TestCase):
         new = Msg.parse(Msg.serialize(old))
         self.assertEqual(new, old)
 
+    def test_process_signal_action(self):
+        old = process.SignalAction(123, 1)
+        new = Msg.parse(Msg.serialize(old))
+        self.assertEqual(new, old)
+
     def test_process_exit_update(self):
         old = process.ExitUpdate(123, 0)
         new = Msg.parse(Msg.serialize(old))
