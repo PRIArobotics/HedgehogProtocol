@@ -28,7 +28,7 @@ enum AcknowledgementCode {
     UNSUPPORTED_COMMAND = 3;
     // the command didn't complete successfully; details are in the message
     // this can happen if the current state of the controller doesn't allow a specific supported command
-    // e.g. an AnalogRequest/DigitalRequest fails because the port is configured as digital/analog, or as output;
+    // e.g. an AnalogRequest/DigitalRequest fails because the port is configured as output;
     //      a process command uses an unknown pid;
     //      a process can't be started because of an OS error (e.g. the executable or working directory is not found)
     FAILED_COMMAND = 4;
@@ -39,6 +39,6 @@ enum AcknowledgementCode {
 message Acknowledgement {
     AcknowledgementCode code = 1;
     // if the code is `OK`, this will be empty
-    // otherwise, the message mith contain more information
+    // otherwise, the message might contain more information
     string message = 2;
 }

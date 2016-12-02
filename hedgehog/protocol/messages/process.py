@@ -70,6 +70,21 @@ class StreamUpdate(Message):
         msg.chunk = self.chunk
 
 
+@Msg.register(process_pb2.ProcessSignalAction, 'process_signal_action')
+class SignalAction(Message):
+    def __init__(self, pid, signal):
+        self.pid = pid
+        self.signal = signal
+
+    @classmethod
+    def _parse(cls, msg):
+        return cls(msg.pid, msg.signal)
+
+    def _serialize(self, msg):
+        msg.pid = self.pid
+        msg.signal = self.signal
+
+
 @Msg.register(process_pb2.ProcessExitUpdate, 'process_exit_update')
 class ExitUpdate(Message):
     async = True
@@ -85,5 +100,3 @@ class ExitUpdate(Message):
     def _serialize(self, msg):
         msg.pid = self.pid
         msg.exit_code = self.exit_code
-
-# TODO implement killing processes

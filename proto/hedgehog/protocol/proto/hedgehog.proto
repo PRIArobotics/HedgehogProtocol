@@ -38,5 +38,6 @@ message HedgehogMessage {
         ProcessStreamAction process_stream_action = 15;
         ProcessStreamUpdate process_stream_update = 16;
         ProcessExitUpdate process_exit_update = 17;
+        ProcessSignalAction process_signal_action = 18;
     }
 }
