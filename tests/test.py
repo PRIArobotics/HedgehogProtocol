@@ -1,22 +1,22 @@
 import unittest
 import zmq
 from hedgehog.protocol import errors, messages, sockets
-from hedgehog.protocol.messages import Msg, ack, io, analog, digital, motor, servo, process
+from hedgehog.protocol.messages import parse, serialize, ack, io, analog, digital, motor, servo, process
 
 
 class TestMessages(unittest.TestCase):
     def test_acknowledgement(self):
         old = ack.Acknowledgement()
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
         old = ack.Acknowledgement(ack.FAILED_COMMAND, 'something went wrong')
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_io_state_action(self):
         old = io.StateAction(0, io.INPUT_PULLDOWN)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
         with self.assertRaises(errors.InvalidCommandError):
@@ -33,39 +33,39 @@ class TestMessages(unittest.TestCase):
 
     def test_analog_request(self):
         old = analog.Request(0)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_analog_update(self):
         old = analog.Update(0, 2)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_digital_request(self):
         old = digital.Request(0)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_digital_update(self):
         old = digital.Update(0, True)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_motor_action(self):
         old = motor.Action(0, motor.POWER)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
         old = motor.Action(0, motor.VELOCITY, 100)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
         old = motor.Action(0, motor.POWER, 100, relative=-100)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
         old = motor.Action(0, motor.VELOCITY, 100, absolute=-100)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
         with self.assertRaises(errors.InvalidCommandError):
@@ -85,52 +85,52 @@ class TestMessages(unittest.TestCase):
 
     def test_motor_request(self):
         old = motor.Request(0)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_motor_update(self):
         old = motor.Update(0, 100, 1000)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_motor_state_update(self):
         old = motor.StateUpdate(0, motor.POWER)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_motor_set_position_action(self):
         old = motor.SetPositionAction(0, 0)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_servo_action(self):
         old = servo.Action(0, True, 512)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_process_execute_request(self):
         old = process.ExecuteRequest('cat', working_dir='/home/hedgehog')
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_process_stream_action(self):
         old = process.StreamAction(123, process.STDIN, b'abc')
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_process_stream_update(self):
         old = process.StreamUpdate(123, process.STDIN, b'abc')
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_process_signal_action(self):
         old = process.SignalAction(123, 1)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
     def test_process_exit_update(self):
         old = process.ExitUpdate(123, 0)
-        new = Msg.parse(Msg.serialize(old))
+        new = parse(serialize(old))
         self.assertEqual(new, old)
 
 
@@ -183,6 +183,7 @@ class TestSockets(unittest.TestCase):
 
         router.close()
         req.close()
+
     def test_sockets_multipart_raw(self):
         context = zmq.Context()
         endpoint = "inproc://test"

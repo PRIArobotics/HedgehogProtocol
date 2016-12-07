@@ -1,4 +1,4 @@
-from .messages import Msg
+from .messages import parse, serialize
 
 
 def _rindex(mylist, elem):
@@ -45,12 +45,12 @@ class DealerRouterWrapper:
         return header, msg_raw
 
     def send_multipart(self, header, msgs):
-        msgs_raw = [Msg.serialize(msg) for msg in msgs]
+        msgs_raw = [serialize(msg) for msg in msgs]
         self.send_multipart_raw(header, msgs_raw)
 
     def recv_multipart(self):
         header, msgs_raw = self.recv_multipart_raw()
-        return header, [Msg.parse(msg) for msg in msgs_raw]
+        return header, [parse(msg) for msg in msgs_raw]
 
     def send_multipart_raw(self, header, msgs_raw):
         self.socket.send_multipart(to_delimited(header, msgs_raw))
@@ -93,12 +93,12 @@ class ReqWrapper:
         return msg_raw
 
     def send_multipart(self, msgs):
-        parts = [Msg.serialize(msg) for msg in msgs]
+        parts = [serialize(msg) for msg in msgs]
         self.send_multipart_raw(parts)
 
     def recv_multipart(self):
         parts = self.recv_multipart_raw()
-        msgs = [Msg.parse(msg) for msg in parts]
+        msgs = [parse(msg) for msg in parts]
         return msgs
 
     def send_multipart_raw(self, msgs_raw):
