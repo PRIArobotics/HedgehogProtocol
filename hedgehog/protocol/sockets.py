@@ -5,6 +5,16 @@ def _rindex(mylist, elem):
     return len(mylist) - mylist[::-1].index(elem) - 1
 
 
+def to_delimited(header, payload):
+    return tuple(header) + (b'',) + tuple(payload)
+
+
+def from_delimited(msgs):
+    delim = _rindex(msgs, b'')
+    header, payload = tuple(msgs[:delim]), tuple(msgs[delim + 1:])
+    return header, payload
+
+
 class DealerRouterWrapper:
     """
     A wrapper for ZMQ dealer & router sockets used to send Hedgehog Protobuf messages.
@@ -43,14 +53,10 @@ class DealerRouterWrapper:
         return header, [Msg.parse(msg) for msg in msgs_raw]
 
     def send_multipart_raw(self, header, msgs_raw):
-        parts = header + [b''] + msgs_raw
-        self.socket.send_multipart(parts)
+        self.socket.send_multipart(to_delimited(header, msgs_raw))
 
     def recv_multipart_raw(self):
-        parts = self.socket.recv_multipart()
-        delim = _rindex(parts, b'')
-        header, msgs_raw = parts[:delim], parts[delim + 1:]
-        return header, msgs_raw
+        return from_delimited(self.socket.recv_multipart())
 
     def close(self):
         self.socket.close()
