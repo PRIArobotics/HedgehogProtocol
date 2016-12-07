@@ -5,14 +5,15 @@ def _rindex(mylist, elem):
     return len(mylist) - mylist[::-1].index(elem) - 1
 
 
-def to_delimited(header, payload):
-    return tuple(header) + (b'',) + tuple(payload)
+def to_delimited(header, payload, raw=True):
+    msgs_raw = tuple(payload) if raw else tuple(serialize(msg) for msg in payload)
+    return tuple(header) + (b'',) + msgs_raw
 
 
-def from_delimited(msgs):
+def from_delimited(msgs, raw=True):
     delim = _rindex(msgs, b'')
     header, payload = tuple(msgs[:delim]), tuple(msgs[delim + 1:])
-    return header, payload
+    return header, payload if raw else tuple(parse(msg_raw) for msg_raw in payload)
 
 
 class DealerRouterWrapper:
