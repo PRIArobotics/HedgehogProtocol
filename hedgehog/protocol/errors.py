@@ -39,6 +39,10 @@ class FailedCommandError(HedgehogCommandError):
     code = FAILED_COMMAND
 
 
+class EmergencyShutdown(FailedCommandError):
+    pass
+
+
 _errors = {
     UNKNOWN_COMMAND: UnknownCommandError,
     INVALID_COMMAND: InvalidCommandError,
@@ -56,4 +60,7 @@ def error(code, *args, **kwargs):
     :param kwargs: Exception kwargs
     :return: the error for the given acknowledgement code
     """
+    # TODO add proper error code
+    if code == FAILED_COMMAND and len(args) >= 1 and args[0] == "Emergency Shutdown activated":
+        return EmergencyShutdown(*args, **kwargs)
     return _errors[code](*args, **kwargs)
