@@ -13,8 +13,8 @@ def to_delimited(header, payload, raw=True):
 
 def from_delimited(msgs, raw=True):
     delim = _rindex(msgs, b'')
-    header, payload = tuple(msgs[:delim]), tuple(msgs[delim + 1:])
-    return header, payload if raw else tuple(parse(msg_raw) for msg_raw in payload)
+    header, payload = tuple(msgs[:delim]), msgs[delim + 1:]
+    return header, tuple(payload) if raw else tuple(parse(msg_raw) for msg_raw in payload)
 
 
 class DealerRouterMixin(object):
