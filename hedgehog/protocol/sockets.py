@@ -2,16 +2,25 @@ from hedgehog.utils.zmq.socket import Socket
 from .messages import parse, serialize
 
 
-def _rindex(mylist, elem):
-    return len(mylist) - mylist[::-1].index(elem) - 1
+def _rindex(mylist, x):
+    """Index of the last occurrence of x in the sequence."""
+    return len(mylist) - mylist[::-1].index(x) - 1
 
 
 def to_delimited(header, payload, raw=True):
+    """
+    Returns a message consisting of header frames, delimiter frame, and payload frames.
+    The payload frames may be given as sequences of bytes (raw) or as `Message`s.
+    """
     msgs_raw = tuple(payload) if raw else tuple(serialize(msg) for msg in payload)
     return tuple(header) + (b'',) + msgs_raw
 
 
 def from_delimited(msgs, raw=True):
+    """
+    From a message consisting of header frames, delimiter frame, and payload frames, return a tuple `(header, payload)`.
+    The payload frames may be returned as sequences of bytes (raw) or as `Message`s.
+    """
     delim = _rindex(msgs, b'')
     header, payload = tuple(msgs[:delim]), msgs[delim + 1:]
     return header, tuple(payload) if raw else tuple(parse(msg_raw) for msg_raw in payload)
