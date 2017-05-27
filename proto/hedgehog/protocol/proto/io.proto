@@ -21,30 +21,37 @@ enum IOStateFlags {
     LEVEL = 0x08; // on/off
 }
 
-// Set one sensor state.
+// Changes the configuration of one IO port
+//
+// => (port, flags):  IO state action => ack
 message IOStateAction {
     uint32 port = 1;
     IOStateFlags flags = 2;
 }
 
-// Request for one analog sensor value
-message AnalogRequest {
+// Request or reply for one IO port's current state. The command may change by an IO state action.
+//
+// => (port):  IO state request => IO state reply
+// <= (port, flags):  IO state reply
+message IOStateMessage {
     uint32 port = 1;
+    IOStateFlags flags = 2;
 }
 
-// Update of one analog sensor value
-message AnalogUpdate {
+// Request or reply for one analog sensor's value
+//
+// => (port):  analog request => analog reply
+// <= (port, value):  analog reply
+message AnalogMessage {
     uint32 port = 1;
     uint32 value = 2;
 }
 
-// Request for one digital sensor value
-message DigitalRequest {
-    uint32 port = 1;
-}
-
-// Update of one digital sensor value
-message DigitalUpdate {
+// Request or reply for one digital sensor's value
+//
+// => (port):  digital request => digital reply
+// <= (port, value):  digital reply
+message DigitalMessage {
     uint32 port = 1;
     bool value = 2;
 }
