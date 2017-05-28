@@ -1,8 +1,8 @@
 from typing import Sequence, Tuple, TypeVar
 
+from hedgehog.protocol import CommSide
 from hedgehog.utils.protobuf import Message
 from hedgehog.utils.zmq.socket import Socket
-from .messages import parse, serialize
 
 
 # a single protobuf-encoded message
@@ -43,12 +43,12 @@ def raw_to_delimited(header: Header, raw_payload: RawPayload) -> DelimitedMsg:
     return tuple(header) + (b'',) + tuple(raw_payload)
 
 
-def to_delimited(header: Header, payload: Payload) -> DelimitedMsg:
+def to_delimited(header: Header, payload: Payload, side: CommSide) -> DelimitedMsg:
     """
     Returns a message consisting of header frames, delimiter frame, and payload frames.
     The payload frames may be given as sequences of bytes (raw) or as `Message`s.
     """
-    return raw_to_delimited(header, [serialize(msg) for msg in payload])
+    return raw_to_delimited(header, [side.serialize(msg) for msg in payload])
 
 
 def raw_from_delimited(msgs: DelimitedMsg) -> RawMsgs:
@@ -60,13 +60,13 @@ def raw_from_delimited(msgs: DelimitedMsg) -> RawMsgs:
     return tuple(msgs[:delim]), tuple(msgs[delim + 1:])
 
 
-def from_delimited(msgs: DelimitedMsg) -> Msgs:
+def from_delimited(msgs: DelimitedMsg, side: CommSide) -> Msgs:
     """
     From a message consisting of header frames, delimiter frame, and payload frames, return a tuple `(header, payload)`.
     The payload frames may be returned as sequences of bytes (raw) or as `Message`s.
     """
     header, raw_payload = raw_from_delimited(msgs)
-    return header, tuple(parse(msg_raw) for msg_raw in raw_payload)
+    return header, tuple(side.parse(msg_raw) for msg_raw in raw_payload)
 
 
 class DealerRouterMixin(object):
@@ -86,11 +86,11 @@ class DealerRouterMixin(object):
         return header, msg
 
     def send_msgs(self, header: Header, msgs: Payload):
-        self.send_msgs_raw(header, [serialize(msg) for msg in msgs])
+        self.send_msgs_raw(header, [self.side.serialize(msg) for msg in msgs])
 
     def recv_msgs(self) -> Msgs:
         header, msgs_raw = self.recv_msgs_raw()
-        return header, tuple(parse(msg_raw) for msg_raw in msgs_raw)
+        return header, tuple(self.side.parse(msg_raw) for msg_raw in msgs_raw)
 
     def send_msg_raw(self, header: Header, msg_raw: RawMessage):
         self.send_msgs_raw(header, [msg_raw])
@@ -107,7 +107,9 @@ class DealerRouterMixin(object):
 
 
 class DealerRouterSocket(DealerRouterMixin, Socket):
-    pass
+    def __init__(self, *args, side: CommSide, **kwargs) -> None:
+        super(DealerRouterSocket, self).__init__(*args, **kwargs)
+        self.side = side
 
 
 class ReqMixin(object):
@@ -127,10 +129,10 @@ class ReqMixin(object):
         return msg
 
     def send_msgs(self, msgs: Payload):
-        self.send_msgs_raw([serialize(msg) for msg in msgs])
+        self.send_msgs_raw([self.side.serialize(msg) for msg in msgs])
 
     def recv_msgs(self) -> Payload:
-        return tuple(parse(msg_raw) for msg_raw in self.recv_msgs_raw())
+        return tuple(self.side.parse(msg_raw) for msg_raw in self.recv_msgs_raw())
 
     def send_msg_raw(self, msg_raw: RawMessage):
         self.send_msgs_raw([msg_raw])
@@ -147,4 +149,6 @@ class ReqMixin(object):
 
 
 class ReqSocket(ReqMixin, Socket):
-    pass
+    def __init__(self, *args, side: CommSide, **kwargs) -> None:
+        super(ReqSocket, self).__init__(*args, **kwargs)
+        self.side = side

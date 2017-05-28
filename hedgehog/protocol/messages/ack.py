@@ -1,18 +1,18 @@
-from . import Msg, Message
+from . import ReplyMsg, SimpleMessage
 from hedgehog.protocol.proto import ack_pb2
 from hedgehog.protocol.proto.ack_pb2 import OK, UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
 
-@Msg.register(ack_pb2.Acknowledgement, 'acknowledgement')
-class Acknowledgement(Message):
-    def __init__(self, code=OK, message=''):
+@ReplyMsg.message(ack_pb2.Acknowledgement, 'acknowledgement')
+class Acknowledgement(SimpleMessage):
+    def __init__(self, code=OK, message='') -> None:
         self.code = code
         self.message = message
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: ack_pb2.Acknowledgement) -> 'Acknowledgement':
         return cls(msg.code, msg.message)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: ack_pb2.Acknowledgement) -> None:
         msg.code = self.code
         msg.message = self.message

@@ -1,102 +1,100 @@
-from . import Msg, Message
+from . import RequestMsg, ReplyMsg, SimpleMessage
 from hedgehog.protocol.proto import process_pb2
 from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 
 
-@Msg.register(process_pb2.ProcessExecuteRequest, 'process_execute_request')
-class ExecuteRequest(Message):
-    def __init__(self, *args, working_dir=None):
+@RequestMsg.message(process_pb2.ProcessExecuteAction, 'process_execute_action')
+class ExecuteAction(SimpleMessage):
+    def __init__(self, *args: str, working_dir: str=None) -> None:
         self.working_dir = working_dir
         self.args = args
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: process_pb2.ProcessExecuteAction) -> 'ExecuteAction':
         return cls(
             *msg.args,
             working_dir=msg.working_dir if msg.working_dir != '' else None)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: process_pb2.ProcessExecuteAction) -> None:
         if self.working_dir is not None:
             msg.working_dir = self.working_dir
         msg.args.extend(self.args)
 
 
-@Msg.register(process_pb2.ProcessExecuteReply, 'process_execute_reply')
-class ExecuteReply(Message):
-    def __init__(self, pid):
+@ReplyMsg.message(process_pb2.ProcessExecuteReply, 'process_execute_reply')
+class ExecuteReply(SimpleMessage):
+    def __init__(self, pid: int) -> None:
         self.pid = pid
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: process_pb2.ProcessExecuteReply) -> 'ExecuteReply':
         return cls(msg.pid)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: process_pb2.ProcessExecuteReply) -> None:
         msg.pid = self.pid
 
 
-@Msg.register(process_pb2.ProcessStreamAction, 'process_stream_action')
-class StreamAction(Message):
-    def __init__(self, pid, fileno, chunk=b''):
+@RequestMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
+class StreamAction(SimpleMessage):
+    def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
         self.pid = pid
         self.fileno = fileno
         self.chunk = chunk
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: process_pb2.ProcessStreamMessage) -> 'StreamAction':
         return cls(msg.pid, msg.fileno, msg.chunk)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: process_pb2.ProcessStreamMessage) -> None:
         msg.pid = self.pid
         msg.fileno = self.fileno
         msg.chunk = self.chunk
 
 
-@Msg.register(process_pb2.ProcessStreamUpdate, 'process_stream_update')
-class StreamUpdate(Message):
-    async = True
-
-    def __init__(self, pid, fileno, chunk=b''):
+@ReplyMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
+class StreamUpdate(SimpleMessage):
+    def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
         self.pid = pid
         self.fileno = fileno
         self.chunk = chunk
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: process_pb2.ProcessStreamMessage) -> 'StreamUpdate':
         return cls(msg.pid, msg.fileno, msg.chunk)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: process_pb2.ProcessStreamMessage) -> None:
         msg.pid = self.pid
         msg.fileno = self.fileno
         msg.chunk = self.chunk
 
 
-@Msg.register(process_pb2.ProcessSignalAction, 'process_signal_action')
-class SignalAction(Message):
-    def __init__(self, pid, signal):
+@RequestMsg.message(process_pb2.ProcessSignalAction, 'process_signal_action')
+class SignalAction(SimpleMessage):
+    def __init__(self, pid: int, signal: int) -> None:
         self.pid = pid
         self.signal = signal
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: process_pb2.ProcessSignalAction) -> 'SignalAction':
         return cls(msg.pid, msg.signal)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: process_pb2.ProcessSignalAction) -> None:
         msg.pid = self.pid
         msg.signal = self.signal
 
 
-@Msg.register(process_pb2.ProcessExitUpdate, 'process_exit_update')
-class ExitUpdate(Message):
+@ReplyMsg.message(process_pb2.ProcessExitUpdate, 'process_exit_update')
+class ExitUpdate(SimpleMessage):
     async = True
 
-    def __init__(self, pid, exit_code):
+    def __init__(self, pid: int, exit_code: int) -> None:
         self.pid = pid
         self.exit_code = exit_code
 
     @classmethod
-    def _parse(cls, msg):
+    def _parse(cls, msg: process_pb2.ProcessExitUpdate) -> 'ExitUpdate':
         return cls(msg.pid, msg.exit_code)
 
-    def _serialize(self, msg):
+    def _serialize(self, msg: process_pb2.ProcessExitUpdate) -> None:
         msg.pid = self.pid
         msg.exit_code = self.exit_code
