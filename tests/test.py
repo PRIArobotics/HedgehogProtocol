@@ -1,23 +1,40 @@
 import unittest
 import zmq
-from hedgehog.protocol import errors, sockets, ServerSide, ClientSide
-from hedgehog.protocol.messages import ack, io, analog, digital, motor, servo, process
+from hedgehog.protocol import errors, sockets, CommSide, ServerSide, ClientSide
+from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
+from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor, servo, process
 
 
 class TestMessages(unittest.TestCase):
-    def test_acknowledgement(self):
-        old = ack.Acknowledgement()
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+    def assertTransmission(self, msg: Message, wire: HedgehogMessage, sender: CommSide, receiver: CommSide):
+        on_wire = sender.serialize(msg)
+        self.assertEqual(on_wire, wire.SerializeToString())
+        received = receiver.parse(on_wire)
+        self.assertEqual(received, msg)
 
-        old = ack.Acknowledgement(ack.FAILED_COMMAND, 'something went wrong')
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+    def assertTransmissionClientServer(self, msg: Message, wire: HedgehogMessage):
+        self.assertTransmission(msg, wire, ClientSide, ServerSide)
+
+    def assertTransmissionServerClient(self, msg: Message, wire: HedgehogMessage):
+        self.assertTransmission(msg, wire, ServerSide, ClientSide)
+
+    def test_acknowledgement(self):
+        msg = ack.Acknowledgement()
+        proto = HedgehogMessage()
+        proto.acknowledgement.SetInParent()
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = ack.Acknowledgement(ack.FAILED_COMMAND, 'something went wrong')
+        proto = HedgehogMessage()
+        proto.acknowledgement.code = ack.FAILED_COMMAND
+        proto.acknowledgement.message = 'something went wrong'
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_io_state_action(self):
-        old = io.StateAction(0, io.INPUT_PULLDOWN)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = io.StateAction(0, io.INPUT_PULLDOWN)
+        proto = HedgehogMessage()
+        proto.io_state_action.flags = io.INPUT_PULLDOWN
+        self.assertTransmissionClientServer(msg, proto)
 
         with self.assertRaises(errors.InvalidCommandError):
             io.StateAction(0, io.OUTPUT | io.PULLUP)
@@ -32,14 +49,16 @@ class TestMessages(unittest.TestCase):
             io.StateAction(0, io.PULLUP | io.PULLDOWN)
 
     def test_io_state_request(self):
-        old = io.StateRequest(0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = io.StateRequest(0)
+        proto = HedgehogMessage()
+        proto.io_state_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_io_state_reply(self):
-        old = io.StateReply(0, io.INPUT_PULLDOWN)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = io.StateReply(0, io.INPUT_PULLDOWN)
+        proto = HedgehogMessage()
+        proto.io_state_message.flags = io.INPUT_PULLDOWN
+        self.assertTransmissionServerClient(msg, proto)
 
         with self.assertRaises(errors.InvalidCommandError):
             io.StateReply(0, io.OUTPUT | io.PULLUP)
@@ -54,41 +73,53 @@ class TestMessages(unittest.TestCase):
             io.StateReply(0, io.PULLUP | io.PULLDOWN)
 
     def test_analog_request(self):
-        old = analog.Request(0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = analog.Request(0)
+        proto = HedgehogMessage()
+        proto.analog_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_analog_reply(self):
-        old = analog.Reply(0, 2)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = analog.Reply(0, 2)
+        proto = HedgehogMessage()
+        proto.analog_message.value = 2
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_digital_request(self):
-        old = digital.Request(0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = digital.Request(0)
+        proto = HedgehogMessage()
+        proto.digital_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_digital_reply(self):
-        old = digital.Reply(0, True)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = digital.Reply(0, True)
+        proto = HedgehogMessage()
+        proto.digital_message.value = True
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_motor_action(self):
-        old = motor.Action(0, motor.POWER)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.Action(0, motor.POWER)
+        proto = HedgehogMessage()
+        proto.motor_action.state = motor.POWER
+        self.assertTransmissionClientServer(msg, proto)
 
-        old = motor.Action(0, motor.VELOCITY, 100)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.Action(0, motor.VELOCITY, 100)
+        proto = HedgehogMessage()
+        proto.motor_action.state = motor.VELOCITY
+        proto.motor_action.amount = 100
+        self.assertTransmissionClientServer(msg, proto)
 
-        old = motor.Action(0, motor.POWER, 100, relative=-100)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.Action(0, motor.POWER, 100, relative=-100)
+        proto = HedgehogMessage()
+        proto.motor_action.amount = 100
+        proto.motor_action.relative = -100
+        self.assertTransmissionClientServer(msg, proto)
 
-        old = motor.Action(0, motor.VELOCITY, 100, absolute=-100)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.Action(0, motor.VELOCITY, 100, absolute=-100)
+        proto = HedgehogMessage()
+        proto.motor_action.state = motor.VELOCITY
+        proto.motor_action.amount = 100
+        proto.motor_action.absolute = -100
+        self.assertTransmissionClientServer(msg, proto)
 
         with self.assertRaises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, 100, relative=100, absolute=100)
@@ -106,74 +137,97 @@ class TestMessages(unittest.TestCase):
             motor.Action(0, motor.POWER, 0, relative=100)
 
     def test_motor_command_request(self):
-        old = motor.CommandRequest(0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.CommandRequest(0)
+        proto = HedgehogMessage()
+        proto.motor_command_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_motor_command_reply(self):
-        old = motor.CommandReply(0, motor.POWER, 1000)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.CommandReply(0, motor.POWER, 1000)
+        proto = HedgehogMessage()
+        proto.motor_command_message.amount = 1000
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_motor_state_request(self):
-        old = motor.StateRequest(0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.StateRequest(0)
+        proto = HedgehogMessage()
+        proto.motor_state_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_motor_state_reply(self):
-        old = motor.StateReply(0, 100, 1000)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.StateReply(0, 100, 1000)
+        proto = HedgehogMessage()
+        proto.motor_state_message.velocity = 100
+        proto.motor_state_message.position = 1000
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_motor_set_position_action(self):
-        old = motor.SetPositionAction(0, 0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = motor.SetPositionAction(0, 0)
+        proto = HedgehogMessage()
+        proto.motor_set_position_action.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_servo_action(self):
-        old = servo.Action(0, True, 512)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = servo.Action(0, True, 512)
+        proto = HedgehogMessage()
+        proto.servo_action.active = True
+        proto.servo_action.position = 512
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_servo_command_request(self):
-        old = servo.CommandRequest(0)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = servo.CommandRequest(0)
+        proto = HedgehogMessage()
+        proto.servo_command_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_servo_command_reply(self):
-        old = servo.CommandReply(0, True, 1000)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = servo.CommandReply(0, True, 1000)
+        proto = HedgehogMessage()
+        proto.servo_command_message.active = True
+        proto.servo_command_message.position = 1000
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_process_execute_action(self):
-        old = process.ExecuteAction('cat', working_dir='/home/pi')
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = process.ExecuteAction('cat', working_dir='/home/pi')
+        proto = HedgehogMessage()
+        proto.process_execute_action.args.append('cat')
+        proto.process_execute_action.working_dir = '/home/pi'
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_process_execute_reply(self):
-        old = process.ExecuteReply(123)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = process.ExecuteReply(123)
+        proto = HedgehogMessage()
+        proto.process_execute_reply.pid = 123
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_process_stream_action(self):
-        old = process.StreamAction(123, process.STDIN, b'abc')
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = process.StreamAction(123, process.STDIN, b'abc')
+        proto = HedgehogMessage()
+        proto.process_stream_message.pid = 123
+        proto.process_stream_message.fileno = process.STDIN
+        proto.process_stream_message.chunk = b'abc'
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_process_stream_update(self):
-        old = process.StreamUpdate(123, process.STDIN, b'abc')
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = process.StreamUpdate(123, process.STDOUT, b'abc')
+        proto = HedgehogMessage()
+        proto.process_stream_message.pid = 123
+        proto.process_stream_message.fileno = process.STDOUT
+        proto.process_stream_message.chunk = b'abc'
+        self.assertTransmissionServerClient(msg, proto)
 
     def test_process_signal_action(self):
-        old = process.SignalAction(123, 1)
-        new = ServerSide.parse(ClientSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = process.SignalAction(123, 1)
+        proto = HedgehogMessage()
+        proto.process_signal_action.pid = 123
+        proto.process_signal_action.signal = 1
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_process_exit_update(self):
-        old = process.ExitUpdate(123, 0)
-        new = ClientSide.parse(ServerSide.serialize(old))
-        self.assertEqual(new, old)
+        msg = process.ExitUpdate(123, 0)
+        proto = HedgehogMessage()
+        proto.process_exit_update.pid = 123
+        self.assertTransmissionServerClient(msg, proto)
 
 
 class TestSockets(unittest.TestCase):
