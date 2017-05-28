@@ -181,10 +181,10 @@ class TestSockets(unittest.TestCase):
         ctx = zmq.Context()
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER)
+        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
         router.bind(endpoint)
 
-        req = sockets.ReqSocket(ctx, zmq.REQ)
+        req = sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
         req.connect(endpoint)
 
         old = analog.Request(1)
@@ -192,7 +192,7 @@ class TestSockets(unittest.TestCase):
         header, new = router.recv_msg()
         self.assertEqual(new, old)
 
-        old = analog.Update(1, 200)
+        old = analog.Reply(1, 200)
         router.send_msg(header, old)
         new = req.recv_msg()
         self.assertEqual(new, old)
@@ -204,10 +204,10 @@ class TestSockets(unittest.TestCase):
         ctx = zmq.Context()
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER)
+        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
         router.bind(endpoint)
 
-        req = sockets.ReqSocket(ctx, zmq.REQ)
+        req = sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
         req.connect(endpoint)
 
         olds = [analog.Request(0), digital.Request(0)]
@@ -216,7 +216,7 @@ class TestSockets(unittest.TestCase):
         for old, new in zip(olds, news):
             self.assertEqual(new, old)
 
-        olds = [analog.Update(0, 100), digital.Update(0, True)]
+        olds = [analog.Reply(0, 100), digital.Reply(0, True)]
         router.send_msgs(header, olds)
         news = req.recv_msgs()
         for old, new in zip(olds, news):
@@ -226,10 +226,10 @@ class TestSockets(unittest.TestCase):
         ctx = zmq.Context()
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER)
+        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
         router.bind(endpoint)
 
-        req = sockets.ReqSocket(ctx, zmq.REQ)
+        req = sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
         req.connect(endpoint)
 
         old = b'as'
@@ -249,10 +249,10 @@ class TestSockets(unittest.TestCase):
         ctx = zmq.Context()
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER)
+        router = sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
         router.bind(endpoint)
 
-        req = sockets.ReqSocket(ctx, zmq.REQ)
+        req = sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
         req.connect(endpoint)
 
         olds = [b'as', b'df']

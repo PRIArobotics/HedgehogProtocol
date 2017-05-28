@@ -107,6 +107,8 @@ class DealerRouterMixin(object):
 
 
 class DealerRouterSocket(DealerRouterMixin, Socket):
+    side = None
+
     def __init__(self, *args, side: CommSide, **kwargs) -> None:
         super(DealerRouterSocket, self).__init__(*args, **kwargs)
         self.side = side
@@ -149,6 +151,8 @@ class ReqMixin(object):
 
 
 class ReqSocket(ReqMixin, Socket):
+    side = None
+
     def __init__(self, *args, side: CommSide, **kwargs) -> None:
         super(ReqSocket, self).__init__(*args, **kwargs)
         self.side = side
