@@ -208,6 +208,12 @@ class TestMessages(unittest.TestCase):
         proto.process_stream_message.chunk = b'abc'
         self.assertTransmissionClientServer(msg, proto)
 
+        with self.assertRaises(errors.InvalidCommandError):
+            process.StreamAction(123, process.STDOUT, b'abc')
+
+        with self.assertRaises(errors.InvalidCommandError):
+            process.StreamAction(123, process.STDERR, b'abc')
+
     def test_process_stream_update(self):
         msg = process.StreamUpdate(123, process.STDOUT, b'abc')
         proto = HedgehogMessage()
@@ -215,6 +221,9 @@ class TestMessages(unittest.TestCase):
         proto.process_stream_message.fileno = process.STDOUT
         proto.process_stream_message.chunk = b'abc'
         self.assertTransmissionServerClient(msg, proto)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            process.StreamUpdate(123, process.STDIN, b'abc')
 
     def test_process_signal_action(self):
         msg = process.SignalAction(123, 1)

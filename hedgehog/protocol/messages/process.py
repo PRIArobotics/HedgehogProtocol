@@ -1,4 +1,5 @@
 from . import RequestMsg, ReplyMsg, SimpleMessage
+from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import process_pb2
 from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 
@@ -37,6 +38,8 @@ class ExecuteReply(SimpleMessage):
 @RequestMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
 class StreamAction(SimpleMessage):
     def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
+        if fileno != STDIN:
+            raise InvalidCommandError("only STDIN is writable")
         self.pid = pid
         self.fileno = fileno
         self.chunk = chunk
@@ -54,6 +57,8 @@ class StreamAction(SimpleMessage):
 @ReplyMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
 class StreamUpdate(SimpleMessage):
     def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
+        if fileno not in (STDOUT, STDERR):
+            raise InvalidCommandError("only STDOUT and STDERR are readable")
         self.pid = pid
         self.fileno = fileno
         self.chunk = chunk
