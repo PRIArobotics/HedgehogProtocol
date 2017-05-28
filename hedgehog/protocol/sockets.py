@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple, TypeVar, Union
+from typing import Sequence, Tuple, TypeVar
 
 from hedgehog.utils.protobuf import Message
 from hedgehog.utils.zmq.socket import Socket
@@ -35,23 +35,38 @@ def _rindex(mylist: Sequence[T], x: T) -> int:
     return len(mylist) - mylist[::-1].index(x) - 1
 
 
-def to_delimited(header: Header, payload: Union[RawPayload, Payload], raw=True) -> DelimitedMsg:
+def raw_to_delimited(header: Header, raw_payload: RawPayload) -> DelimitedMsg:
     """
     Returns a message consisting of header frames, delimiter frame, and payload frames.
     The payload frames may be given as sequences of bytes (raw) or as `Message`s.
     """
-    msgs_raw = tuple(payload) if raw else tuple(serialize(msg) for msg in payload)
-    return tuple(header) + (b'',) + msgs_raw
+    return tuple(header) + (b'',) + tuple(raw_payload)
 
 
-def from_delimited(msgs: DelimitedMsg, raw=True) -> Union[RawMsgs, Msgs]:
+def to_delimited(header: Header, payload: Payload) -> DelimitedMsg:
+    """
+    Returns a message consisting of header frames, delimiter frame, and payload frames.
+    The payload frames may be given as sequences of bytes (raw) or as `Message`s.
+    """
+    return raw_to_delimited(header, [serialize(msg) for msg in payload])
+
+
+def raw_from_delimited(msgs: DelimitedMsg) -> RawMsgs:
     """
     From a message consisting of header frames, delimiter frame, and payload frames, return a tuple `(header, payload)`.
     The payload frames may be returned as sequences of bytes (raw) or as `Message`s.
     """
     delim = _rindex(msgs, b'')
-    header, payload = tuple(msgs[:delim]), msgs[delim + 1:]
-    return header, tuple(payload) if raw else tuple(parse(msg_raw) for msg_raw in payload)
+    return tuple(msgs[:delim]), tuple(msgs[delim + 1:])
+
+
+def from_delimited(msgs: DelimitedMsg) -> Msgs:
+    """
+    From a message consisting of header frames, delimiter frame, and payload frames, return a tuple `(header, payload)`.
+    The payload frames may be returned as sequences of bytes (raw) or as `Message`s.
+    """
+    header, raw_payload = raw_from_delimited(msgs)
+    return header, tuple(parse(msg_raw) for msg_raw in raw_payload)
 
 
 class DealerRouterMixin(object):
@@ -85,10 +100,10 @@ class DealerRouterMixin(object):
         return header, msg_raw
 
     def send_msgs_raw(self, header: Header, msgs_raw: RawPayload):
-        self.send_multipart(to_delimited(header, msgs_raw))
+        self.send_multipart(raw_to_delimited(header, msgs_raw))
 
     def recv_msgs_raw(self) -> RawMsgs:
-        return from_delimited(self.recv_multipart())
+        return raw_from_delimited(self.recv_multipart())
 
 
 class DealerRouterSocket(DealerRouterMixin, Socket):
