@@ -6,7 +6,7 @@ option java_package = "at.pria.hedgehog.protocol.proto";
 option java_outer_classname = "IOP";
 
 // IO flags and flag combinations
-enum IOStateFlags {
+enum IOFlags {
     option allow_alias = true;
     // flag combinations (first because 0x00 needs to be first)
     INPUT_FLOATING = 0x00;
@@ -24,18 +24,18 @@ enum IOStateFlags {
 // Changes the configuration of one IO port
 //
 // => (port, flags):  IO state action => ack
-message IOStateAction {
+message IOAction {
     uint32 port = 1;
-    IOStateFlags flags = 2;
+    IOFlags flags = 2;
 }
 
-// Request or reply for one IO port's current state. The command may change by an IO state action.
+// Request or reply for one IO port's current command. The command may change by an IO action.
 //
-// => (port):  IO state request => IO state reply
-// <= (port, flags):  IO state reply
-message IOStateMessage {
+// => (port):  IO command request => IO command reply
+// <= (port, flags):  IO command reply
+message IOCommandMessage {
     uint32 port = 1;
-    IOStateFlags flags = 2;
+    IOFlags flags = 2;
 }
 
 // Request or reply for one analog sensor's value

@@ -31,46 +31,46 @@ class TestMessages(unittest.TestCase):
         self.assertTransmissionServerClient(msg, proto)
 
     def test_io_state_action(self):
-        msg = io.StateAction(0, io.INPUT_PULLDOWN)
+        msg = io.Action(0, io.INPUT_PULLDOWN)
         proto = HedgehogMessage()
-        proto.io_state_action.flags = io.INPUT_PULLDOWN
+        proto.io_action.flags = io.INPUT_PULLDOWN
         self.assertTransmissionClientServer(msg, proto)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateAction(0, io.OUTPUT | io.PULLUP)
+            io.Action(0, io.OUTPUT | io.PULLUP)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateAction(0, io.OUTPUT | io.PULLDOWN)
+            io.Action(0, io.OUTPUT | io.PULLDOWN)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateAction(0, io.LEVEL)
+            io.Action(0, io.LEVEL)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateAction(0, io.PULLUP | io.PULLDOWN)
+            io.Action(0, io.PULLUP | io.PULLDOWN)
 
-    def test_io_state_request(self):
-        msg = io.StateRequest(0)
+    def test_io_command_request(self):
+        msg = io.CommandRequest(0)
         proto = HedgehogMessage()
-        proto.io_state_message.SetInParent()
+        proto.io_command_message.SetInParent()
         self.assertTransmissionClientServer(msg, proto)
 
-    def test_io_state_reply(self):
-        msg = io.StateReply(0, io.INPUT_PULLDOWN)
+    def test_io_command_reply(self):
+        msg = io.CommandReply(0, io.INPUT_PULLDOWN)
         proto = HedgehogMessage()
-        proto.io_state_message.flags = io.INPUT_PULLDOWN
+        proto.io_command_message.flags = io.INPUT_PULLDOWN
         self.assertTransmissionServerClient(msg, proto)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateReply(0, io.OUTPUT | io.PULLUP)
+            io.CommandReply(0, io.OUTPUT | io.PULLUP)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateReply(0, io.OUTPUT | io.PULLDOWN)
+            io.CommandReply(0, io.OUTPUT | io.PULLDOWN)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateReply(0, io.LEVEL)
+            io.CommandReply(0, io.LEVEL)
 
         with self.assertRaises(errors.InvalidCommandError):
-            io.StateReply(0, io.PULLUP | io.PULLDOWN)
+            io.CommandReply(0, io.PULLUP | io.PULLDOWN)
 
     def test_analog_request(self):
         msg = analog.Request(0)

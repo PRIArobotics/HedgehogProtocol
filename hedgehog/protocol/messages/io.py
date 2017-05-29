@@ -16,8 +16,8 @@ def _check_flags(flags: int) -> None:
         raise InvalidCommandError("pullup and pulldown are mutually exclusive")
 
 
-@RequestMsg.message(io_pb2.IOStateAction, 'io_state_action')
-class StateAction(SimpleMessage):
+@RequestMsg.message(io_pb2.IOAction, 'io_action')
+class Action(SimpleMessage):
     def __init__(self, port: int, flags: int) -> None:
         _check_flags(flags)
         self.port = port
@@ -40,29 +40,29 @@ class StateAction(SimpleMessage):
         return (self.flags & LEVEL) != 0
 
     @classmethod
-    def _parse(cls, msg: io_pb2.IOStateAction) -> 'StateAction':
+    def _parse(cls, msg: io_pb2.IOAction) -> 'Action':
         return cls(msg.port, msg.flags)
 
-    def _serialize(self, msg: io_pb2.IOStateAction) -> None:
+    def _serialize(self, msg: io_pb2.IOAction) -> None:
         msg.port = self.port
         msg.flags = self.flags
 
 
-@RequestMsg.message(io_pb2.IOStateMessage, 'io_state_message', fields=('port',))
-class StateRequest(SimpleMessage):
+@RequestMsg.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port',))
+class CommandRequest(SimpleMessage):
     def __init__(self, port: int) -> None:
         self.port = port
 
     @classmethod
-    def _parse(cls, msg: io_pb2.IOStateAction) -> 'StateRequest':
+    def _parse(cls, msg: io_pb2.IOCommandMessage) -> 'CommandRequest':
         return cls(msg.port)
 
-    def _serialize(self, msg: io_pb2.IOStateMessage) -> None:
+    def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
 
 
-@ReplyMsg.message(io_pb2.IOStateMessage, 'io_state_message')
-class StateReply(SimpleMessage):
+@ReplyMsg.message(io_pb2.IOCommandMessage, 'io_command_message')
+class CommandReply(SimpleMessage):
     def __init__(self, port: int, flags: int) -> None:
         _check_flags(flags)
         self.port = port
@@ -85,9 +85,9 @@ class StateReply(SimpleMessage):
         return (self.flags & LEVEL) != 0
 
     @classmethod
-    def _parse(cls, msg: io_pb2.IOStateMessage) -> 'StateReply':
+    def _parse(cls, msg: io_pb2.IOCommandMessage) -> 'CommandReply':
         return cls(msg.port, msg.flags)
 
-    def _serialize(self, msg: io_pb2.IOStateMessage) -> None:
+    def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
         msg.flags = self.flags
