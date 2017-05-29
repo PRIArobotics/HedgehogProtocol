@@ -22,7 +22,7 @@ enum MotorState {
 // reaching the position.
 //
 // => (port, state, amount):  indefinite motor action => ack
-// => (port, state, reached_state, relative/absolute):  terminating motor action => ack
+// => (port, state, amount, reached_state, relative/absolute):  terminating motor action => ack
 message MotorAction {
     uint32 port = 1;
     // the state to set
@@ -66,7 +66,7 @@ message MotorStateMessage {
 
 // Set one motor's position counter.
 //
-// => (port, position ):  set motor position action => ack
+// => (port, position):  set motor position action => ack
 message MotorSetPositionAction {
     uint32 port = 1;
     sint32 position = 2;
