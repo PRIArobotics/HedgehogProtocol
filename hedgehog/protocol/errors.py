@@ -6,7 +6,6 @@ Every error corresponds to one acknowledge code from ack.proto; the `OK` code na
 
 from typing import Dict, Type
 
-from .messages import Message
 from .proto.ack_pb2 import UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
 
@@ -36,10 +35,6 @@ class InvalidCommandError(HedgehogCommandError):
 
 class UnsupportedCommandError(HedgehogCommandError):
     code = UNSUPPORTED_COMMAND
-
-    @classmethod
-    def from_msg_class(cls, msg: Type[Message]) -> 'UnsupportedCommandError':
-        return cls(msg.msg_name())
 
 
 class FailedCommandError(HedgehogCommandError):
