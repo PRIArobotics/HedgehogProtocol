@@ -39,9 +39,7 @@ class UnsupportedCommandError(HedgehogCommandError):
 
     @classmethod
     def from_msg_class(cls, msg: Type[Message]) -> 'UnsupportedCommandError':
-        module, name = msg.__module__, msg.__name__
-        module = module[module.rindex('.') + 1:]
-        return cls(module + '.' + name)
+        return cls(msg.msg_name())
 
 
 class FailedCommandError(HedgehogCommandError):
