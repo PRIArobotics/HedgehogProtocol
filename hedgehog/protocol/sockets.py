@@ -1,8 +1,8 @@
 from typing import Sequence, Tuple, TypeVar
 
 from hedgehog.protocol import CommSide
-from hedgehog.utils.protobuf import Message
 from hedgehog.utils.zmq.socket import Socket
+from .messages import Message
 
 
 # a single protobuf-encoded message

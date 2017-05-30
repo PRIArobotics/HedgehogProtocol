@@ -250,7 +250,7 @@ class TestSockets(unittest.TestCase):
         req = sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
         req.connect(endpoint)
 
-        old = analog.Request(1)
+        old = analog.Request(1)  # type: Message
         req.send_msg(old)
         header, new = router.recv_msg()
         self.assertEqual(new, old)

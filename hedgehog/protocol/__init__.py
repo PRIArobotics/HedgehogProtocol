@@ -1,11 +1,11 @@
 from hedgehog.utils import protobuf
 
-from .messages import Message, RequestMsg, ReplyMsg
+from .messages import ContainerMessage, Message, RequestMsg, ReplyMsg
 from .errors import UnknownCommandError
 
 
 class CommSide(object):
-    def __init__(self, receiver: protobuf.ContainerMessage, sender: protobuf.ContainerMessage) -> None:
+    def __init__(self, receiver: ContainerMessage, sender: protobuf.ContainerMessage) -> None:
         self.receiver = receiver
         self.sender = sender
 

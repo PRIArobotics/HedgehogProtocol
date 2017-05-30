@@ -1,9 +1,7 @@
+from typing import cast
+
 from hedgehog.utils import protobuf
 from ..proto import hedgehog_pb2
-
-
-RequestMsg = protobuf.ContainerMessage(hedgehog_pb2.HedgehogMessage)
-ReplyMsg = protobuf.ContainerMessage(hedgehog_pb2.HedgehogMessage)
 
 
 class Message(protobuf.Message):
@@ -23,3 +21,12 @@ class Message(protobuf.Message):
 
 class SimpleMessage(Message, protobuf.SimpleMessageMixin):
     pass
+
+
+class ContainerMessage(protobuf.ContainerMessage):
+    def parse(self, data: bytes) -> Message:
+        return cast(Message, super(ContainerMessage, self).parse(data))
+
+
+RequestMsg = ContainerMessage(hedgehog_pb2.HedgehogMessage)
+ReplyMsg = ContainerMessage(hedgehog_pb2.HedgehogMessage)
