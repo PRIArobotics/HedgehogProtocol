@@ -1,31 +1,10 @@
-from typing import Sequence, Tuple, TypeVar
+from typing import Sequence, TypeVar
 
 from hedgehog.protocol import CommSide
 from hedgehog.utils.zmq.socket import Socket
-from .messages import Message
+from . import RawMessage, Message, RawPayload, Payload, \
+    Header, DelimitedMsg, RawMsgs, Msgs, RawMsg, Msg
 
-
-# a single protobuf-encoded message
-RawMessage = bytes
-# a single decoded message
-#Message
-# a sequence of raw messages
-RawPayload = Sequence[RawMessage]
-# a sequence of decoded messages
-Payload = Sequence[Message]
-
-# sequence of zeromq header frames
-Header = Sequence[bytes]
-# a multipart ZeroMQ message with headers, delimiter and payload
-DelimitedMsg = Sequence[bytes]
-# a decoded message with headers and raw payload
-RawMsgs = Tuple[Header, RawPayload]
-# a decoded message with headers and payload
-Msgs = Tuple[Header, Payload]
-# a decoded message with headers and a single raw message
-RawMsg = Tuple[Header, RawMessage]
-# a decoded message with headers and a single message
-Msg = Tuple[Header, Message]
 
 T = TypeVar('T')
 
