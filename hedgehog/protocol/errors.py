@@ -4,12 +4,14 @@ Errors that may be caused by Hedgehog commands.
 Every error corresponds to one acknowledge code from ack.proto; the `OK` code naturally has no corresponding error.
 """
 
+from typing import Dict, Type
+
 from .proto.ack_pb2 import UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
 
 class HedgehogCommandError(Exception):
     """Superclass of all errors caused by Hedgehog commands."""
-    code = None
+    code = None  # type: int
     """Class property containing the acknowledgement code"""
 
     def to_message(self):
@@ -48,10 +50,10 @@ _errors = {
     INVALID_COMMAND: InvalidCommandError,
     UNSUPPORTED_COMMAND: UnsupportedCommandError,
     FAILED_COMMAND: FailedCommandError,
-}
+}  # type: Dict[int, Type[HedgehogCommandError]]
 
 
-def error(code, *args, **kwargs):
+def error(code: int, *args, **kwargs) -> HedgehogCommandError:
     """
     Creates an error from the given code, and args and kwargs.
 
