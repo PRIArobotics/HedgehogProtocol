@@ -36,7 +36,7 @@ class CommandRequest(SimpleMessage):
         msg.port = self.port
 
 
-@ReplyMsg.message(servo_pb2.ServoCommandMessage, 'servo_command_message')
+@ReplyMsg.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position'))
 class CommandReply(SimpleMessage):
     def __init__(self, port: int, active: bool, position: int=0) -> None:
         self.port = port

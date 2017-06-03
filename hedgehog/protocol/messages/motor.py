@@ -61,7 +61,7 @@ class CommandRequest(SimpleMessage):
         msg.port = self.port
 
 
-@ReplyMsg.message(motor_pb2.MotorCommandMessage, 'motor_command_message')
+@ReplyMsg.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount'))
 class CommandReply(SimpleMessage):
     def __init__(self, port: int, state: int, amount: int) -> None:
         self.port = port
@@ -95,7 +95,7 @@ class StateRequest(SimpleMessage):
         msg.port = self.port
 
 
-@ReplyMsg.message(motor_pb2.MotorStateMessage, 'motor_state_message')
+@ReplyMsg.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position'))
 class StateReply(SimpleMessage):
     def __init__(self, port: int, velocity: int, position: int) -> None:
         self.port = port

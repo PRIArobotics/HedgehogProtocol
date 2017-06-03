@@ -64,7 +64,7 @@ class CommandRequest(SimpleMessage):
         msg.port = self.port
 
 
-@ReplyMsg.message(io_pb2.IOCommandMessage, 'io_command_message')
+@ReplyMsg.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags'))
 class CommandReply(SimpleMessage):
     def __init__(self, port: int, flags: int) -> None:
         _check_flags(flags)

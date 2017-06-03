@@ -16,7 +16,7 @@ class Request(SimpleMessage):
         msg.port = self.port
 
 
-@ReplyMsg.message(io_pb2.AnalogMessage, 'analog_message')
+@ReplyMsg.message(io_pb2.AnalogMessage, 'analog_message', fields=('port', 'value'))
 class Reply(SimpleMessage):
     def __init__(self, port: int, value: int) -> None:
         self.port = port
