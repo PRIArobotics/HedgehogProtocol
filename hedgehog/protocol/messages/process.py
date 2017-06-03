@@ -12,9 +12,9 @@ class ExecuteAction(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExecuteAction) -> 'ExecuteAction':
-        return cls(
-            *msg.args,
-            working_dir=msg.working_dir if msg.working_dir != '' else None)
+        working_dir = msg.working_dir if msg.working_dir != '' else None
+        args = msg.args
+        return cls(*args, working_dir=working_dir)
 
     def _serialize(self, msg: process_pb2.ProcessExecuteAction) -> None:
         if self.working_dir is not None:
@@ -29,7 +29,8 @@ class ExecuteReply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExecuteReply) -> 'ExecuteReply':
-        return cls(msg.pid)
+        pid = msg.pid
+        return cls(pid)
 
     def _serialize(self, msg: process_pb2.ProcessExecuteReply) -> None:
         msg.pid = self.pid
@@ -46,7 +47,10 @@ class StreamAction(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessStreamMessage) -> 'StreamAction':
-        return cls(msg.pid, msg.fileno, msg.chunk)
+        pid = msg.pid
+        fileno = msg.fileno
+        chunk = msg.chunk
+        return cls(pid, fileno, chunk)
 
     def _serialize(self, msg: process_pb2.ProcessStreamMessage) -> None:
         msg.pid = self.pid
@@ -65,7 +69,10 @@ class StreamUpdate(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessStreamMessage) -> 'StreamUpdate':
-        return cls(msg.pid, msg.fileno, msg.chunk)
+        pid = msg.pid
+        fileno = msg.fileno
+        chunk = msg.chunk
+        return cls(pid, fileno, chunk)
 
     def _serialize(self, msg: process_pb2.ProcessStreamMessage) -> None:
         msg.pid = self.pid
@@ -81,7 +88,9 @@ class SignalAction(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessSignalAction) -> 'SignalAction':
-        return cls(msg.pid, msg.signal)
+        pid = msg.pid
+        signal = msg.signal
+        return cls(pid, signal)
 
     def _serialize(self, msg: process_pb2.ProcessSignalAction) -> None:
         msg.pid = self.pid
@@ -98,7 +107,9 @@ class ExitUpdate(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExitUpdate) -> 'ExitUpdate':
-        return cls(msg.pid, msg.exit_code)
+        pid = msg.pid
+        exit_code = msg.exit_code
+        return cls(pid, exit_code)
 
     def _serialize(self, msg: process_pb2.ProcessExitUpdate) -> None:
         msg.pid = self.pid

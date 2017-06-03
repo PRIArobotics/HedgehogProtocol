@@ -11,7 +11,9 @@ class Acknowledgement(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: ack_pb2.Acknowledgement) -> 'Acknowledgement':
-        return cls(msg.code, msg.message)
+        code = msg.code
+        message = msg.message
+        return cls(code, message)
 
     def _serialize(self, msg: ack_pb2.Acknowledgement) -> None:
         msg.code = self.code
