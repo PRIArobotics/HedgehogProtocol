@@ -142,7 +142,7 @@ class StateSubscribe(Message):
 
 
 @RequestMsg.parser('motor_state_message')
-def _parse_command_request(msg: motor_pb2.MotorStateMessage) -> Union[StateRequest, StateSubscribe]:
+def _parse_state_request(msg: motor_pb2.MotorStateMessage) -> Union[StateRequest, StateSubscribe]:
     port = msg.port
     subscription = msg.subscription if msg.HasField('subscription') else None
     if subscription is None:
@@ -180,7 +180,7 @@ class StateUpdate(Message):
 
 
 @ReplyMsg.parser('motor_state_message')
-def _parse_command_reply(msg: motor_pb2.MotorStateMessage) -> Union[StateReply, StateUpdate]:
+def _parse_state_reply(msg: motor_pb2.MotorStateMessage) -> Union[StateReply, StateUpdate]:
     port = msg.port
     velocity = msg.velocity
     position = msg.position
