@@ -11,7 +11,10 @@ class Action(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: servo_pb2.ServoAction) -> 'Action':
-        return cls(msg.port, msg.active, msg.position)
+        port = msg.port
+        active = msg.active
+        position = msg.position
+        return cls(port, active, position)
 
     def _serialize(self, msg: servo_pb2.ServoAction) -> None:
         msg.port = self.port
@@ -26,7 +29,8 @@ class CommandRequest(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: servo_pb2.ServoCommandMessage) -> 'CommandRequest':
-        return cls(msg.port)
+        port = msg.port
+        return cls(port)
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
@@ -41,7 +45,10 @@ class CommandReply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: servo_pb2.ServoCommandMessage) -> 'CommandReply':
-        return cls(msg.port, msg.active, msg.position)
+        port = msg.port
+        active = msg.active
+        position = msg.position
+        return cls(port, active, position)
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port

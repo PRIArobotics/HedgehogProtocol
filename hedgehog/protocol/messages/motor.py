@@ -28,20 +28,23 @@ class Action(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: motor_pb2.MotorAction) -> 'Action':
-        return cls(
-            msg.port, msg.state,
-            msg.amount,
-            msg.reached_state,
-            msg.relative if msg.HasField('relative') else None,
-            msg.absolute if msg.HasField('absolute') else None)
+        port = msg.port
+        state = msg.state
+        amount = msg.amount
+        reached_state = msg.reached_state
+        relative = msg.relative if msg.HasField('relative') else None
+        absolute = msg.absolute if msg.HasField('absolute') else None
+        return cls(port, state, amount, reached_state, relative, absolute)
 
     def _serialize(self, msg: motor_pb2.MotorAction) -> None:
         msg.port = self.port
         msg.state = self.state
         msg.amount = self.amount
         msg.reached_state = self.reached_state
-        if self.relative is not None: msg.relative = self.relative
-        if self.absolute is not None: msg.absolute = self.absolute
+        if self.relative is not None:
+            msg.relative = self.relative
+        if self.absolute is not None:
+            msg.absolute = self.absolute
 
 
 @RequestMsg.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
@@ -51,7 +54,8 @@ class CommandRequest(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: motor_pb2.MotorCommandMessage) -> 'CommandRequest':
-        return cls(msg.port)
+        port = msg.port
+        return cls(port)
 
     def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
         msg.port = self.port
@@ -66,7 +70,10 @@ class CommandReply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: motor_pb2.MotorCommandMessage) -> 'CommandReply':
-        return cls(msg.port, msg.state, msg.amount)
+        port = msg.port
+        state = msg.state
+        amount = msg.amount
+        return cls(port, state, amount)
 
     def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
         msg.port = self.port
@@ -81,7 +88,8 @@ class StateRequest(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: motor_pb2.MotorStateMessage) -> 'StateRequest':
-        return cls(msg.port)
+        port = msg.port
+        return cls(port)
 
     def _serialize(self, msg: motor_pb2.MotorStateMessage):
         msg.port = self.port
@@ -96,7 +104,10 @@ class StateReply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: motor_pb2.MotorStateMessage) -> 'StateReply':
-        return cls(msg.port, msg.velocity, msg.position)
+        port = msg.port
+        velocity = msg.velocity
+        position = msg.position
+        return cls(port, velocity, position)
 
     def _serialize(self, msg: motor_pb2.MotorStateMessage) -> None:
         msg.port = self.port
@@ -112,7 +123,9 @@ class SetPositionAction(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: motor_pb2.MotorSetPositionAction) -> 'SetPositionAction':
-        return cls(msg.port, msg.position)
+        port = msg.port
+        position = msg.position
+        return cls(port, position)
 
     def _serialize(self, msg: motor_pb2.MotorSetPositionAction) -> None:
         msg.port = self.port

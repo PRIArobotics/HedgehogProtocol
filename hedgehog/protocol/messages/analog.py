@@ -9,7 +9,8 @@ class Request(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: io_pb2.AnalogMessage) -> 'Request':
-        return cls(msg.port)
+        port = msg.port
+        return cls(port)
 
     def _serialize(self, msg: io_pb2.AnalogMessage) -> None:
         msg.port = self.port
@@ -23,7 +24,9 @@ class Reply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: io_pb2.AnalogMessage) -> 'Reply':
-        return cls(msg.port, msg.value)
+        port = msg.port
+        value = msg.value
+        return cls(port, value)
 
     def _serialize(self, msg: io_pb2.AnalogMessage) -> None:
         msg.port = self.port

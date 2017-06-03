@@ -41,7 +41,9 @@ class Action(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: io_pb2.IOAction) -> 'Action':
-        return cls(msg.port, msg.flags)
+        port = msg.port
+        flags = msg.flags
+        return cls(port, flags)
 
     def _serialize(self, msg: io_pb2.IOAction) -> None:
         msg.port = self.port
@@ -55,7 +57,8 @@ class CommandRequest(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: io_pb2.IOCommandMessage) -> 'CommandRequest':
-        return cls(msg.port)
+        port = msg.port
+        return cls(port)
 
     def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
@@ -86,7 +89,9 @@ class CommandReply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: io_pb2.IOCommandMessage) -> 'CommandReply':
-        return cls(msg.port, msg.flags)
+        port = msg.port
+        flags = msg.flags
+        return cls(port, flags)
 
     def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
