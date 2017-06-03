@@ -1,6 +1,7 @@
 from typing import Union
 
 from . import RequestMsg, ReplyMsg, SimpleMessage, Message
+from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import servo_pb2
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
 from hedgehog.utils import protobuf
@@ -8,10 +9,12 @@ from hedgehog.utils import protobuf
 
 @RequestMsg.message(servo_pb2.ServoAction, 'servo_action')
 class Action(SimpleMessage):
-    def __init__(self, port: int, active: bool, position: int) -> None:
+    def __init__(self, port: int, active: bool, position: int=None) -> None:
+        if active and position is None:
+            raise InvalidCommandError("position must be given when activating servo")
         self.port = port
         self.active = active
-        self.position = position
+        self.position = position if active else None
 
     @classmethod
     def _parse(cls, msg: servo_pb2.ServoAction) -> 'Action':
@@ -23,7 +26,8 @@ class Action(SimpleMessage):
     def _serialize(self, msg: servo_pb2.ServoAction) -> None:
         msg.port = self.port
         msg.active = self.active
-        msg.position = self.position
+        if self.position is not None:
+            msg.position = self.position
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
@@ -58,7 +62,7 @@ def _parse_command_request(msg: servo_pb2.ServoCommandMessage) -> Union[CommandR
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position'))
 class CommandReply(SimpleMessage):
-    def __init__(self, port: int, active: bool, position: int=0) -> None:
+    def __init__(self, port: int, active: bool, position: int) -> None:
         self.port = port
         self.active = active
         self.position = position
@@ -74,7 +78,7 @@ class CommandUpdate(Message):
     def __init__(self, port: int, active: bool, position: int, subscription: Subscription) -> None:
         self.port = port
         self.active = active
-        self.position = position
+        self.position = position if active else None
         self.subscription = subscription
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:

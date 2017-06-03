@@ -297,6 +297,14 @@ class TestMessages(unittest.TestCase):
         proto.servo_action.position = 512
         self.assertTransmissionClientServer(msg, proto)
 
+        msg = servo.Action(0, False)
+        proto = HedgehogMessage()
+        proto.servo_action.active = False
+        self.assertTransmissionClientServer(msg, proto)
+
+        with self.assertRaises(errors.InvalidCommandError):
+            servo.Action(0, True)
+
     def test_servo_command_request(self):
         msg = servo.CommandRequest(0)
         proto = HedgehogMessage()
