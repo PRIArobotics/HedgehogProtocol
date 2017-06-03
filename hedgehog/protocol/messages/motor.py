@@ -1,7 +1,11 @@
-from . import RequestMsg, ReplyMsg, SimpleMessage
+from typing import Union
+
+from . import RequestMsg, ReplyMsg, SimpleMessage, Message
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import motor_pb2
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
+from hedgehog.protocol.proto.subscription_pb2 import Subscription
+from hedgehog.utils import protobuf
 
 
 @RequestMsg.message(motor_pb2.MotorAction, 'motor_action')
@@ -47,33 +51,42 @@ class Action(SimpleMessage):
             msg.absolute = self.absolute
 
 
-@RequestMsg.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
-class CommandRequest(SimpleMessage):
+@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
+class CommandRequest(Message):
     def __init__(self, port: int) -> None:
         self.port = port
-
-    @classmethod
-    def _parse(cls, msg: motor_pb2.MotorCommandMessage) -> 'CommandRequest':
-        port = msg.port
-        return cls(port)
 
     def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
         msg.port = self.port
 
 
-@ReplyMsg.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount'))
-class CommandReply(SimpleMessage):
+@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'subscription'))
+class CommandSubscribe(Message):
+    def __init__(self, port: int, subscription: Subscription) -> None:
+        self.port = port
+        self.subscription = subscription
+
+    def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
+        msg.port = self.port
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@RequestMsg.parser('motor_command_message')
+def _parse_command_request(msg: motor_pb2.MotorCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
+    port = msg.port
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    if subscription is None:
+        return CommandRequest(port)
+    else:
+        return CommandSubscribe(port, subscription)
+
+
+@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount'))
+class CommandReply(Message):
     def __init__(self, port: int, state: int, amount: int) -> None:
         self.port = port
         self.state = state
         self.amount = amount
-
-    @classmethod
-    def _parse(cls, msg: motor_pb2.MotorCommandMessage) -> 'CommandReply':
-        port = msg.port
-        state = msg.state
-        amount = msg.amount
-        return cls(port, state, amount)
 
     def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
         msg.port = self.port
@@ -81,38 +94,101 @@ class CommandReply(SimpleMessage):
         msg.amount = self.amount
 
 
-@RequestMsg.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port',))
-class StateRequest(SimpleMessage):
+@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message')
+class CommandUpdate(Message):
+    def __init__(self, port: int, state: int, amount: int, subscription: Subscription) -> None:
+        self.port = port
+        self.state = state
+        self.amount = amount
+        self.subscription = subscription
+
+    def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
+        msg.port = self.port
+        msg.state = self.state
+        msg.amount = self.amount
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@ReplyMsg.parser('motor_command_message')
+def _parse_command_reply(msg: motor_pb2.MotorCommandMessage) -> Union[CommandReply, CommandUpdate]:
+    port = msg.port
+    state = msg.state
+    amount = msg.amount
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    if subscription is None:
+        return CommandReply(port, state, amount)
+    else:
+        return CommandUpdate(port, state, amount, subscription)
+
+
+@protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port',))
+class StateRequest(Message):
     def __init__(self, port: int) -> None:
         self.port = port
-
-    @classmethod
-    def _parse(cls, msg: motor_pb2.MotorStateMessage) -> 'StateRequest':
-        port = msg.port
-        return cls(port)
 
     def _serialize(self, msg: motor_pb2.MotorStateMessage):
         msg.port = self.port
 
 
-@ReplyMsg.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position'))
-class StateReply(SimpleMessage):
+@protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'subscription'))
+class StateSubscribe(Message):
+    def __init__(self, port: int, subscription: Subscription) -> None:
+        self.port = port
+        self.subscription = subscription
+
+    def _serialize(self, msg: motor_pb2.MotorStateMessage) -> None:
+        msg.port = self.port
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@RequestMsg.parser('motor_state_message')
+def _parse_command_request(msg: motor_pb2.MotorStateMessage) -> Union[StateRequest, StateSubscribe]:
+    port = msg.port
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    if subscription is None:
+        return StateRequest(port)
+    else:
+        return StateSubscribe(port, subscription)
+
+
+@protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position'))
+class StateReply(Message):
     def __init__(self, port: int, velocity: int, position: int) -> None:
         self.port = port
         self.velocity = velocity
         self.position = position
 
-    @classmethod
-    def _parse(cls, msg: motor_pb2.MotorStateMessage) -> 'StateReply':
-        port = msg.port
-        velocity = msg.velocity
-        position = msg.position
-        return cls(port, velocity, position)
+    def _serialize(self, msg: motor_pb2.MotorStateMessage) -> None:
+        msg.port = self.port
+        msg.velocity = self.velocity
+        msg.position = self.position
+
+
+@protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message')
+class StateUpdate(Message):
+    def __init__(self, port: int, velocity: int, position: int, subscription: Subscription) -> None:
+        self.port = port
+        self.velocity = velocity
+        self.position = position
+        self.subscription = subscription
 
     def _serialize(self, msg: motor_pb2.MotorStateMessage) -> None:
         msg.port = self.port
         msg.velocity = self.velocity
         msg.position = self.position
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@ReplyMsg.parser('motor_state_message')
+def _parse_command_reply(msg: motor_pb2.MotorStateMessage) -> Union[StateReply, StateUpdate]:
+    port = msg.port
+    velocity = msg.velocity
+    position = msg.position
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    if subscription is None:
+        return StateReply(port, velocity, position)
+    else:
+        return StateUpdate(port, velocity, position, subscription)
 
 
 @RequestMsg.message(motor_pb2.MotorSetPositionAction, 'motor_set_position_action')

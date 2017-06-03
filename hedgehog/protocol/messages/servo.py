@@ -1,5 +1,9 @@
-from . import RequestMsg, ReplyMsg, SimpleMessage
+from typing import Union
+
+from . import RequestMsg, ReplyMsg, SimpleMessage, Message
 from hedgehog.protocol.proto import servo_pb2
+from hedgehog.protocol.proto.subscription_pb2 import Subscription
+from hedgehog.utils import protobuf
 
 
 @RequestMsg.message(servo_pb2.ServoAction, 'servo_action')
@@ -22,35 +26,71 @@ class Action(SimpleMessage):
         msg.position = self.position
 
 
-@RequestMsg.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
 class CommandRequest(SimpleMessage):
     def __init__(self, port: int) -> None:
         self.port = port
-
-    @classmethod
-    def _parse(cls, msg: servo_pb2.ServoCommandMessage) -> 'CommandRequest':
-        port = msg.port
-        return cls(port)
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
 
 
-@ReplyMsg.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position'))
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'subscription'))
+class CommandSubscribe(Message):
+    def __init__(self, port: int, subscription: Subscription) -> None:
+        self.port = port
+        self.subscription = subscription
+
+    def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
+        msg.port = self.port
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@RequestMsg.parser('servo_command_message')
+def _parse_command_request(msg: servo_pb2.ServoCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
+    port = msg.port
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    if subscription is None:
+        return CommandRequest(port)
+    else:
+        return CommandSubscribe(port, subscription)
+
+
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position'))
 class CommandReply(SimpleMessage):
     def __init__(self, port: int, active: bool, position: int=0) -> None:
         self.port = port
         self.active = active
         self.position = position
 
-    @classmethod
-    def _parse(cls, msg: servo_pb2.ServoCommandMessage) -> 'CommandReply':
-        port = msg.port
-        active = msg.active
-        position = msg.position
-        return cls(port, active, position)
+    def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
+        msg.port = self.port
+        msg.active = self.active
+        msg.position = self.position
+
+
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message')
+class CommandUpdate(Message):
+    def __init__(self, port: int, active: bool, position: int, subscription: Subscription) -> None:
+        self.port = port
+        self.active = active
+        self.position = position
+        self.subscription = subscription
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
         msg.active = self.active
         msg.position = self.position
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@ReplyMsg.parser('servo_command_message')
+def _parse_command_reply(msg: servo_pb2.ServoCommandMessage) -> Union[CommandReply, CommandUpdate]:
+    port = msg.port
+    active = msg.active
+    position = msg.position
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    if subscription is None:
+        return CommandReply(port, active, position)
+    else:
+        return CommandUpdate(port, active, position, subscription)
