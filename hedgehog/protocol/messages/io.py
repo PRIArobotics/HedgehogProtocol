@@ -113,6 +113,8 @@ class CommandReply(Message):
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message')
 class CommandUpdate(Message):
+    async = True
+
     def __init__(self, port: int, flags: int, subscription: Subscription) -> None:
         _check_flags(flags)
         self.port = port

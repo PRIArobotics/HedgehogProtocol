@@ -7,17 +7,19 @@ from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor,
 
 
 class TestMessages(unittest.TestCase):
-    def assertTransmission(self, msg: Message, wire: HedgehogMessage, sender: CommSide, receiver: CommSide):
+    def assertTransmission(self, msg: Message, wire: HedgehogMessage, sender: CommSide, receiver: CommSide, async: bool=False):
+        self.assertEqual(msg.async, async)
         on_wire = sender.serialize(msg)
         self.assertEqual(on_wire, wire.SerializeToString())
         received = receiver.parse(on_wire)
         self.assertEqual(received, msg)
+        self.assertEqual(received.async, async)
 
-    def assertTransmissionClientServer(self, msg: Message, wire: HedgehogMessage):
-        self.assertTransmission(msg, wire, ClientSide, ServerSide)
+    def assertTransmissionClientServer(self, msg: Message, wire: HedgehogMessage, async: bool=False):
+        self.assertTransmission(msg, wire, ClientSide, ServerSide, async)
 
-    def assertTransmissionServerClient(self, msg: Message, wire: HedgehogMessage):
-        self.assertTransmission(msg, wire, ServerSide, ClientSide)
+    def assertTransmissionServerClient(self, msg: Message, wire: HedgehogMessage, async: bool=False):
+        self.assertTransmission(msg, wire, ServerSide, ClientSide, async)
 
     def test_acknowledgement(self):
         msg = ack.Acknowledgement()
@@ -92,7 +94,7 @@ class TestMessages(unittest.TestCase):
         proto.io_command_message.flags = io.INPUT_PULLDOWN
         proto.io_command_message.subscription.subscribe = True
         proto.io_command_message.subscription.timeout = 10
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
         with self.assertRaises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.OUTPUT | io.PULLUP, sub)
@@ -145,7 +147,7 @@ class TestMessages(unittest.TestCase):
         proto.analog_message.subscription.timeout = 10
         proto.analog_message.subscription.int_granularity = 20
         proto.analog_message.subscription.granularity_timeout = 200
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
     def test_digital_request(self):
         msg = digital.Request(0)
@@ -174,7 +176,7 @@ class TestMessages(unittest.TestCase):
         proto = HedgehogMessage()
         proto.digital_message.value = True
         proto.digital_message.subscription.subscribe = True
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
     def test_motor_action(self):
         msg = motor.Action(0, motor.POWER)
@@ -247,7 +249,7 @@ class TestMessages(unittest.TestCase):
         proto.motor_command_message.amount = 1000
         proto.motor_command_message.subscription.subscribe = True
         proto.motor_command_message.subscription.timeout = 10
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
     def test_motor_state_request(self):
         msg = motor.StateRequest(0)
@@ -282,7 +284,7 @@ class TestMessages(unittest.TestCase):
         proto.motor_state_message.position = 1000
         proto.motor_state_message.subscription.subscribe = True
         proto.motor_state_message.subscription.timeout = 10
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
     def test_motor_set_position_action(self):
         msg = motor.SetPositionAction(0, 0)
@@ -339,7 +341,7 @@ class TestMessages(unittest.TestCase):
         proto.servo_command_message.position = 1000
         proto.servo_command_message.subscription.subscribe = True
         proto.servo_command_message.subscription.timeout = 10
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
     def test_process_execute_action(self):
         msg = process.ExecuteAction('cat', working_dir='/home/pi')
@@ -374,7 +376,7 @@ class TestMessages(unittest.TestCase):
         proto.process_stream_message.pid = 123
         proto.process_stream_message.fileno = process.STDOUT
         proto.process_stream_message.chunk = b'abc'
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
         with self.assertRaises(errors.InvalidCommandError):
             process.StreamUpdate(123, process.STDIN, b'abc')
@@ -390,7 +392,7 @@ class TestMessages(unittest.TestCase):
         msg = process.ExitUpdate(123, 0)
         proto = HedgehogMessage()
         proto.process_exit_update.pid = 123
-        self.assertTransmissionServerClient(msg, proto)
+        self.assertTransmissionServerClient(msg, proto, async=True)
 
 
 class TestSockets(unittest.TestCase):

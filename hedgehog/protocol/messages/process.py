@@ -60,6 +60,8 @@ class StreamAction(SimpleMessage):
 
 @ReplyMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
 class StreamUpdate(SimpleMessage):
+    async = True
+
     def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
         if fileno not in (STDOUT, STDERR):
             raise InvalidCommandError("only STDOUT and STDERR are readable")
