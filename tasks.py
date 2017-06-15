@@ -8,4 +8,4 @@ def protoc(context):
 
 @task
 def gsl(context):
-    run("gsl gsl/protocol.xml")
+    run("gsl gsl/hedgehog_protocol.xml")
