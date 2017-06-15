@@ -1,44 +1,32 @@
 .template 0
  ignorecase = 0
- pkg_name = "$(name)_pb2"
 
- for message
-   message.full_name = "$(pkg_name).$(name)"
-   for usage
-     usage.Msg = complex ?? "protobuf" ? string.replace(type, "req|RequestMsg,rep|ReplyMsg,upd|ReplyMsg")
-     usage.Superclass = complex ?? "Message" ? "SimpleMessage"
-
--    # copy fields from message to usage
-     for field as f
-       for message.field where name="$(f)"
-         copy field to usage
-         delete f
-       else
-         abort "ERROR: $(class_name) requires nonexistent field $(name).$(f)"
-       endfor
-     else
-       for message.field
-         copy field to usage
-       endfor
-     endfor
+ function add_import
+   for module.import where name = "$(class->message.package)_pb2"
+   else
+     new module.import
+       import.name = "$(class->message.package)_pb2"
+     endnew
    endfor
-   for parser
-     parser.Msg = string.replace(dir, "req|RequestMsg,rep|ReplyMsg")
-     parser.name = "_parse_$(id)_$(string.replace(dir, "req|request,rep|reply"))"
+ endfunction
 
--    # copy usages from message to parser
-     for usage as u
-       for message.usage where class_name="$(u)"
-         copy usage to parser
-         delete u
-       else
-         abort "ERROR: $(name) requires nonexistent class $(package.name).$(u)"
-       endfor
-     else
-       for message.field
-         copy field to usage
-       endfor
-     endfor
+ for class
+   add_import()
+   class->message.full_name = "$(->message.package)_pb2.$(->message.name)"
+   class.Msg = string.replace(type, "req|RequestMsg,rep|ReplyMsg,upd|ReplyMsg")
+   class.Superclass = "SimpleMessage"
+ endfor
+
+ for complex
+   complex->message.full_name = "$(->message.package)_pb2.$(->message.name)"
+   complex.Msg = string.replace(dir, "req|RequestMsg,rep|ReplyMsg")
+   complex.parse_name = "_parse_$(id)_$(string.replace(dir, "req|request,rep|reply"))"
+
+   for class
+     add_import()
+     class->message.full_name = "$(->message.package)_pb2.$(->message.name)"
+     class.Msg = "protobuf"
+     class.Superclass = "Message"
    endfor
  endfor
 .endtemplate
@@ -46,18 +34,23 @@
 from typing import Union
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
-from hedgehog.protocol.proto import $(pkg_name)
+.for import
+from $(string.replace(path, "/|.")).proto import $(name)
+.endfor
 from hedgehog.utils import protobuf
-.for message
-.  for usage
+.for class
+
+
+.  gsl from "gsl/python_class"
+.endfor
+.for complex
+.  for class
 
 
 .    gsl from "gsl/python_class"
 .  endfor
-.  for parser
 
 
-.    gsl from "gsl/python_parser"
-.  endfor
+.  gsl from "gsl/python_parser"
 .endfor
 .endtemplate

@@ -2,4 +2,7 @@
 <protocol script="gsl/protocol.gsl"
           path="hedgehog/protocol">
   <package>io</package>
+  <module>io</module>
+  <!--<module>analog</module>-->
+  <!--<module>digital</module>-->
 </protocol>

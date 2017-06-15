@@ -16,7 +16,7 @@ package $(string.replace(path, "/|.")).proto;
 //
 .  for usage
 // $("$(to_arrow(type)) $(syntax):":block)\
-                             $(->description:block)
+                             $(description:block)
 .  endfor
 message $(name) {
 .  for field

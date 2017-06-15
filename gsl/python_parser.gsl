@@ -3,8 +3,8 @@
 
  function classes_list
    result = ""
-   for usage
-     result += "$(class_name)$(last() ?? "" ? ", ")"
+   for class
+     result += "$(name)$(last() ?? "" ? ", ")"
    endfor
    return result
  endfunction
@@ -29,14 +29,14 @@
 
 .endtemplate
 .template 1
-@$(Msg).parser('$(oneof_name)')
-def $(name)(msg: $(full_name)) -> Union[$(classes_list())]:
-.for message.field
+@$(Msg).parser('$(->message.oneof_name)')
+def $(parse_name)(msg: $(->message.full_name)) -> Union[$(classes_list())]:
+.for ->message.field
 .  parse_field()
 .endfor
     # TODO return correct message instance
-.for usage
-    #return $(usage.class_name)($(msg_param_list()))
+.for class
+    #return $(name)($(msg_param_list()))
 .endfor
     return None
 .endtemplate

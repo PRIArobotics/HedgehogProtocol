@@ -2,15 +2,15 @@
  ignorecase = 0
 
  function fields_list
-   if count(field) = count(message.field)
-     return ""
-   else
+  if count(field) = count(->message.field)
+    return ""
+  else
      result = ""
      for field
        result += "'$(name)'$(!last() ?? ", " ? (first() ?? "," ? ""))"
      endfor
      return ", fields=($(result))"
-   endif
+  endif
  endfunction
 
  function init_param_list
@@ -52,8 +52,8 @@
 
 .endtemplate
 .template 1
-@$(Msg).message($(full_name), '$(oneof_name)'$(fields_list()))
-class $(class_name)($(Superclass)):
+@$(Msg).message($(->message.full_name), '$(->message.oneof_name)'$(fields_list()))
+class $(name)($(Superclass)):
 .if type = "upd"
     async = True
 
@@ -65,14 +65,14 @@ class $(class_name)($(Superclass)):
 .if !defined(complex)
 
     @classmethod
-    def _parse(cls, msg: $(full_name)) -> '$(class_name)':
+    def _parse(cls, msg: $(->message.full_name)) -> '$(name)':
 .for field
 .  parse_field()
 .endfor
         return cls($(msg_param_list()))
 .endif
 
-    def _serialize(self, msg: $(full_name)) -> None:
+    def _serialize(self, msg: $(->message.full_name)) -> None:
 .for field
 .  serialize_field()
 .endfor
