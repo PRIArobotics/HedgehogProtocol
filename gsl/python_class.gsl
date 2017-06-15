@@ -1,0 +1,56 @@
+.template 1
+.ignorecase = 0
+@$(Msg).message($(full_name), '$(oneof_name)'\
+.if count(field) <> count(message.field)
+, fields=(\
+.  for field
+'$(name)'$(!last() ?? ", " ? (first() ?? "," ? ""))\
+.  endfor
+)\
+.endif
+)
+class $(class_name)($(Superclass)):
+.if type = "upd"
+    async = True
+
+.endif
+    def __init__(self\
+.for field
+, $(name): $(->python.type)\
+.endfor
+) -> None:
+.for field
+        self.$(name) = $(name)
+.endfor
+.if !defined(complex)
+
+    @classmethod
+    def _parse(cls, msg: $(full_name)) -> '$(class_name)':
+.for field
+.  if defined(kind) & kind = "nested"
+        $(name) = msg.$(name) if msg.HasField('$(name)') else None
+.  elsif defined(kind) & kind = "oneof"
+        $(name) = msg.$(name) if msg.HasField('$(name)') else None
+.  else
+        $(name) = msg.$(name)
+.  endif
+.endfor
+        return cls(\
+.for field
+$(name)$(last() ?? "" ? ", ")\
+.endfor
+)
+.endif
+
+    def _serialize(self, msg: $(full_name)) -> None:
+.for field
+.  if (kind ? "") = "nested"
+        msg.$(name).CopyFrom(self.$(name))
+.  elsif (kind ? "") = "oneof"
+        if self.$(name) is not None:
+            msg.$(name) = self.$(name)
+.  else
+        msg.$(name) = self.$(name)
+.  endif
+.endfor
+.endtemplate

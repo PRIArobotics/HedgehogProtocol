@@ -1,0 +1,27 @@
+.template 1
+.ignorecase = 0
+@$(Msg).parser('$(oneof_name)')
+def $(name)(msg: $(full_name)) -> Union[\
+.for usage
+$(usage.class_name)$(last() ?? "" ? ", ")\
+.endfor
+]:
+.for message.field
+.  if defined(kind) & kind = "nested"
+    $(name) = msg.$(name) if msg.HasField('$(name)') else None
+.  elsif defined(kind) & kind = "oneof"
+    $(name) = msg.$(name) if msg.HasField('$(name)') else None
+.  else
+    $(name) = msg.$(name)
+.  endif
+.endfor
+    # TODO return correct message instance
+.for usage
+    #return $(usage.class_name)(\
+.  for field
+$(name)$(last() ?? "" ? ", ")\
+.  endfor
+)
+.endfor
+    return None
+.endtemplate

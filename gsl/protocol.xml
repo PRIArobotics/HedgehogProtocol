@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<protocol script="gsl/protocol.gsl"
+          path="hedgehog/protocol">
+  <package>io</package>
+</protocol>

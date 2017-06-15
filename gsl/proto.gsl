@@ -1,0 +1,20 @@
+.template 1
+.ignorecase = 0
+syntax = "proto3";
+
+package $(string.replace(path, "/|.")).proto;
+.for message
+
+// $(->description:block)
+//
+.  for usage
+// $("$(string.replace(type, "req|=>,rep|<=,upd|<-")) $(syntax):":block)\
+                             $(->description:block)
+.  endfor
+message $(name) {
+.  for field
+    $(->proto.type) $(name) = $(->proto.tag);
+.  endfor
+}
+.endfor
+.endtemplate

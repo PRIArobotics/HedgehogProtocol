@@ -1,0 +1,22 @@
+.template 0
+ ignorecase = 0
+
+-# load package infos
+ for package
+   xml to protocol from "gsl/$(package).xml"
+   delete package
+ endfor
+ for package
+-  # generate proto definitions
+   directory.create("proto/$(path)/proto/")
+   output "proto/$(path)/proto/$(name).proto"
+     gsl from "gsl/proto"
+   close
+
+-  # generate python messages
+   directory.create("$(path)/messages/")
+   output "$(path)/messages/$(name).py"
+     gsl from "gsl/python"
+   close
+ endfor
+.endtemplate
