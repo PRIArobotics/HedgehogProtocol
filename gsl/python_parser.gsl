@@ -1,12 +1,15 @@
-.template 1
-.ignorecase = 0
-@$(Msg).parser('$(oneof_name)')
-def $(name)(msg: $(full_name)) -> Union[\
-.for usage
-$(usage.class_name)$(last() ?? "" ? ", ")\
-.endfor
-]:
-.for message.field
+.template 0
+ ignorecase = 0
+
+ function classes_list
+   result = ""
+   for usage
+     result += "$(class_name)$(last() ?? "" ? ", ")"
+   endfor
+   return result
+ endfunction
+
+ macro parse_field
 .  if defined(kind) & kind = "nested"
     $(name) = msg.$(name) if msg.HasField('$(name)') else None
 .  elsif defined(kind) & kind = "oneof"
@@ -14,14 +17,26 @@ $(usage.class_name)$(last() ?? "" ? ", ")\
 .  else
     $(name) = msg.$(name)
 .  endif
+.endmacro
+
+ function msg_param_list
+   result = ""
+   for field
+     result += "$(name)$(last() ?? "" ? ", ")"
+   endfor
+   return result
+ endfunction
+
+.endtemplate
+.template 1
+@$(Msg).parser('$(oneof_name)')
+def $(name)(msg: $(full_name)) -> Union[$(classes_list())]:
+.for message.field
+.  parse_field()
 .endfor
     # TODO return correct message instance
 .for usage
-    #return $(usage.class_name)(\
-.  for field
-$(name)$(last() ?? "" ? ", ")\
-.  endfor
-)
+    #return $(usage.class_name)($(msg_param_list()))
 .endfor
     return None
 .endtemplate

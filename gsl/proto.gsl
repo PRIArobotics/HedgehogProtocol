@@ -1,5 +1,12 @@
+.template 0
+ ignorecase = 0
+
+ function to_arrow (type)
+   return string.replace(type, "req|=>,rep|<=,upd|<-")
+ endfunction
+
+.endtemplate
 .template 1
-.ignorecase = 0
 syntax = "proto3";
 
 package $(string.replace(path, "/|.")).proto;
@@ -8,7 +15,7 @@ package $(string.replace(path, "/|.")).proto;
 // $(->description:block)
 //
 .  for usage
-// $("$(string.replace(type, "req|=>,rep|<=,upd|<-")) $(syntax):":block)\
+// $("$(to_arrow(type)) $(syntax):":block)\
                              $(->description:block)
 .  endfor
 message $(name) {
