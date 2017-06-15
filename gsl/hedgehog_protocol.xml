@@ -3,6 +3,6 @@
           path="hedgehog/protocol">
   <package>io</package>
   <module>io</module>
-  <!--<module>analog</module>-->
-  <!--<module>digital</module>-->
+  <module>analog</module>
+  <module>digital</module>
 </protocol>

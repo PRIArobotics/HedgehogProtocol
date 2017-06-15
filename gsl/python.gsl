@@ -20,7 +20,7 @@
  for complex
    complex->message.full_name = "$(->message.package)_pb2.$(->message.name)"
    complex.Msg = string.replace(dir, "req|RequestMsg,rep|ReplyMsg")
-   complex.parse_name = "_parse_$(id)_$(string.replace(dir, "req|request,rep|reply"))"
+   complex.parse_name = "_parse_$((id <> "") ?? "$(id)_" ?)$(string.replace(dir, "req|request,rep|reply"))"
 
    for class
      add_import()
