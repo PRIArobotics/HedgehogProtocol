@@ -3,11 +3,14 @@
           path="hedgehog/protocol">
   <root package="hedgehog" message="HedgehogMessage"/>
   <package>ack</package>
-  <module>ack</module>
   <package>io</package>
+  <package>motor</package>
+  <package>servo</package>
+
+  <module>ack</module>
   <module>io</module>
   <module>analog</module>
   <module>digital</module>
-  <package>motor</package>
   <module>motor</module>
+  <module>servo</module>
 </protocol>
