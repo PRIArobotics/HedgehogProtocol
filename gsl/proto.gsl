@@ -20,7 +20,15 @@ package $(string.replace(path, "/|.")).proto;
 .  endfor
 message $(name) {
 .  for field
+.    if defined(oneof)
+    oneof $(oneof) {
+.      for field
+        $(->proto.type) $(name) = $(->proto.tag);
+.      endfor
+    }
+.    else
     $(->proto.type) $(name) = $(->proto.tag);
+.    endif
 .  endfor
 }
 .endfor

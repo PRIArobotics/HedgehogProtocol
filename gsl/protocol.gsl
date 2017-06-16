@@ -59,8 +59,18 @@
          copy field to class
          delete f
        else
-         # lookup corresponding fields failed
-         abort "ERROR: $(module.name).$(name) references nonexistent field $(message.name).$(f)"
+         found = 0
+         for message.field where defined(oneof)
+           for field.field where name = "$(f)"
+             copy field to class
+             delete f
+             found = 1
+           endfor
+         endfor
+         if found = 0
+           # lookup corresponding fields failed
+           abort "ERROR: $(module.name).$(name) references nonexistent field $(message.name).$(f)"
+         endif
        endfor
      else
        # use all message's fields

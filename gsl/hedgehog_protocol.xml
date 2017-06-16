@@ -5,4 +5,6 @@
   <module>io</module>
   <module>analog</module>
   <module>digital</module>
+  <package>motor</package>
+  <module>motor</module>
 </protocol>

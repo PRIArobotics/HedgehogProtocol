@@ -1,6 +1,6 @@
 from typing import Union
 
-from . import RequestMsg, ReplyMsg, SimpleMessage, Message
+from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import motor_pb2
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
@@ -10,8 +10,7 @@ from hedgehog.utils import protobuf
 
 @RequestMsg.message(motor_pb2.MotorAction, 'motor_action')
 class Action(SimpleMessage):
-    def __init__(self, port: int, state: int, amount: int=0,
-                 reached_state: int=POWER, relative: int=None, absolute: int=None) -> None:
+    def __init__(self, port: int, state: int, amount: int=0, reached_state: int=POWER, relative: int=None, absolute: int=None) -> None:
         if relative is not None and absolute is not None:
             raise InvalidCommandError("relative and absolute are mutually exclusive")
         if relative is None and absolute is None:
@@ -49,6 +48,23 @@ class Action(SimpleMessage):
             msg.relative = self.relative
         if self.absolute is not None:
             msg.absolute = self.absolute
+
+
+@RequestMsg.message(motor_pb2.MotorSetPositionAction, 'motor_set_position_action')
+class SetPositionAction(SimpleMessage):
+    def __init__(self, port: int, position: int) -> None:
+        self.port = port
+        self.position = position
+
+    @classmethod
+    def _parse(cls, msg: motor_pb2.MotorSetPositionAction) -> 'SetPositionAction':
+        port = msg.port
+        position = msg.position
+        return cls(port, position)
+
+    def _serialize(self, msg: motor_pb2.MotorSetPositionAction) -> None:
+        msg.port = self.port
+        msg.position = self.position
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
@@ -128,7 +144,7 @@ class StateRequest(Message):
     def __init__(self, port: int) -> None:
         self.port = port
 
-    def _serialize(self, msg: motor_pb2.MotorStateMessage):
+    def _serialize(self, msg: motor_pb2.MotorStateMessage) -> None:
         msg.port = self.port
 
 
@@ -193,20 +209,3 @@ def _parse_state_reply(msg: motor_pb2.MotorStateMessage) -> Union[StateReply, St
         return StateReply(port, velocity, position)
     else:
         return StateUpdate(port, velocity, position, subscription)
-
-
-@RequestMsg.message(motor_pb2.MotorSetPositionAction, 'motor_set_position_action')
-class SetPositionAction(SimpleMessage):
-    def __init__(self, port: int, position: int) -> None:
-        self.port = port
-        self.position = position
-
-    @classmethod
-    def _parse(cls, msg: motor_pb2.MotorSetPositionAction) -> 'SetPositionAction':
-        port = msg.port
-        position = msg.position
-        return cls(port, position)
-
-    def _serialize(self, msg: motor_pb2.MotorSetPositionAction) -> None:
-        msg.port = self.port
-        msg.position = self.position

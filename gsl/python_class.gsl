@@ -5,49 +5,69 @@
   if count(field) = count(->message.field)
     return ""
   else
-     result = ""
-     for field
-       result += "'$(name)'$(!last() ?? ", " ? (first() ?? "," ? ""))"
-     endfor
-     return ", fields=($(result))"
+    result = ""
+    for field
+      result += "'$(name)'$(!last() ?? ", " ? (first() ?? "," ? ""))"
+    endfor
+    return ", fields=($(result))"
   endif
  endfunction
 
  function init_param_list
    result = "self"
    for field
-     result += ", $(name): $(->python.type)"
+     for field
+       # oneof
+       result += ", $(name): $(->python.type)"
+     else
+       # regular field
+       result += ", $(name): $(->python.type)"
+     endfor
    endfor
    return result
  endfunction
 
  macro parse_field
-.  if defined(kind) & kind = "nested"
-        $(name) = msg.$(name) if msg.HasField('$(name)') else None
-.  elsif defined(kind) & kind = "oneof"
+.  for field
+.    # oneof
         $(name) = msg.$(name) if msg.HasField('$(name)') else None
 .  else
+.    # regular field
+.    if (kind ? "") = "nested"
+        $(name) = msg.$(name) if msg.HasField('$(name)') else None
+.    else
         $(name) = msg.$(name)
-.  endif
+.    endif
+.  endfor
 .endmacro
 
  function msg_param_list
    result = ""
    for field
-     result += "$(name)$(last() ?? "" ? ", ")"
+     for field
+       # oneof
+       result += "$(name)$(last() ?? "" ? ", ")"
+     else
+       # regular field
+       result += "$(name)$(last() ?? "" ? ", ")"
+     endfor
    endfor
    return result
  endfunction
 
  macro serialize_field
-.  if (kind ? "") = "nested"
-        msg.$(name).CopyFrom(self.$(name))
-.  elsif (kind ? "") = "oneof"
+.  for field
+.    # oneof
         if self.$(name) is not None:
             msg.$(name) = self.$(name)
 .  else
+.    # regular field
+.    if (kind ? "") = "nested"
+        msg.$(name).CopyFrom(self.$(name))
+.    else
         msg.$(name) = self.$(name)
-.  endif
+.    endif
+.  endfor
 .endmacro
 
 .endtemplate
@@ -60,7 +80,13 @@ class $(name)($(Superclass)):
 .endif
     def __init__($(init_param_list())) -> None:
 .for field
+.  for field
+.    # oneof
         self.$(name) = $(name)
+.  else
+.    # regular field
+        self.$(name) = $(name)
+.  endfor
 .endfor
 .if !defined(complex)
 

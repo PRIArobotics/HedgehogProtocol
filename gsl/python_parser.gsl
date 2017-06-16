@@ -10,19 +10,29 @@
  endfunction
 
  macro parse_field
-.  if defined(kind) & kind = "nested"
-    $(name) = msg.$(name) if msg.HasField('$(name)') else None
-.  elsif defined(kind) & kind = "oneof"
+.  for field
+.    # oneof
     $(name) = msg.$(name) if msg.HasField('$(name)') else None
 .  else
+.    # regular field
+.    if (kind ? "") = "nested"
+    $(name) = msg.$(name) if msg.HasField('$(name)') else None
+.    else
     $(name) = msg.$(name)
-.  endif
+.    endif
+.  endfor
 .endmacro
 
  function msg_param_list
    result = ""
    for field
-     result += "$(name)$(last() ?? "" ? ", ")"
+     for field
+       # oneof
+       result += "$(name)$(last() ?? "" ? ", ")"
+     else
+       # regular field
+       result += "$(name)$(last() ?? "" ? ", ")"
+     endfor
    endfor
    return result
  endfunction
