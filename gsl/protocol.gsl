@@ -125,6 +125,12 @@
  endfor
 
  directory.create("proto/$(path)/proto/")
+ scope ->root
+   # generate main proto definitions
+   output "proto/$(path)/proto/$(package).proto"
+     gsl from "gsl/root_proto"
+   close
+ endscope
  for package
    # generate proto definitions
    output "proto/$(path)/proto/$(name).proto"

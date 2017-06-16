@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <protocol script="gsl/protocol.gsl"
           path="hedgehog/protocol">
+  <root package="hedgehog" message="HedgehogMessage"/>
   <package>io</package>
   <module>io</module>
   <module>analog</module>
