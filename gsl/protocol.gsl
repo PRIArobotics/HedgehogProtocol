@@ -124,16 +124,16 @@
    endfor
  endfor
 
+ directory.create("proto/$(path)/proto/")
  for package
    # generate proto definitions
-   directory.create("proto/$(path)/proto/")
    output "proto/$(path)/proto/$(name).proto"
      gsl from "gsl/proto"
    close
  endfor
+ directory.create("$(path)/messages/")
  for module
    # generate python messages
-   directory.create("$(path)/messages/")
    output "$(path)/messages/$(name).py"
      gsl from "gsl/python"
    close
