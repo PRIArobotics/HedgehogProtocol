@@ -14,11 +14,11 @@ the motor will go into `reached_state` upon reaching the position.</description>
     </field>
     <field name="amount">
       <proto type="sint32" tag="3"/>
-      <python type="int"/>
+      <python type="int" default="0"/>
     </field>
     <field name="reached_state">
       <proto type="MotorState" tag="4"/>
-      <python type="int"/>
+      <python type="int" default="POWER"/>
     </field>
     <field oneof="position">
       <field name="relative">

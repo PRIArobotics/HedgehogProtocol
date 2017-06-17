@@ -18,10 +18,13 @@
    for field
      for field
        # oneof
-       result += ", $(name): $(->python.type)"
+       result += ", $(name): $(->python.type)=None"
      else
        # regular field
        result += ", $(name): $(->python.type)"
+       if defined(->python.default)
+         result += "=$(->python.default)"
+       endif
      endfor
    endfor
    return result

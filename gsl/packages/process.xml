@@ -9,7 +9,7 @@
     </field>
     <field name="working_dir">
       <proto type="string" tag="1"/>
-      <python type="str"/>
+      <python type="str" default="None"/>
     </field>
   </message>
   <message name="ProcessExecuteReply" oneof_name="process_execute_reply" oneof_tag="21">
@@ -33,7 +33,7 @@
     </field>
     <field name="chunk">
       <proto type="bytes" tag="3"/>
-      <python type="bytes"/>
+      <python type="bytes" default="b''"/>
     </field>
   </message>
   <message name="ProcessSignalAction" oneof_name="process_signal_action" oneof_tag="22">
