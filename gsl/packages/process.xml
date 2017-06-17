@@ -3,7 +3,7 @@
   <message name="ProcessExecuteAction" oneof_name="process_execute_action" oneof_tag="20">
     <description>Invoke a process on the controller</description>
 
-    <field name="args">
+    <field name="args" repeated="1">
       <proto type="string" tag="2"/>
       <python type="str"/>
     </field>

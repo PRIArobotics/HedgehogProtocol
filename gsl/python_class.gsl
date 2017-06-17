@@ -62,7 +62,9 @@
             msg.$(name) = self.$(name)
 .  else
 .    # regular field
-.    if (kind ? "") = "nested"
+.    if defined(repeated)
+        msg.$(name).extend(self.$(name))
+.    elsif (kind ? "") = "nested"
         msg.$(name).CopyFrom(self.$(name))
 .    else
         msg.$(name) = self.$(name)

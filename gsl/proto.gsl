@@ -27,7 +27,7 @@ message $(name) {
 .      endfor
     }
 .    else
-    $(->proto.type) $(name) = $(->proto.tag);
+    $(repeated ?? "repeated ")$(->proto.type) $(name) = $(->proto.tag);
 .    endif
 .  endfor
 }
