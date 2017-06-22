@@ -33,7 +33,7 @@ class TestMessages(unittest.TestCase):
         proto.acknowledgement.message = 'something went wrong'
         self.assertTransmissionServerClient(msg, proto)
 
-    def test_io_state_action(self):
+    def test_io_action(self):
         msg = io.Action(0, io.INPUT_PULLDOWN)
         proto = HedgehogMessage()
         proto.io_action.flags = io.INPUT_PULLDOWN
