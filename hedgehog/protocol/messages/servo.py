@@ -65,7 +65,7 @@ class CommandReply(Message):
     def __init__(self, port: int, active: bool, position: int) -> None:
         self.port = port
         self.active = active
-        self.position = position
+        self.position = position if active else None
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
