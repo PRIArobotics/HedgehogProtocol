@@ -22,7 +22,7 @@ class HedgehogCommandError(Exception):
         :return: the message representing this exception
         """
         from .messages import ack
-        return ack.Acknowledgement(self.code, self.args[0])
+        return ack.Acknowledgement(self.code, self.args[0] if len(self.args) > 0 else '')
 
 
 class UnknownCommandError(HedgehogCommandError):
