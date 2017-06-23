@@ -25,7 +25,7 @@ enum IOFlags {
 
 // Changes the configuration of one IO port
 //
-// => (port, flags):  IO action => ack
+// => (port, flags):         IO action => ack
 message IOAction {
     uint32 port = 1;
     IOFlags flags = 2;
@@ -33,8 +33,8 @@ message IOAction {
 
 // Request or reply for one IO port's current command. The command may change by an IO action.
 //
-// => (port):  IO command request => IO command reply
-// <= (port, flags):  IO command reply
+// => (port):                IO command request => IO command reply
+// <= (port, flags):         IO command reply
 // => (port, subscription):  IO command subscribe => ack
 // <- (port, flags, subscription):  IO command update
 message IOCommandMessage {
@@ -45,8 +45,8 @@ message IOCommandMessage {
 
 // Request or reply for one analog sensor's value
 //
-// => (port):  analog request => analog reply
-// <= (port, value):  analog reply
+// => (port):                analog request => analog reply
+// <= (port, value):         analog reply
 // => (port, subscription):  analog subscribe => ack
 // <- (port, value, subscription):  analog update
 message AnalogMessage {
@@ -57,8 +57,8 @@ message AnalogMessage {
 
 // Request or reply for one digital sensor's value
 //
-// => (port):  digital request => digital reply
-// <= (port, value):  digital reply
+// => (port):                digital request => digital reply
+// <= (port, value):         digital reply
 // => (port, subscription):  digital subscribe => ack
 // <- (port, value, subscription):  digital update
 message DigitalMessage {

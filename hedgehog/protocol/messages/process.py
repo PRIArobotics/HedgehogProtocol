@@ -7,19 +7,19 @@ from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 @RequestMsg.message(process_pb2.ProcessExecuteAction, 'process_execute_action')
 class ExecuteAction(SimpleMessage):
     def __init__(self, *args: str, working_dir: str=None) -> None:
-        self.working_dir = working_dir
         self.args = args
+        self.working_dir = working_dir
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExecuteAction) -> 'ExecuteAction':
-        working_dir = msg.working_dir if msg.working_dir != '' else None
         args = msg.args
+        working_dir = msg.working_dir if msg.working_dir != '' else None
         return cls(*args, working_dir=working_dir)
 
     def _serialize(self, msg: process_pb2.ProcessExecuteAction) -> None:
+        msg.args.extend(self.args)
         if self.working_dir is not None:
             msg.working_dir = self.working_dir
-        msg.args.extend(self.args)
 
 
 @ReplyMsg.message(process_pb2.ProcessExecuteReply, 'process_execute_reply')

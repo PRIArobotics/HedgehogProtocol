@@ -20,8 +20,8 @@ enum MotorState {
     VELOCITY = 2;
 }
 
-// Command for one motor. By setting a relative or absolute goal position, the motor will go into `reached_state` upon
-// reaching the position.
+// Command for one motor. By setting a relative or absolute goal position,
+// the motor will go into `reached_state` upon reaching the position.     
 //
 // => (port, state, amount):  indefinite motor action => ack
 // => (port, state, amount, reached_state, relative/absolute):  terminating motor action => ack
@@ -44,10 +44,10 @@ message MotorAction {
     }
 }
 
-// Request or reply for one motor's current command. The command may change by a motor action, or by reaching the goal
-// position of a terminating motor action.
+// Request or reply for one motor's current command.                                                        
+// The command may change by a motor action, or by reaching the goal position of a terminating motor action.
 //
-// => (port):  motor command request => motor command reply
+// => (port):                motor command request => motor command reply
 // <= (port, state, amount):  motor command reply
 // => (port, subscription):  motor command subscribe => ack
 // <- (port, state, amount, subscription):  motor command update
@@ -58,10 +58,10 @@ message MotorCommandMessage {
     Subscription subscription = 4;
 }
 
-// Request or reply for one motor's state. The motor state may generally change at any time, but returned values are
-// approximations, and motor state requests may not be supported at all.
+// Request or reply for one motor's state. The motor state may generally change at any time,    
+// but returned values are approximations, and motor state requests may not be supported at all.
 //
-// => (port):  motor state request => motor state reply
+// => (port):                motor state request => motor state reply
 // <= (port, velocity, position):  motor state reply
 // => (port, subscription):  motor state subscribe => ack
 // <- (port, velocity, position, subscription):  motor state update
@@ -74,7 +74,7 @@ message MotorStateMessage {
 
 // Set one motor's position counter.
 //
-// => (port, position):  set motor position action => ack
+// => (port, position):      set motor position action => ack
 message MotorSetPositionAction {
     uint32 port = 1;
     sint32 position = 2;

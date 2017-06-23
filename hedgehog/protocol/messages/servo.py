@@ -1,6 +1,6 @@
 from typing import Union
 
-from . import RequestMsg, ReplyMsg, SimpleMessage, Message
+from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import servo_pb2
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
@@ -31,7 +31,7 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
-class CommandRequest(SimpleMessage):
+class CommandRequest(Message):
     def __init__(self, port: int) -> None:
         self.port = port
 
@@ -61,11 +61,11 @@ def _parse_command_request(msg: servo_pb2.ServoCommandMessage) -> Union[CommandR
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position'))
-class CommandReply(SimpleMessage):
+class CommandReply(Message):
     def __init__(self, port: int, active: bool, position: int) -> None:
         self.port = port
         self.active = active
-        self.position = position
+        self.position = position if active else None
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
