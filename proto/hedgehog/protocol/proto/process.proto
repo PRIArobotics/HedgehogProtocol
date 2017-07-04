@@ -23,7 +23,7 @@ message ProcessExecuteAction {
 
 // Reply with the process' PID for communication purposes
 //
-// <= (pid):  process execute reply
+// <= (pid):                 process execute reply
 message ProcessExecuteReply {
     uint32 pid = 1;
 }
@@ -44,7 +44,7 @@ message ProcessStreamMessage {
 
 // Send signal to a process
 //
-// => (pid, signal):  process signal action => ack
+// => (pid, signal):         process signal action => ack
 message ProcessSignalAction {
     uint32 pid = 1;
     uint32 signal = 2;
@@ -52,7 +52,7 @@ message ProcessSignalAction {
 
 // Signals that the process has exited
 //
-// <- (pid, exit_code):  process exit update
+// <- (pid, exit_code):      process exit update
 message ProcessExitUpdate {
     uint32 pid = 1;
     int32 exit_code = 2;

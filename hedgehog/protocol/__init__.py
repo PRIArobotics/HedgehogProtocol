@@ -39,7 +39,7 @@ class CommSide(object):
         try:
             return self.receiver.parse(data)
         except KeyError as err:
-            raise UnknownCommandError
+            raise UnknownCommandError() from err
 
     def serialize(self, msg: Message) -> RawMessage:
         """Serializes a Message object into a binary protobuf message"""

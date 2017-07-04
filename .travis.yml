@@ -1,0 +1,19 @@
+language: python
+
+# using container based testing is faster, but you can't use sudo
+sudo: false
+
+python:
+    - "3.6"
+#    - "2.7"
+
+# install other libraries using pip
+install:
+    - pip install -Ue .[dev]
+    - wget https://github.com/google/protobuf/releases/download/v3.1.0/protoc-3.1.0-linux-x86_64.zip
+    - unzip protoc-3.1.0-linux-x86_64.zip
+    - PATH=./bin:$PATH
+    - invoke protoc
+
+# command to run tests
+script: nosetests -vw tests

@@ -7,19 +7,19 @@ from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 @RequestMsg.message(process_pb2.ProcessExecuteAction, 'process_execute_action')
 class ExecuteAction(SimpleMessage):
     def __init__(self, *args: str, working_dir: str=None) -> None:
-        self.working_dir = working_dir
         self.args = args
+        self.working_dir = working_dir
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExecuteAction) -> 'ExecuteAction':
-        return cls(
-            *msg.args,
-            working_dir=msg.working_dir if msg.working_dir != '' else None)
+        args = msg.args
+        working_dir = msg.working_dir if msg.working_dir != '' else None
+        return cls(*args, working_dir=working_dir)
 
     def _serialize(self, msg: process_pb2.ProcessExecuteAction) -> None:
+        msg.args.extend(self.args)
         if self.working_dir is not None:
             msg.working_dir = self.working_dir
-        msg.args.extend(self.args)
 
 
 @ReplyMsg.message(process_pb2.ProcessExecuteReply, 'process_execute_reply')
@@ -29,7 +29,8 @@ class ExecuteReply(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExecuteReply) -> 'ExecuteReply':
-        return cls(msg.pid)
+        pid = msg.pid
+        return cls(pid)
 
     def _serialize(self, msg: process_pb2.ProcessExecuteReply) -> None:
         msg.pid = self.pid
@@ -46,7 +47,10 @@ class StreamAction(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessStreamMessage) -> 'StreamAction':
-        return cls(msg.pid, msg.fileno, msg.chunk)
+        pid = msg.pid
+        fileno = msg.fileno
+        chunk = msg.chunk
+        return cls(pid, fileno, chunk)
 
     def _serialize(self, msg: process_pb2.ProcessStreamMessage) -> None:
         msg.pid = self.pid
@@ -56,6 +60,8 @@ class StreamAction(SimpleMessage):
 
 @ReplyMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
 class StreamUpdate(SimpleMessage):
+    async = True
+
     def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
         if fileno not in (STDOUT, STDERR):
             raise InvalidCommandError("only STDOUT and STDERR are readable")
@@ -65,7 +71,10 @@ class StreamUpdate(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessStreamMessage) -> 'StreamUpdate':
-        return cls(msg.pid, msg.fileno, msg.chunk)
+        pid = msg.pid
+        fileno = msg.fileno
+        chunk = msg.chunk
+        return cls(pid, fileno, chunk)
 
     def _serialize(self, msg: process_pb2.ProcessStreamMessage) -> None:
         msg.pid = self.pid
@@ -81,7 +90,9 @@ class SignalAction(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessSignalAction) -> 'SignalAction':
-        return cls(msg.pid, msg.signal)
+        pid = msg.pid
+        signal = msg.signal
+        return cls(pid, signal)
 
     def _serialize(self, msg: process_pb2.ProcessSignalAction) -> None:
         msg.pid = self.pid
@@ -98,7 +109,9 @@ class ExitUpdate(SimpleMessage):
 
     @classmethod
     def _parse(cls, msg: process_pb2.ProcessExitUpdate) -> 'ExitUpdate':
-        return cls(msg.pid, msg.exit_code)
+        pid = msg.pid
+        exit_code = msg.exit_code
+        return cls(pid, exit_code)
 
     def _serialize(self, msg: process_pb2.ProcessExitUpdate) -> None:
         msg.pid = self.pid
