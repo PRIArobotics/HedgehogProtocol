@@ -331,6 +331,11 @@ class TestMessages(unittest.TestCase):
         proto.servo_command_message.position = 1000
         self.assertTransmissionServerClient(msg, proto)
 
+        msg = servo.CommandReply(0, False, 0)
+        proto = HedgehogMessage()
+        proto.servo_command_message.active = False
+        self.assertTransmissionServerClient(msg, proto)
+
     def test_servo_command_update(self):
         sub = Subscription()
         sub.subscribe = True
@@ -339,6 +344,13 @@ class TestMessages(unittest.TestCase):
         proto = HedgehogMessage()
         proto.servo_command_message.active = True
         proto.servo_command_message.position = 1000
+        proto.servo_command_message.subscription.subscribe = True
+        proto.servo_command_message.subscription.timeout = 10
+        self.assertTransmissionServerClient(msg, proto, async=True)
+
+        msg = servo.CommandUpdate(0, False, 0, sub)
+        proto = HedgehogMessage()
+        proto.servo_command_message.active = False
         proto.servo_command_message.subscription.subscribe = True
         proto.servo_command_message.subscription.timeout = 10
         self.assertTransmissionServerClient(msg, proto, async=True)
