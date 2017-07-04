@@ -70,7 +70,8 @@ class CommandReply(Message):
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
         msg.active = self.active
-        msg.position = self.position
+        if self.position is not None:
+            msg.position = self.position
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message')
@@ -86,7 +87,8 @@ class CommandUpdate(Message):
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
         msg.active = self.active
-        msg.position = self.position
+        if self.position is not None:
+            msg.position = self.position
         msg.subscription.CopyFrom(self.subscription)
 
 
