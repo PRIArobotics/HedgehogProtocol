@@ -17,4 +17,4 @@ install:
     - invoke protoc
 
 # command to run tests
-script: nosetests -vw tests
+script: pytest

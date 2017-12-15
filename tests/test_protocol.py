@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import zmq
 from hedgehog.protocol import errors, sockets, CommSide, ServerSide, ClientSide
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
@@ -6,14 +6,14 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor, servo, process
 
 
-class TestMessages(unittest.TestCase):
+class TestMessages(object):
     def assertTransmission(self, msg: Message, wire: HedgehogMessage, sender: CommSide, receiver: CommSide, async: bool=False):
-        self.assertEqual(msg.async, async)
+        assert msg.async == async
         on_wire = sender.serialize(msg)
-        self.assertEqual(on_wire, wire.SerializeToString())
+        assert on_wire == wire.SerializeToString()
         received = receiver.parse(on_wire)
-        self.assertEqual(received, msg)
-        self.assertEqual(received.async, async)
+        assert received == msg
+        assert received.async == async
 
     def assertTransmissionClientServer(self, msg: Message, wire: HedgehogMessage, async: bool=False):
         self.assertTransmission(msg, wire, ClientSide, ServerSide, async)
@@ -39,16 +39,16 @@ class TestMessages(unittest.TestCase):
         proto.io_action.flags = io.INPUT_PULLDOWN
         self.assertTransmissionClientServer(msg, proto)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.Action(0, io.OUTPUT | io.PULLUP)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.Action(0, io.OUTPUT | io.PULLDOWN)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.Action(0, io.LEVEL)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.Action(0, io.PULLUP | io.PULLDOWN)
 
     def test_io_command_request(self):
@@ -73,16 +73,16 @@ class TestMessages(unittest.TestCase):
         proto.io_command_message.flags = io.INPUT_PULLDOWN
         self.assertTransmissionServerClient(msg, proto)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandReply(0, io.OUTPUT | io.PULLUP)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandReply(0, io.OUTPUT | io.PULLDOWN)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandReply(0, io.LEVEL)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandReply(0, io.PULLUP | io.PULLDOWN)
 
     def test_io_command_update(self):
@@ -96,16 +96,16 @@ class TestMessages(unittest.TestCase):
         proto.io_command_message.subscription.timeout = 10
         self.assertTransmissionServerClient(msg, proto, async=True)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.OUTPUT | io.PULLUP, sub)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.OUTPUT | io.PULLDOWN, sub)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.LEVEL, sub)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.PULLUP | io.PULLDOWN, sub)
 
     def test_analog_request(self):
@@ -203,19 +203,19 @@ class TestMessages(unittest.TestCase):
         proto.motor_action.absolute = -100
         self.assertTransmissionClientServer(msg, proto)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, 100, relative=100, absolute=100)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, 100, reached_state=motor.BRAKE)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.BRAKE, 100, absolute=100)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, -100, absolute=100)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, 0, relative=100)
 
     def test_motor_command_request(self):
@@ -304,7 +304,7 @@ class TestMessages(unittest.TestCase):
         proto.servo_action.active = False
         self.assertTransmissionClientServer(msg, proto)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             servo.Action(0, True)
 
     def test_servo_command_request(self):
@@ -376,10 +376,10 @@ class TestMessages(unittest.TestCase):
         proto.process_stream_message.chunk = b'abc'
         self.assertTransmissionClientServer(msg, proto)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             process.StreamAction(123, process.STDOUT, b'abc')
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             process.StreamAction(123, process.STDERR, b'abc')
 
     def test_process_stream_update(self):
@@ -390,7 +390,7 @@ class TestMessages(unittest.TestCase):
         proto.process_stream_message.chunk = b'abc'
         self.assertTransmissionServerClient(msg, proto, async=True)
 
-        with self.assertRaises(errors.InvalidCommandError):
+        with pytest.raises(errors.InvalidCommandError):
             process.StreamUpdate(123, process.STDIN, b'abc')
 
     def test_process_signal_action(self):
@@ -407,7 +407,7 @@ class TestMessages(unittest.TestCase):
         self.assertTransmissionServerClient(msg, proto, async=True)
 
 
-class TestSockets(unittest.TestCase):
+class TestSockets(object):
     def test_sockets_msg(self):
         ctx = zmq.Context()
         endpoint = "inproc://test"
@@ -421,12 +421,12 @@ class TestSockets(unittest.TestCase):
         old = analog.Request(1)  # type: Message
         req.send_msg(old)
         header, new = router.recv_msg()
-        self.assertEqual(new, old)
+        assert new == old
 
         old = analog.Reply(1, 200)
         router.send_msg(header, old)
         new = req.recv_msg()
-        self.assertEqual(new, old)
+        assert new == old
 
         router.close()
         req.close()
@@ -445,13 +445,13 @@ class TestSockets(unittest.TestCase):
         req.send_msgs(olds)
         header, news = router.recv_msgs()
         for old, new in zip(olds, news):
-            self.assertEqual(new, old)
+            assert new == old
 
         olds = [analog.Reply(0, 100), digital.Reply(0, True)]
         router.send_msgs(header, olds)
         news = req.recv_msgs()
         for old, new in zip(olds, news):
-            self.assertEqual(new, old)
+            assert new == old
 
     def test_sockets_msg_raw(self):
         ctx = zmq.Context()
@@ -466,12 +466,12 @@ class TestSockets(unittest.TestCase):
         old = b'as'
         req.send_msg_raw(old)
         header, new = router.recv_msg_raw()
-        self.assertEqual(new, old)
+        assert new == old
 
         old = b'df'
         router.send_msg_raw(header, old)
         new = req.recv_msg_raw()
-        self.assertEqual(new, old)
+        assert new == old
 
         router.close()
         req.close()
@@ -490,14 +490,10 @@ class TestSockets(unittest.TestCase):
         req.send_msgs_raw(olds)
         header, news = router.recv_msgs_raw()
         for old, new in zip(olds, news):
-            self.assertEqual(new, old)
+            assert new == old
 
         olds = [b'fd', b'sa']
         router.send_msgs_raw(header, olds)
         news = req.recv_msgs_raw()
         for old, new in zip(olds, news):
-            self.assertEqual(new, old)
-
-
-if __name__ == '__main__':
-    unittest.main()
+            assert new == old
