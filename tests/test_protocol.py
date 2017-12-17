@@ -1,6 +1,6 @@
 import pytest
-import zmq
-from hedgehog.protocol import errors, sockets, CommSide, ServerSide, ClientSide
+import zmq.asyncio
+from hedgehog.protocol import errors, sockets, async_sockets, CommSide, ServerSide, ClientSide
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
 from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor, servo, process
@@ -495,5 +495,99 @@ class TestSockets(object):
         olds = [b'fd', b'sa']
         router.send_msgs_raw(header, olds)
         news = req.recv_msgs_raw()
+        for old, new in zip(olds, news):
+            assert new == old
+
+    @pytest.mark.asyncio
+    async def test_async_sockets_msg(self):
+        ctx = zmq.asyncio.Context()
+        endpoint = "inproc://test"
+
+        router = async_sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
+        router.bind(endpoint)
+
+        req = async_sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
+        req.connect(endpoint)
+
+        old = analog.Request(1)  # type: Message
+        await req.send_msg(old)
+        header, new = await router.recv_msg()
+        assert new == old
+
+        old = analog.Reply(1, 200)
+        await router.send_msg(header, old)
+        new = await req.recv_msg()
+        assert new == old
+
+        router.close()
+        req.close()
+
+    @pytest.mark.asyncio
+    async def test_async_sockets_msgs(self):
+        ctx = zmq.asyncio.Context()
+        endpoint = "inproc://test"
+
+        router = async_sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
+        router.bind(endpoint)
+
+        req = async_sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
+        req.connect(endpoint)
+
+        olds = [analog.Request(0), digital.Request(0)]
+        await req.send_msgs(olds)
+        header, news = await router.recv_msgs()
+        for old, new in zip(olds, news):
+            assert new == old
+
+        olds = [analog.Reply(0, 100), digital.Reply(0, True)]
+        await router.send_msgs(header, olds)
+        news = await req.recv_msgs()
+        for old, new in zip(olds, news):
+            assert new == old
+
+    @pytest.mark.asyncio
+    async def test_async_sockets_msg_raw(self):
+        ctx = zmq.asyncio.Context()
+        endpoint = "inproc://test"
+
+        router = async_sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
+        router.bind(endpoint)
+
+        req = async_sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
+        req.connect(endpoint)
+
+        old = b'as'
+        await req.send_msg_raw(old)
+        header, new = await router.recv_msg_raw()
+        assert new == old
+
+        old = b'df'
+        await router.send_msg_raw(header, old)
+        new = await req.recv_msg_raw()
+        assert new == old
+
+        router.close()
+        req.close()
+
+    @pytest.mark.asyncio
+    async def test_async_sockets_msgs_raw(self):
+        ctx = zmq.asyncio.Context()
+        endpoint = "inproc://test"
+
+        router = async_sockets.DealerRouterSocket(ctx, zmq.ROUTER, side=ServerSide)
+        router.bind(endpoint)
+
+        req = async_sockets.ReqSocket(ctx, zmq.REQ, side=ClientSide)
+        req.connect(endpoint)
+
+        olds = [b'as', b'df']
+        await req.send_msgs_raw(olds)
+        header, news = await router.recv_msgs_raw()
+        for old, new in zip(olds, news):
+            assert new == old
+
+        olds = [b'fd', b'sa']
+        await router.send_msgs_raw(header, olds)
+        news = await req.recv_msgs_raw()
         for old, new in zip(olds, news):
             assert new == old
