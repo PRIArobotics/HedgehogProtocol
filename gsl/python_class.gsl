@@ -80,7 +80,7 @@
 @$(Msg).message($(->message.full_name), '$(->message.oneof_name)'$(fields_list()))
 class $(name)($(Superclass)):
 .if type = "upd"
-    async = True
+    is_async = True
 
 .endif
     def __init__($(init_param_list())) -> None:
