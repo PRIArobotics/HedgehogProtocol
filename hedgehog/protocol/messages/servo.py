@@ -76,7 +76,7 @@ class CommandReply(Message):
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message')
 class CommandUpdate(Message):
-    async = True
+    is_async = True
 
     def __init__(self, port: int, active: bool, position: int, subscription: Subscription) -> None:
         self.port = port
