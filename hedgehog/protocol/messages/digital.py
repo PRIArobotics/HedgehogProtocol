@@ -49,7 +49,7 @@ class Reply(Message):
 
 @protobuf.message(io_pb2.DigitalMessage, 'digital_message')
 class Update(Message):
-    async = True
+    is_async = True
 
     def __init__(self, port: int, value: bool, subscription: Subscription) -> None:
         self.port = port

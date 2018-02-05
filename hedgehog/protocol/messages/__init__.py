@@ -5,7 +5,7 @@ from ..proto import hedgehog_pb2
 
 
 class Message(protobuf.Message):
-    async = False
+    is_async = False
 
     @classmethod
     def msg_name(cls):

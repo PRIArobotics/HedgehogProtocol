@@ -60,7 +60,7 @@ class StreamAction(SimpleMessage):
 
 @ReplyMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message')
 class StreamUpdate(SimpleMessage):
-    async = True
+    is_async = True
 
     def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
         if fileno not in (STDOUT, STDERR):
@@ -101,7 +101,7 @@ class SignalAction(SimpleMessage):
 
 @ReplyMsg.message(process_pb2.ProcessExitUpdate, 'process_exit_update')
 class ExitUpdate(SimpleMessage):
-    async = True
+    is_async = True
 
     def __init__(self, pid: int, exit_code: int) -> None:
         self.pid = pid

@@ -112,7 +112,7 @@ class CommandReply(Message):
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message')
 class CommandUpdate(Message):
-    async = True
+    is_async = True
 
     def __init__(self, port: int, state: int, amount: int, subscription: Subscription) -> None:
         self.port = port
@@ -184,7 +184,7 @@ class StateReply(Message):
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message')
 class StateUpdate(Message):
-    async = True
+    is_async = True
 
     def __init__(self, port: int, velocity: int, position: int, subscription: Subscription) -> None:
         self.port = port
