@@ -20,7 +20,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='hedgehog-protocol',
     version='0.6.0',
-    description='Protocol definitions for Hedgehog',
+    description='Python Protocol definitions for Hedgehog',
     long_description=long_description,
     url="https://github.com/PRIArobotics/HedgehogProtocol",
     author="Clemens Koza",
@@ -51,7 +51,7 @@ setup(
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['invoke', 'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-cov'],
+        'dev': ['invoke', 'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-cov', 'hedgehog-protocol-spec'],
     },
 
     package_data={

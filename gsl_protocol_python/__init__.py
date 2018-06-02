@@ -1,7 +1,11 @@
+import os.path
+
 from gsl.yaml import YAML
 
 from gsl_protocol import proto_target, get_model as _get_model
 from gsl_protocol.grammar.HedgehogProtocolVisitor import Oneof, Field
+
+PYTHON_PROTOCOL_MODEL = os.path.join(os.path.dirname(__file__), 'python.yaml')
 
 
 def unique(it):
@@ -12,7 +16,10 @@ def unique(it):
             yield item
 
 
-def get_model(model_file, py_model_file):
+def get_model(model_file=None, py_model_file=None):
+    if py_model_file is None:
+        py_model_file = PYTHON_PROTOCOL_MODEL
+
     with open(py_model_file) as f:
         yaml = YAML(typ='safe')
         py_model = yaml.load(f)
@@ -43,7 +50,7 @@ def get_model(model_file, py_model_file):
 def main():
     from . import python_target
 
-    model = get_model('gsl_protocol/hedgehog_protocol', 'gsl_protocol_python/python.yaml')
+    model = get_model()
     root = '.'
     proto_target.generate_code(model, root)
     python_target.generate_code(model, root)
