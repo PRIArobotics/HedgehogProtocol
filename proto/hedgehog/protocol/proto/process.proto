@@ -5,6 +5,7 @@ package hedgehog.protocol.proto;
 option java_package = "at.pria.hedgehog.protocol.proto";
 option java_outer_classname = "ProcessP";
 
+// <GSL customizable: module-extras>
 // TODO allow environment variables
 
 enum ProcessFileno {
@@ -12,6 +13,7 @@ enum ProcessFileno {
     STDOUT = 1;
     STDERR = 2;
 }
+// </GSL customizable: module-extras>
 
 // Invoke a process on the controller
 //

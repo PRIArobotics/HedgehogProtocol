@@ -1,20 +1,27 @@
 from typing import Union
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
-from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import servo_pb2
-from hedgehog.protocol.proto.subscription_pb2 import Subscription
 from hedgehog.utils import protobuf
 
+# <GSL customizable: module-header>
+from hedgehog.protocol.errors import InvalidCommandError
+from hedgehog.protocol.proto.subscription_pb2 import Subscription
+# </GSL customizable: module-header>
 
-@RequestMsg.message(servo_pb2.ServoAction, 'servo_action')
+
+@RequestMsg.message(servo_pb2.ServoAction, 'servo_action', fields=('port', 'active', 'position',))
 class Action(SimpleMessage):
     def __init__(self, port: int, active: bool, position: int=None) -> None:
+        # <GSL customizable: Action-init-validation>
         if active and position is None:
             raise InvalidCommandError("position must be given when activating servo")
+        # </GSL customizable: Action-init-validation>
         self.port = port
         self.active = active
         self.position = position if active else None
+
+    # <default GSL customizable: Action-extra-members />
 
     @classmethod
     def _parse(cls, msg: servo_pb2.ServoAction) -> 'Action':
@@ -33,39 +40,24 @@ class Action(SimpleMessage):
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
 class CommandRequest(Message):
     def __init__(self, port: int) -> None:
+        # <default GSL customizable: CommandRequest-init-validation />
         self.port = port
+
+    # <default GSL customizable: CommandRequest-extra-members />
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
 
 
-@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'subscription'))
-class CommandSubscribe(Message):
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        self.port = port
-        self.subscription = subscription
-
-    def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
-        msg.port = self.port
-        msg.subscription.CopyFrom(self.subscription)
-
-
-@RequestMsg.parser('servo_command_message')
-def _parse_command_request(msg: servo_pb2.ServoCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
-    port = msg.port
-    subscription = msg.subscription if msg.HasField('subscription') else None
-    if subscription is None:
-        return CommandRequest(port)
-    else:
-        return CommandSubscribe(port, subscription)
-
-
-@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position'))
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position',))
 class CommandReply(Message):
     def __init__(self, port: int, active: bool, position: int) -> None:
+        # <default GSL customizable: CommandReply-init-validation />
         self.port = port
         self.active = active
         self.position = position if active else None
+
+    # <default GSL customizable: CommandReply-extra-members />
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
@@ -74,15 +66,32 @@ class CommandReply(Message):
             msg.position = self.position
 
 
-@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message')
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'subscription',))
+class CommandSubscribe(Message):
+    def __init__(self, port: int, subscription: Subscription) -> None:
+        # <default GSL customizable: CommandSubscribe-init-validation />
+        self.port = port
+        self.subscription = subscription
+
+    # <default GSL customizable: CommandSubscribe-extra-members />
+
+    def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
+        msg.port = self.port
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position', 'subscription',))
 class CommandUpdate(Message):
     is_async = True
 
     def __init__(self, port: int, active: bool, position: int, subscription: Subscription) -> None:
+        # <default GSL customizable: CommandUpdate-init-validation />
         self.port = port
         self.active = active
         self.position = position if active else None
         self.subscription = subscription
+
+    # <default GSL customizable: CommandUpdate-extra-members />
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
@@ -92,13 +101,29 @@ class CommandUpdate(Message):
         msg.subscription.CopyFrom(self.subscription)
 
 
-@ReplyMsg.parser('servo_command_message')
-def _parse_command_reply(msg: servo_pb2.ServoCommandMessage) -> Union[CommandReply, CommandUpdate]:
+@RequestMsg.parser('servo_command_message')
+def _parse_servo_command_message_request(msg: servo_pb2.ServoCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
     port = msg.port
     active = msg.active
     position = msg.position
     subscription = msg.subscription if msg.HasField('subscription') else None
+    # <GSL customizable: _parse_servo_command_message_request-return>
+    if subscription is None:
+        return CommandRequest(port)
+    else:
+        return CommandSubscribe(port, subscription)
+    # </GSL customizable: _parse_servo_command_message_request-return>
+
+
+@ReplyMsg.parser('servo_command_message')
+def _parse_servo_command_message_reply(msg: servo_pb2.ServoCommandMessage) -> Union[CommandReply, CommandUpdate]:
+    port = msg.port
+    active = msg.active
+    position = msg.position
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    # <GSL customizable: _parse_servo_command_message_reply-return>
     if subscription is None:
         return CommandReply(port, active, position)
     else:
         return CommandUpdate(port, active, position, subscription)
+    # </GSL customizable: _parse_servo_command_message_reply-return>

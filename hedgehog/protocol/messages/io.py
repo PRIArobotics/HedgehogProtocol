@@ -1,13 +1,15 @@
 from typing import Union
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
-from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto import io_pb2
+from hedgehog.utils import protobuf
+
+# <GSL customizable: module-header>
+from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.io_pb2 import INPUT_FLOATING, INPUT_PULLUP, INPUT_PULLDOWN
 from hedgehog.protocol.proto.io_pb2 import OUTPUT_OFF, OUTPUT_ON
 from hedgehog.protocol.proto.io_pb2 import OUTPUT, PULLUP, PULLDOWN, LEVEL
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.utils import protobuf
 
 
 def _check_flags(flags: int) -> None:
@@ -17,15 +19,19 @@ def _check_flags(flags: int) -> None:
         raise InvalidCommandError("only output ports can be set to on")
     if flags & PULLUP and flags & PULLDOWN:
         raise InvalidCommandError("pullup and pulldown are mutually exclusive")
+# </GSL customizable: module-header>
 
 
-@RequestMsg.message(io_pb2.IOAction, 'io_action')
+@RequestMsg.message(io_pb2.IOAction, 'io_action', fields=('port', 'flags',))
 class Action(SimpleMessage):
     def __init__(self, port: int, flags: int) -> None:
+        # <GSL customizable: Action-init-validation>
         _check_flags(flags)
+        # </GSL customizable: Action-init-validation>
         self.port = port
         self.flags = flags
 
+    # <GSL customizable: Action-extra-members>
     @property
     def output(self) -> bool:
         return (self.flags & OUTPUT) != 0
@@ -41,6 +47,7 @@ class Action(SimpleMessage):
     @property
     def level(self) -> bool:
         return (self.flags & LEVEL) != 0
+    # </GSL customizable: Action-extra-members>
 
     @classmethod
     def _parse(cls, msg: io_pb2.IOAction) -> 'Action':
@@ -56,40 +63,25 @@ class Action(SimpleMessage):
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port',))
 class CommandRequest(Message):
     def __init__(self, port: int) -> None:
+        # <default GSL customizable: CommandRequest-init-validation />
         self.port = port
+
+    # <default GSL customizable: CommandRequest-extra-members />
 
     def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
 
 
-@protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'subscription'))
-class CommandSubscribe(Message):
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        self.port = port
-        self.subscription = subscription
-
-    def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
-        msg.port = self.port
-        msg.subscription.CopyFrom(self.subscription)
-
-
-@RequestMsg.parser('io_command_message')
-def _parse_command_request(msg: io_pb2.IOCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
-    port = msg.port
-    subscription = msg.subscription if msg.HasField('subscription') else None
-    if subscription is None:
-        return CommandRequest(port)
-    else:
-        return CommandSubscribe(port, subscription)
-
-
-@protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags'))
+@protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags',))
 class CommandReply(Message):
     def __init__(self, port: int, flags: int) -> None:
+        # <GSL customizable: CommandReply-init-validation>
         _check_flags(flags)
+        # </GSL customizable: CommandReply-init-validation>
         self.port = port
         self.flags = flags
 
+    # <GSL customizable: CommandReply-extra-members>
     @property
     def output(self) -> bool:
         return (self.flags & OUTPUT) != 0
@@ -105,22 +97,40 @@ class CommandReply(Message):
     @property
     def level(self) -> bool:
         return (self.flags & LEVEL) != 0
+    # </GSL customizable: CommandReply-extra-members>
 
     def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
         msg.flags = self.flags
 
 
-@protobuf.message(io_pb2.IOCommandMessage, 'io_command_message')
+@protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'subscription',))
+class CommandSubscribe(Message):
+    def __init__(self, port: int, subscription: Subscription) -> None:
+        # <default GSL customizable: CommandSubscribe-init-validation />
+        self.port = port
+        self.subscription = subscription
+
+    # <default GSL customizable: CommandSubscribe-extra-members />
+
+    def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
+        msg.port = self.port
+        msg.subscription.CopyFrom(self.subscription)
+
+
+@protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags', 'subscription',))
 class CommandUpdate(Message):
     is_async = True
 
     def __init__(self, port: int, flags: int, subscription: Subscription) -> None:
+        # <GSL customizable: CommandUpdate-init-validation>
         _check_flags(flags)
+        # </GSL customizable: CommandUpdate-init-validation>
         self.port = port
         self.flags = flags
         self.subscription = subscription
 
+    # <GSL customizable: CommandUpdate-extra-members>
     @property
     def output(self) -> bool:
         return (self.flags & OUTPUT) != 0
@@ -136,6 +146,7 @@ class CommandUpdate(Message):
     @property
     def level(self) -> bool:
         return (self.flags & LEVEL) != 0
+    # </GSL customizable: CommandUpdate-extra-members>
 
     def _serialize(self, msg: io_pb2.IOCommandMessage) -> None:
         msg.port = self.port
@@ -143,12 +154,27 @@ class CommandUpdate(Message):
         msg.subscription.CopyFrom(self.subscription)
 
 
-@ReplyMsg.parser('io_command_message')
-def _parse_command_reply(msg: io_pb2.IOCommandMessage) -> Union[CommandReply, CommandUpdate]:
+@RequestMsg.parser('io_command_message')
+def _parse_io_command_message_request(msg: io_pb2.IOCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
     port = msg.port
     flags = msg.flags
     subscription = msg.subscription if msg.HasField('subscription') else None
+    # <GSL customizable: _parse_io_command_message_request-return>
+    if subscription is None:
+        return CommandRequest(port)
+    else:
+        return CommandSubscribe(port, subscription)
+    # </GSL customizable: _parse_io_command_message_request-return>
+
+
+@ReplyMsg.parser('io_command_message')
+def _parse_io_command_message_reply(msg: io_pb2.IOCommandMessage) -> Union[CommandReply, CommandUpdate]:
+    port = msg.port
+    flags = msg.flags
+    subscription = msg.subscription if msg.HasField('subscription') else None
+    # <GSL customizable: _parse_io_command_message_reply-return>
     if subscription is None:
         return CommandReply(port, flags)
     else:
         return CommandUpdate(port, flags, subscription)
+    # </GSL customizable: _parse_io_command_message_reply-return>
