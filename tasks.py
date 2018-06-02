@@ -9,7 +9,7 @@ def grammar(context):
 
 @task
 def gsl(context):
-    from gsl_protocol import main
+    from gsl_protocol_python import main
 
     main()
 

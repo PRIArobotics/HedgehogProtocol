@@ -10,14 +10,6 @@ Proto = pseudo_tuple('Proto', ('path', 'name', 'messages'))
 Module = pseudo_tuple('Module', ('path', 'name', 'messageClasses', 'complexMessages'))
 
 
-def unique(it):
-    items = set()
-    for item in it:
-        if item not in items:
-            items.add(item)
-            yield item
-
-
 class HedgehogProtocolVisitor(_HedgehogProtocolVisitor):
     def visitField(self, ctx):
         result = super(HedgehogProtocolVisitor, self).visitField(ctx)
