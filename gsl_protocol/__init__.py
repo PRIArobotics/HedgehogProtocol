@@ -21,7 +21,6 @@ def unique(it):
 class HedgehogProtocolVisitor(_HedgehogProtocolVisitor):
     def visitField(self, ctx):
         result = super(HedgehogProtocolVisitor, self).visitField(ctx)
-        result.languageFieldSpecs = {type(spec): spec for spec in result.languageFieldSpecs}
         return result
 
     def visitNumber(self, ctx):
@@ -132,9 +131,8 @@ def get_model(model_file):
 
 
 def main():
-    from . import proto_target, python_target
+    from . import proto_target
 
     model = get_model('gsl_protocol/hedgehog_protocol')
     root = '.'
     proto_target.generate_code(model, root)
-    python_target.generate_code(model, root)

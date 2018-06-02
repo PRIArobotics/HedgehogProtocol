@@ -3,14 +3,8 @@ ack.Acknowledgement acknowledgement = 1 {
 negative acknowledgements. A negative acknowledgement may be sent as the reply to any message, even if another reply
 is expected. Negative acknowledgements may have a `message` describing the error condition."""
 
-  AcknowledgementCode code = 1 {
-    Python: "int", "OK";
-    TypeScript: "number", "AcknowledgementCode.OK";
-  }
-  string message = 2 {
-    Python: "str", "''";
-    TypeScript: "string", "''";
-  }
+  AcknowledgementCode code = 1;
+  string message = 2;
 
   <= ack.Acknowledgement(code, [message])
     """ack""";
@@ -19,14 +13,8 @@ is expected. Negative acknowledgements may have a `message` describing the error
 io.IOAction io_action = 2 {
   """Changes the configuration of one IO port"""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  IOFlags flags = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
+  uint32 port = 1;
+  IOFlags flags = 2;
 
   => io.Action(port, flags)
     """IO action => ack""";
@@ -35,18 +23,9 @@ io.IOAction io_action = 2 {
 io.IOCommandMessage io_command_message = 16 {
   """Request or reply for one IO port's current command. The command may change by an IO action."""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  IOFlags flags = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  nested Subscription subscription = 3 {
-    Python: "Subscription";
-    TypeScript: "Subscription";
-  }
+  uint32 port = 1;
+  IOFlags flags = 2;
+  nested Subscription subscription = 3;
 
   => io.CommandRequest(port)
     """IO command request => IO command reply""";
@@ -61,18 +40,9 @@ io.IOCommandMessage io_command_message = 16 {
 io.AnalogMessage analog_message = 3 {
   """Request or reply for one analog sensor's value"""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  uint32 value = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  nested Subscription subscription = 3 {
-    Python: "Subscription";
-    TypeScript: "Subscription";
-  }
+  uint32 port = 1;
+  uint32 value = 2;
+  nested Subscription subscription = 3;
 
   => analog.Request(port)
     """analog request => analog reply""";
@@ -87,18 +57,9 @@ io.AnalogMessage analog_message = 3 {
 io.DigitalMessage digital_message = 4 {
   """Request or reply for one digital sensor's value"""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  bool value = 2 {
-    Python: "bool";
-    TypeScript: "boolean";
-  }
-  nested Subscription subscription = 3 {
-    Python: "Subscription";
-    TypeScript: "Subscription";
-  }
+  uint32 port = 1;
+  bool value = 2;
+  nested Subscription subscription = 3;
 
   => digital.Request(port)
     """digital request => digital reply""";
@@ -114,31 +75,13 @@ motor.MotorAction motor_action = 5 {
   """Command for one motor. By setting a relative or absolute goal position,
 the motor will go into `reached_state` upon reaching the position."""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  MotorState state = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  sint32 amount = 3 {
-    Python: "int", "0";
-    TypeScript: "number", "0";
-  }
-  MotorState reached_state = 4 {
-    Python: "int", "POWER";
-    TypeScript: "number", "MotorState.POWER";
-  }
+  uint32 port = 1;
+  MotorState state = 2;
+  sint32 amount = 3;
+  MotorState reached_state = 4;
   oneof position {
-    sint32 relative = 5 {
-      Python: "int";
-      TypeScript: "number";
-    }
-    sint32 absolute = 6 {
-      Python: "int";
-      TypeScript: "number";
-    }
+    sint32 relative = 5;
+    sint32 absolute = 6;
   }
 
   => motor.Action(port, state, amount, [reached_state, relative/absolute])
@@ -149,22 +92,10 @@ motor.MotorCommandMessage motor_command_message = 17 {
   """Request or reply for one motor's current command.
 The command may change by a motor action, or by reaching the goal position of a terminating motor action."""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  MotorState state = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  sint32 amount = 3 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  nested Subscription subscription = 4 {
-    Python: "Subscription";
-    TypeScript: "Subscription";
-  }
+  uint32 port = 1;
+  MotorState state = 2;
+  sint32 amount = 3;
+  nested Subscription subscription = 4;
 
   => motor.CommandRequest(port)
     """motor command request => motor command reply""";
@@ -180,22 +111,10 @@ motor.MotorStateMessage motor_state_message = 6 {
   """Request or reply for one motor's state. The motor state may generally change at any time,
 but returned values are approximations, and motor state requests may not be supported at all."""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  sint32 velocity = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  sint32 position = 3 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  nested Subscription subscription = 4 {
-    Python: "Subscription";
-    TypeScript: "Subscription";
-  }
+  uint32 port = 1;
+  sint32 velocity = 2;
+  sint32 position = 3;
+  nested Subscription subscription = 4;
 
   => motor.StateRequest(port)
     """motor state request => motor state reply""";
@@ -210,14 +129,8 @@ but returned values are approximations, and motor state requests may not be supp
 motor.MotorSetPositionAction motor_set_position_action = 18 {
   """Set one motor's position counter."""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  sint32 position = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
+  uint32 port = 1;
+  sint32 position = 2;
 
   => motor.SetPositionAction(port, position)
     """set motor position action => ack""";
@@ -226,18 +139,9 @@ motor.MotorSetPositionAction motor_set_position_action = 18 {
 servo.ServoAction servo_action = 7 {
   """Set one servo target position"""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  bool active = 2 {
-    Python: "bool";
-    TypeScript: "boolean";
-  }
-  uint32 position = 3 {
-    Python: "int", "None";
-    TypeScript: "number", "undefined";
-  }
+  uint32 port = 1;
+  bool active = 2;
+  uint32 position = 3;
 
   => servo.Action(port, active, position)
     """servo action => ack""";
@@ -247,22 +151,10 @@ servo.ServoCommandMessage servo_command_message = 19 {
   """Request or reply for one servo's current command. The command may change by a servo action,
 actual servo movement is not reflected."""
 
-  uint32 port = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  bool active = 2 {
-    Python: "bool";
-    TypeScript: "boolean";
-  }
-  uint32 position = 3 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  nested Subscription subscription = 4 {
-    Python: "Subscription";
-    TypeScript: "Subscription";
-  }
+  uint32 port = 1;
+  bool active = 2;
+  uint32 position = 3;
+  nested Subscription subscription = 4;
 
   => servo.CommandRequest(port)
     """servo command request => servo command reply""";
@@ -277,14 +169,8 @@ actual servo movement is not reflected."""
 process.ProcessExecuteAction process_execute_action = 20 {
   """Invoke a process on the controller"""
 
-  repeated string args = 2 {
-    Python: "str";
-    TypeScript: "string[]";
-  }
-  string working_dir = 1 {
-    Python: "str", "None";
-    TypeScript: "string", "undefined";
-  }
+  repeated string args = 2;
+  string working_dir = 1;
 
   => process.ExecuteAction(*args, [working_dir])
     """process execute action => process execute reply""";
@@ -293,10 +179,7 @@ process.ProcessExecuteAction process_execute_action = 20 {
 process.ProcessExecuteReply process_execute_reply = 21 {
   """Reply with the process' PID for communication purposes"""
 
-  uint32 pid = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
+  uint32 pid = 1;
 
   <= process.ExecuteReply(pid)
     """process execute reply""";
@@ -305,18 +188,9 @@ process.ProcessExecuteReply process_execute_reply = 21 {
 process.ProcessStreamMessage process_stream_message = 8 {
   """send data to/receive data from a process' file streams"""
 
-  uint32 pid = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  ProcessFileno fileno = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  bytes chunk = 3 {
-    Python: "bytes", "b''";
-    TypeScript: "Uint8Array", "undefined";
-  }
+  uint32 pid = 1;
+  ProcessFileno fileno = 2;
+  bytes chunk = 3;
 
   => process.StreamAction(pid, fileno, chunk)
     """stream data action => ack""";
@@ -327,14 +201,8 @@ process.ProcessStreamMessage process_stream_message = 8 {
 process.ProcessSignalAction process_signal_action = 22 {
   """Send signal to a process"""
 
-  uint32 pid = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  uint32 signal = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
+  uint32 pid = 1;
+  uint32 signal = 2;
 
   => process.SignalAction(pid, signal)
     """process signal action => ack""";
@@ -343,14 +211,8 @@ process.ProcessSignalAction process_signal_action = 22 {
 process.ProcessExitUpdate process_exit_update = 23 {
   """Signals that the process has exited"""
 
-  uint32 pid = 1 {
-    Python: "int";
-    TypeScript: "number";
-  }
-  int32 exit_code = 2 {
-    Python: "int";
-    TypeScript: "number";
-  }
+  uint32 pid = 1;
+  int32 exit_code = 2;
 
   <- process.ExitUpdate(pid, exit_code)
     """process exit update""";

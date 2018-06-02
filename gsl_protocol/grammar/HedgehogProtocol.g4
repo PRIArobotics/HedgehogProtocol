@@ -11,18 +11,12 @@ message:
   RBRACE;
 
 field:
-  nested='nested'? rep='repeated'? fieldType=identifier name=identifier EQUALS label=number LBRACE
-    languageFieldSpec*
-  RBRACE;
+  nested='nested'? rep='repeated'? fieldType=identifier name=identifier EQUALS label=number SEMI;
 
 oneof:
   'oneof' name=identifier LBRACE
     field*
   RBRACE;
-
-languageFieldSpec:
-  'Python' COLON typ=string (COMMA default=string)? SEMI #pythonSpec |
-  'TypeScript' COLON typ=string (COMMA default=string)? SEMI #typeScriptSpec;
 
 messageClass:
   direction qualifiedName LPAREN paramList RPAREN

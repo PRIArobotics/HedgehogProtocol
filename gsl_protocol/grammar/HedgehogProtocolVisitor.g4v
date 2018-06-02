@@ -23,22 +23,11 @@ field = Field(
   fieldType=`fieldType`,
   name=`name`,
   label=`label`,
-  languageFieldSpecs=languageFieldSpec*, //replace by dict
 );
 
 oneof = Oneof(
   name=`name`,
   fields=field*,
-);
-
-pythonSpec = PythonSpec(
-  typ=`typ`,
-  default=[`default`],
-);
-
-typeScriptSpec = TypeScriptSpec(
-  typ=`typ`,
-  default=[`default`],
 );
 
 messageClass = MessageClass(

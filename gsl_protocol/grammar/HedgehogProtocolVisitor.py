@@ -9,10 +9,8 @@ else:
 
 Model = pseudo_tuple('Model', ('messages',))
 Message = pseudo_tuple('Message', ('qualifiedName', 'discriminator', 'label', 'docstring', 'fields', 'messageClasses',))
-Field = pseudo_tuple('Field', ('nested', 'repeated', 'fieldType', 'name', 'label', 'languageFieldSpecs',))
+Field = pseudo_tuple('Field', ('nested', 'repeated', 'fieldType', 'name', 'label',))
 Oneof = pseudo_tuple('Oneof', ('name', 'fields',))
-PythonSpec = pseudo_tuple('PythonSpec', ('typ', 'default',))
-TypeScriptSpec = pseudo_tuple('TypeScriptSpec', ('typ', 'default',))
 MessageClass = pseudo_tuple('MessageClass', ('direction', 'qualifiedName', 'params', 'docstring',))
 MandatoryParam = pseudo_tuple('MandatoryParam', ('name',))
 RepeatedParam = pseudo_tuple('RepeatedParam', ('name',))
@@ -43,25 +41,12 @@ class HedgehogProtocolVisitor(ParseTreeVisitor):
             self.visitNode(ctx.fieldType),
             self.visitNode(ctx.name),
             self.visitNode(ctx.label),
-            self.visitNodes(self.get_children(ctx, HedgehogProtocolParser.LanguageFieldSpecContext)),
         )
 
     def visitOneof(self, ctx: HedgehogProtocolParser.OneofContext):
         return Oneof(
             self.visitNode(ctx.name),
             self.visitNodes(self.get_children(ctx, HedgehogProtocolParser.FieldContext)),
-        )
-
-    def visitPythonSpec(self, ctx: HedgehogProtocolParser.PythonSpecContext):
-        return PythonSpec(
-            self.visitNode(ctx.typ),
-            self.visitNode(ctx.default) if ctx.default else None,
-        )
-
-    def visitTypeScriptSpec(self, ctx: HedgehogProtocolParser.TypeScriptSpecContext):
-        return TypeScriptSpec(
-            self.visitNode(ctx.typ),
-            self.visitNode(ctx.default) if ctx.default else None,
         )
 
     def visitMessageClass(self, ctx: HedgehogProtocolParser.MessageClassContext):
