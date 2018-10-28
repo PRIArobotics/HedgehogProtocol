@@ -13,7 +13,7 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
 
 @RequestMsg.message(motor_pb2.MotorAction, 'motor_action', fields=('port', 'state', 'amount', 'reached_state', 'relative', 'absolute',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Action(SimpleMessage):
     port: int
     state: int
@@ -61,7 +61,7 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandRequest(Message):
     port: int
 
@@ -77,7 +77,7 @@ class CommandRequest(Message):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandReply(Message):
     port: int
     state: int
@@ -97,7 +97,7 @@ class CommandReply(Message):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandSubscribe(Message):
     port: int
     subscription: Subscription
@@ -115,7 +115,7 @@ class CommandSubscribe(Message):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandUpdate(Message):
     is_async = True
 
@@ -139,7 +139,7 @@ class CommandUpdate(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class StateRequest(Message):
     port: int
 
@@ -155,7 +155,7 @@ class StateRequest(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class StateReply(Message):
     port: int
     velocity: int
@@ -175,7 +175,7 @@ class StateReply(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class StateSubscribe(Message):
     port: int
     subscription: Subscription
@@ -193,7 +193,7 @@ class StateSubscribe(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class StateUpdate(Message):
     is_async = True
 
@@ -217,7 +217,7 @@ class StateUpdate(Message):
 
 
 @RequestMsg.message(motor_pb2.MotorSetPositionAction, 'motor_set_position_action', fields=('port', 'position',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class SetPositionAction(SimpleMessage):
     port: int
     position: int

@@ -12,7 +12,7 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
 
 @RequestMsg.message(servo_pb2.ServoAction, 'servo_action', fields=('port', 'active', 'position',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Action(SimpleMessage):
     port: int
     active: bool
@@ -43,7 +43,7 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandRequest(Message):
     port: int
 
@@ -59,7 +59,7 @@ class CommandRequest(Message):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandReply(Message):
     port: int
     active: bool
@@ -81,7 +81,7 @@ class CommandReply(Message):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandSubscribe(Message):
     port: int
     subscription: Subscription
@@ -99,7 +99,7 @@ class CommandSubscribe(Message):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandUpdate(Message):
     is_async = True
 

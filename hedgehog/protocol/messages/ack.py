@@ -11,7 +11,7 @@ from hedgehog.protocol.proto.ack_pb2 import OK, UNKNOWN_COMMAND, INVALID_COMMAND
 
 
 @ReplyMsg.message(ack_pb2.Acknowledgement, 'acknowledgement', fields=('code', 'message',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Acknowledgement(SimpleMessage):
     code: int = OK
     message: str = ''

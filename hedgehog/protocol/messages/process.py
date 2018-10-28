@@ -12,7 +12,7 @@ from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
 
 
 @RequestMsg.message(process_pb2.ProcessExecuteAction, 'process_execute_action', fields=('args', 'working_dir',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class ExecuteAction(SimpleMessage):
     args: Sequence[str]
     working_dir: str = None
@@ -42,7 +42,7 @@ class ExecuteAction(SimpleMessage):
 
 
 @ReplyMsg.message(process_pb2.ProcessExecuteReply, 'process_execute_reply', fields=('pid',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class ExecuteReply(SimpleMessage):
     pid: int
 
@@ -63,7 +63,7 @@ class ExecuteReply(SimpleMessage):
 
 
 @RequestMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message', fields=('pid', 'fileno', 'chunk',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class StreamAction(SimpleMessage):
     pid: int
     fileno: int
@@ -91,7 +91,7 @@ class StreamAction(SimpleMessage):
 
 
 @ReplyMsg.message(process_pb2.ProcessStreamMessage, 'process_stream_message', fields=('pid', 'fileno', 'chunk',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class StreamUpdate(SimpleMessage):
     is_async = True
 
@@ -121,7 +121,7 @@ class StreamUpdate(SimpleMessage):
 
 
 @RequestMsg.message(process_pb2.ProcessSignalAction, 'process_signal_action', fields=('pid', 'signal',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class SignalAction(SimpleMessage):
     pid: int
     signal: int
@@ -145,7 +145,7 @@ class SignalAction(SimpleMessage):
 
 
 @ReplyMsg.message(process_pb2.ProcessExitUpdate, 'process_exit_update', fields=('pid', 'exit_code',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class ExitUpdate(SimpleMessage):
     is_async = True
 

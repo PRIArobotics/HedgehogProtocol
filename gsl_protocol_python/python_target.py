@@ -177,7 +177,7 @@ def generate_module_code(model, mod, root):
 
 
 @{decorator}.message({proto.name}_pb2.{message.name}, '{message.discriminator}', fields=({fields_str}))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class {messageClass.name}({"Message" if complex else "SimpleMessage"}):""")
 
             if is_async:

@@ -43,6 +43,9 @@ class TestMessages(object):
         with pytest.raises(errors.UnknownCommandError):
             ServerSide.parse(b'asdf')
 
+    def test_repr(self):
+        assert repr(io.Action(0, io.INPUT_PULLUP)) == f'io.Action(port=0, flags={io.INPUT_PULLUP})'
+
     def test_acknowledgement(self):
         msg = ack.Acknowledgement()
         proto = HedgehogMessage()

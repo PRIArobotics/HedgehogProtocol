@@ -11,12 +11,12 @@ class Message(protobuf.Message):
     def msg_name(cls):
         module, name = cls.__module__, cls.__name__
         module = module[module.rindex('.') + 1:]
-        return module + '.' + name
+        return f'{module}.{name}'
 
     def __repr__(self):
         field_pairs = ((field, getattr(self, field)) for field in self.meta.fields)
-        field_reprs = ('{}={}'.format(field, repr(value)) for field, value in field_pairs)
-        return '{}({})'.format(self.msg_name(), ', '.join(field_reprs))
+        field_reprs = ', '.join(f'{field}={value!r}' for field, value in field_pairs)
+        return f'{self.msg_name()}({field_reprs})'
 
 
 class SimpleMessage(Message, protobuf.SimpleMessageMixin):

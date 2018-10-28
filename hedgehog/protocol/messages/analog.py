@@ -11,7 +11,7 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
 
 @protobuf.message(io_pb2.AnalogMessage, 'analog_message', fields=('port',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Request(Message):
     port: int
 
@@ -27,7 +27,7 @@ class Request(Message):
 
 
 @protobuf.message(io_pb2.AnalogMessage, 'analog_message', fields=('port', 'value',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Reply(Message):
     port: int
     value: int
@@ -45,7 +45,7 @@ class Reply(Message):
 
 
 @protobuf.message(io_pb2.AnalogMessage, 'analog_message', fields=('port', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Subscribe(Message):
     port: int
     subscription: Subscription
@@ -63,7 +63,7 @@ class Subscribe(Message):
 
 
 @protobuf.message(io_pb2.AnalogMessage, 'analog_message', fields=('port', 'value', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Update(Message):
     is_async = True
 

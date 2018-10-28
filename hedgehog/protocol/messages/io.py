@@ -24,7 +24,7 @@ def _check_flags(flags: int) -> None:
 
 
 @RequestMsg.message(io_pb2.IOAction, 'io_action', fields=('port', 'flags',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Action(SimpleMessage):
     port: int
     flags: int
@@ -64,7 +64,7 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandRequest(Message):
     port: int
 
@@ -80,7 +80,7 @@ class CommandRequest(Message):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandReply(Message):
     port: int
     flags: int
@@ -114,7 +114,7 @@ class CommandReply(Message):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandSubscribe(Message):
     port: int
     subscription: Subscription
@@ -132,7 +132,7 @@ class CommandSubscribe(Message):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags', 'subscription',))
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class CommandUpdate(Message):
     is_async = True
 
