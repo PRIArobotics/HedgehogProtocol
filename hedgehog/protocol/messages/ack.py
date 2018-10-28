@@ -5,8 +5,12 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import ack_pb2
 from hedgehog.utils import protobuf
 
+__all__ = ['Acknowledgement']
+
 # <GSL customizable: module-header>
 from hedgehog.protocol.proto.ack_pb2 import OK, UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
+
+__all__ += ['OK', 'UNKNOWN_COMMAND', 'INVALID_COMMAND', 'UNSUPPORTED_COMMAND', 'FAILED_COMMAND']
 # </GSL customizable: module-header>
 
 

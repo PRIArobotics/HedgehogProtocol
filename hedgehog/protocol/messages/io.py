@@ -5,12 +5,21 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import io_pb2
 from hedgehog.utils import protobuf
 
+__all__ = ['Action', 'CommandRequest', 'CommandReply', 'CommandSubscribe', 'CommandUpdate']
+
 # <GSL customizable: module-header>
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.io_pb2 import INPUT_FLOATING, INPUT_PULLUP, INPUT_PULLDOWN
 from hedgehog.protocol.proto.io_pb2 import OUTPUT_OFF, OUTPUT_ON
 from hedgehog.protocol.proto.io_pb2 import OUTPUT, PULLUP, PULLDOWN, LEVEL
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
+
+__all__ += [
+    'INPUT_FLOATING', 'INPUT_PULLUP', 'INPUT_PULLDOWN',
+    'OUTPUT_OFF', 'OUTPUT_ON',
+    'OUTPUT', 'PULLUP', 'PULLDOWN', 'LEVEL',
+    'Subscription',
+]
 
 
 def _check_flags(flags: int) -> None:

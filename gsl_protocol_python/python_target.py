@@ -267,6 +267,8 @@ from hedgehog.protocol.proto{'.'.join(('',) + protoPath)} import {protoName}_pb2
         yield from lines(f"""\
 from hedgehog.utils import protobuf
 
+__all__ = [{', '.join(repr(messageClass.name) for messageClass in mod.messageClasses)}]
+
 # <default GSL customizable: module-header />""")
         for messageClass in mod.messageClasses:
             yield from message_class_code(messageClass)

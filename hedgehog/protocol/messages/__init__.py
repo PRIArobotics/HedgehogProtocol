@@ -3,6 +3,8 @@ from typing import cast
 from hedgehog.utils import protobuf
 from ..proto import hedgehog_pb2
 
+__all__ = ['Message', 'SimpleMessage', 'ContainerMessage', 'RequestMsg', 'ReplyMsg']
+
 
 class Message(protobuf.Message):
     is_async = False

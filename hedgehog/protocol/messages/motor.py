@@ -5,10 +5,17 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import motor_pb2
 from hedgehog.utils import protobuf
 
+__all__ = ['Action', 'CommandRequest', 'CommandReply', 'CommandSubscribe', 'CommandUpdate', 'StateRequest', 'StateReply', 'StateSubscribe', 'StateUpdate', 'SetPositionAction']
+
 # <GSL customizable: module-header>
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
+
+__all__ += [
+    'POWER', 'BRAKE', 'VELOCITY',
+    'Subscription',
+]
 # </GSL customizable: module-header>
 
 

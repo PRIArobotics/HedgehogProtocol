@@ -5,9 +5,13 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import process_pb2
 from hedgehog.utils import protobuf
 
+__all__ = ['ExecuteAction', 'ExecuteReply', 'StreamAction', 'StreamUpdate', 'SignalAction', 'ExitUpdate']
+
 # <GSL customizable: module-header>
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.process_pb2 import STDIN, STDOUT, STDERR
+
+__all__ += ['STDIN', 'STDOUT', 'STDERR']
 # </GSL customizable: module-header>
 
 

@@ -5,9 +5,14 @@ from . import RawMessage, Message, RawPayload, Payload, \
 
 from .sockets import raw_to_delimited, to_delimited, raw_from_delimited, from_delimited
 
+__all__ = [
+    'raw_to_delimited', 'to_delimited', 'raw_from_delimited', 'from_delimited',
+    'DealerRouterMixin', 'DealerRouterSocket', 'ReqMixin', 'ReqSocket',
+]
+
 
 class DealerRouterMixin(object):
-    """
+    """\
     A mixin for async ZMQ dealer & router sockets used to send delimited & Hedgehog-encoded messages.
 
     This mixin defines methods to send/receive single/multipart binary/hedgehog messages on dealer & router sockets.
@@ -52,7 +57,7 @@ class DealerRouterSocket(DealerRouterMixin, Socket):
 
 
 class ReqMixin(object):
-    """
+    """\
     A mixin for async ZMQ req sockets used to send Hedgehog-encoded messages.
 
     This mixin defines methods to send/receive single/multipart binary/hedgehog messages on req sockets.

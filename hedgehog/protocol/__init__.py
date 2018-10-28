@@ -6,6 +6,12 @@ from hedgehog.utils import protobuf
 from .messages import ContainerMessage, Message, RequestMsg, ReplyMsg
 from .errors import HedgehogCommandError, UnknownCommandError
 
+__all__ = [
+    'RawMessage', 'RawPayload', 'Payload',
+    'Header', 'DelimitedMsg', 'RawMsgs', 'Msgs', 'RawMsg', 'Msg',
+    'CommSide', 'ServerSide', 'ClientSide',
+]
+
 
 # a single protobuf-encoded message
 RawMessage = bytes
@@ -36,7 +42,9 @@ class CommSide(object):
         self.sender = sender
 
     def parse(self, data: RawMessage) -> Message:
-        """Parses a binary protobuf message into a Message object."""
+        """\
+        Parses a binary protobuf message into a Message object.
+        """
         try:
             return self.receiver.parse(data)
         except KeyError as err:
@@ -45,7 +53,9 @@ class CommSide(object):
             raise UnknownCommandError(f"{err}") from err
 
     def serialize(self, msg: Message) -> RawMessage:
-        """Serializes a Message object into a binary protobuf message"""
+        """\
+        Serializes a Message object into a binary protobuf message.
+        """
         return self.sender.serialize(msg)
 
 

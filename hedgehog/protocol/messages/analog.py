@@ -5,8 +5,12 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import io_pb2
 from hedgehog.utils import protobuf
 
+__all__ = ['Request', 'Reply', 'Subscribe', 'Update']
+
 # <GSL customizable: module-header>
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
+
+__all__ += ['Subscription']
 # </GSL customizable: module-header>
 
 
