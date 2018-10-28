@@ -69,6 +69,10 @@ def generate_module_code(model, mod, root):
                 yield from map_params_code(messageClass, mandatory, repeated, optional)
 
             def message_init_code():
+                # only generate an __init__ method if the dataclass __init__ is not enough
+                if not any(isinstance(param, RepeatedParam) for param in messageClass.params):
+                    return
+
                 def init_param_strs():
                     def param_str(name, typ, default=None, repeated=False, optional=False):
                         if repeated:
@@ -97,12 +101,14 @@ def generate_module_code(model, mod, root):
 
                 yield from lines(f"""\
 
-    def __init__({", ".join(init_param_strs())}) -> None:
-        # <default GSL customizable: {messageClass.name}-init-validation />""")
+    def __init__({", ".join(init_param_strs())}) -> None:""")
 
                 for name in field_names(messageClass):
                     yield from lines(f"""\
         object.__setattr__(self, {name!r}, {name})""")
+
+                yield from lines(f"""\
+        self.__post_init__()""")
 
             def message_parse_code():
                 def init_param_strs():
@@ -182,6 +188,13 @@ class {messageClass.name}({"Message" if complex else "SimpleMessage"}):""")
 
             yield from message_fields_code()
             yield from message_init_code()
+
+            yield from lines(f"""\
+
+    def __post_init__(self):
+        # <default GSL customizable: {messageClass.name}-init-validation>
+        pass
+        # </GSL customizable: {messageClass.name}-init-validation>""")
 
             yield from lines(f"""\
 

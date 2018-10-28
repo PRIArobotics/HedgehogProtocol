@@ -15,9 +15,10 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 class Request(Message):
     port: int
 
-    def __init__(self, port: int) -> None:
-        # <default GSL customizable: Request-init-validation />
-        object.__setattr__(self, 'port', port)
+    def __post_init__(self):
+        # <default GSL customizable: Request-init-validation>
+        pass
+        # </GSL customizable: Request-init-validation>
 
     # <default GSL customizable: Request-extra-members />
 
@@ -31,10 +32,10 @@ class Reply(Message):
     port: int
     value: int
 
-    def __init__(self, port: int, value: int) -> None:
-        # <default GSL customizable: Reply-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'value', value)
+    def __post_init__(self):
+        # <default GSL customizable: Reply-init-validation>
+        pass
+        # </GSL customizable: Reply-init-validation>
 
     # <default GSL customizable: Reply-extra-members />
 
@@ -49,10 +50,10 @@ class Subscribe(Message):
     port: int
     subscription: Subscription
 
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        # <default GSL customizable: Subscribe-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: Subscribe-init-validation>
+        pass
+        # </GSL customizable: Subscribe-init-validation>
 
     # <default GSL customizable: Subscribe-extra-members />
 
@@ -70,11 +71,10 @@ class Update(Message):
     value: int
     subscription: Subscription
 
-    def __init__(self, port: int, value: int, subscription: Subscription) -> None:
-        # <default GSL customizable: Update-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'value', value)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: Update-init-validation>
+        pass
+        # </GSL customizable: Update-init-validation>
 
     # <default GSL customizable: Update-extra-members />
 

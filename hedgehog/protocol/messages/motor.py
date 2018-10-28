@@ -22,26 +22,20 @@ class Action(SimpleMessage):
     relative: int = None
     absolute: int = None
 
-    def __init__(self, port: int, state: int, amount: int=0, reached_state: int=POWER, relative: int=None, absolute: int=None) -> None:
+    def __post_init__(self):
         # <GSL customizable: Action-init-validation>
-        if relative is not None and absolute is not None:
+        if self.relative is not None and self.absolute is not None:
             raise InvalidCommandError("relative and absolute are mutually exclusive")
-        if relative is None and absolute is None:
-            if reached_state != 0:
+        if self.relative is None and self.absolute is None:
+            if self.reached_state != 0:
                 raise InvalidCommandError(
                     "reached_state must be kept at its default value for non-positional motor commands")
         else:
-            if state == BRAKE:
+            if self.state == BRAKE:
                 raise InvalidCommandError("state can't be BRAKE for positional motor commands")
-            if amount <= 0:
+            if self.amount <= 0:
                 raise InvalidCommandError("velocity/power must be positive for positional motor commands")
         # </GSL customizable: Action-init-validation>
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'state', state)
-        object.__setattr__(self, 'amount', amount)
-        object.__setattr__(self, 'reached_state', reached_state)
-        object.__setattr__(self, 'relative', relative)
-        object.__setattr__(self, 'absolute', absolute)
 
     # <default GSL customizable: Action-extra-members />
 
@@ -71,9 +65,10 @@ class Action(SimpleMessage):
 class CommandRequest(Message):
     port: int
 
-    def __init__(self, port: int) -> None:
-        # <default GSL customizable: CommandRequest-init-validation />
-        object.__setattr__(self, 'port', port)
+    def __post_init__(self):
+        # <default GSL customizable: CommandRequest-init-validation>
+        pass
+        # </GSL customizable: CommandRequest-init-validation>
 
     # <default GSL customizable: CommandRequest-extra-members />
 
@@ -88,11 +83,10 @@ class CommandReply(Message):
     state: int
     amount: int
 
-    def __init__(self, port: int, state: int, amount: int) -> None:
-        # <default GSL customizable: CommandReply-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'state', state)
-        object.__setattr__(self, 'amount', amount)
+    def __post_init__(self):
+        # <default GSL customizable: CommandReply-init-validation>
+        pass
+        # </GSL customizable: CommandReply-init-validation>
 
     # <default GSL customizable: CommandReply-extra-members />
 
@@ -108,10 +102,10 @@ class CommandSubscribe(Message):
     port: int
     subscription: Subscription
 
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        # <default GSL customizable: CommandSubscribe-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: CommandSubscribe-init-validation>
+        pass
+        # </GSL customizable: CommandSubscribe-init-validation>
 
     # <default GSL customizable: CommandSubscribe-extra-members />
 
@@ -130,12 +124,10 @@ class CommandUpdate(Message):
     amount: int
     subscription: Subscription
 
-    def __init__(self, port: int, state: int, amount: int, subscription: Subscription) -> None:
-        # <default GSL customizable: CommandUpdate-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'state', state)
-        object.__setattr__(self, 'amount', amount)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: CommandUpdate-init-validation>
+        pass
+        # </GSL customizable: CommandUpdate-init-validation>
 
     # <default GSL customizable: CommandUpdate-extra-members />
 
@@ -151,9 +143,10 @@ class CommandUpdate(Message):
 class StateRequest(Message):
     port: int
 
-    def __init__(self, port: int) -> None:
-        # <default GSL customizable: StateRequest-init-validation />
-        object.__setattr__(self, 'port', port)
+    def __post_init__(self):
+        # <default GSL customizable: StateRequest-init-validation>
+        pass
+        # </GSL customizable: StateRequest-init-validation>
 
     # <default GSL customizable: StateRequest-extra-members />
 
@@ -168,11 +161,10 @@ class StateReply(Message):
     velocity: int
     position: int
 
-    def __init__(self, port: int, velocity: int, position: int) -> None:
-        # <default GSL customizable: StateReply-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'velocity', velocity)
-        object.__setattr__(self, 'position', position)
+    def __post_init__(self):
+        # <default GSL customizable: StateReply-init-validation>
+        pass
+        # </GSL customizable: StateReply-init-validation>
 
     # <default GSL customizable: StateReply-extra-members />
 
@@ -188,10 +180,10 @@ class StateSubscribe(Message):
     port: int
     subscription: Subscription
 
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        # <default GSL customizable: StateSubscribe-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: StateSubscribe-init-validation>
+        pass
+        # </GSL customizable: StateSubscribe-init-validation>
 
     # <default GSL customizable: StateSubscribe-extra-members />
 
@@ -210,12 +202,10 @@ class StateUpdate(Message):
     position: int
     subscription: Subscription
 
-    def __init__(self, port: int, velocity: int, position: int, subscription: Subscription) -> None:
-        # <default GSL customizable: StateUpdate-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'velocity', velocity)
-        object.__setattr__(self, 'position', position)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: StateUpdate-init-validation>
+        pass
+        # </GSL customizable: StateUpdate-init-validation>
 
     # <default GSL customizable: StateUpdate-extra-members />
 
@@ -232,10 +222,10 @@ class SetPositionAction(SimpleMessage):
     port: int
     position: int
 
-    def __init__(self, port: int, position: int) -> None:
-        # <default GSL customizable: SetPositionAction-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'position', position)
+    def __post_init__(self):
+        # <default GSL customizable: SetPositionAction-init-validation>
+        pass
+        # </GSL customizable: SetPositionAction-init-validation>
 
     # <default GSL customizable: SetPositionAction-extra-members />
 

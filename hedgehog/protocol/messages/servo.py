@@ -18,14 +18,13 @@ class Action(SimpleMessage):
     active: bool
     position: int = None
 
-    def __init__(self, port: int, active: bool, position: int=None) -> None:
+    def __post_init__(self):
         # <GSL customizable: Action-init-validation>
-        if active and position is None:
+        if self.active and self.position is None:
             raise InvalidCommandError("position must be given when activating servo")
+        if not self.active:
+            object.__setattr__(self, 'position', None)
         # </GSL customizable: Action-init-validation>
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'active', active)
-        object.__setattr__(self, 'position', position if active else None)
 
     # <default GSL customizable: Action-extra-members />
 
@@ -48,9 +47,10 @@ class Action(SimpleMessage):
 class CommandRequest(Message):
     port: int
 
-    def __init__(self, port: int) -> None:
-        # <default GSL customizable: CommandRequest-init-validation />
-        object.__setattr__(self, 'port', port)
+    def __post_init__(self):
+        # <default GSL customizable: CommandRequest-init-validation>
+        pass
+        # </GSL customizable: CommandRequest-init-validation>
 
     # <default GSL customizable: CommandRequest-extra-members />
 
@@ -65,11 +65,11 @@ class CommandReply(Message):
     active: bool
     position: int
 
-    def __init__(self, port: int, active: bool, position: int) -> None:
-        # <default GSL customizable: CommandReply-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'active', active)
-        object.__setattr__(self, 'position', position if active else None)
+    def __post_init__(self):
+        # <GSL customizable: CommandReply-init-validation>
+        if not self.active:
+            object.__setattr__(self, 'position', None)
+        # </GSL customizable: CommandReply-init-validation>
 
     # <default GSL customizable: CommandReply-extra-members />
 
@@ -86,10 +86,10 @@ class CommandSubscribe(Message):
     port: int
     subscription: Subscription
 
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        # <default GSL customizable: CommandSubscribe-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: CommandSubscribe-init-validation>
+        pass
+        # </GSL customizable: CommandSubscribe-init-validation>
 
     # <default GSL customizable: CommandSubscribe-extra-members />
 
@@ -108,12 +108,11 @@ class CommandUpdate(Message):
     position: int
     subscription: Subscription
 
-    def __init__(self, port: int, active: bool, position: int, subscription: Subscription) -> None:
-        # <default GSL customizable: CommandUpdate-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'active', active)
-        object.__setattr__(self, 'position', position if active else None)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <GSL customizable: CommandUpdate-init-validation>
+        if not self.active:
+            object.__setattr__(self, 'position', None)
+        # </GSL customizable: CommandUpdate-init-validation>
 
     # <default GSL customizable: CommandUpdate-extra-members />
 

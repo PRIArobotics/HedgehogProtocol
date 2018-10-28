@@ -29,12 +29,10 @@ class Action(SimpleMessage):
     port: int
     flags: int
 
-    def __init__(self, port: int, flags: int) -> None:
+    def __post_init__(self):
         # <GSL customizable: Action-init-validation>
-        _check_flags(flags)
+        _check_flags(self.flags)
         # </GSL customizable: Action-init-validation>
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'flags', flags)
 
     # <GSL customizable: Action-extra-members>
     @property
@@ -70,9 +68,10 @@ class Action(SimpleMessage):
 class CommandRequest(Message):
     port: int
 
-    def __init__(self, port: int) -> None:
-        # <default GSL customizable: CommandRequest-init-validation />
-        object.__setattr__(self, 'port', port)
+    def __post_init__(self):
+        # <default GSL customizable: CommandRequest-init-validation>
+        pass
+        # </GSL customizable: CommandRequest-init-validation>
 
     # <default GSL customizable: CommandRequest-extra-members />
 
@@ -86,12 +85,10 @@ class CommandReply(Message):
     port: int
     flags: int
 
-    def __init__(self, port: int, flags: int) -> None:
+    def __post_init__(self):
         # <GSL customizable: CommandReply-init-validation>
-        _check_flags(flags)
+        _check_flags(self.flags)
         # </GSL customizable: CommandReply-init-validation>
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'flags', flags)
 
     # <GSL customizable: CommandReply-extra-members>
     @property
@@ -122,10 +119,10 @@ class CommandSubscribe(Message):
     port: int
     subscription: Subscription
 
-    def __init__(self, port: int, subscription: Subscription) -> None:
-        # <default GSL customizable: CommandSubscribe-init-validation />
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'subscription', subscription)
+    def __post_init__(self):
+        # <default GSL customizable: CommandSubscribe-init-validation>
+        pass
+        # </GSL customizable: CommandSubscribe-init-validation>
 
     # <default GSL customizable: CommandSubscribe-extra-members />
 
@@ -143,13 +140,10 @@ class CommandUpdate(Message):
     flags: int
     subscription: Subscription
 
-    def __init__(self, port: int, flags: int, subscription: Subscription) -> None:
+    def __post_init__(self):
         # <GSL customizable: CommandUpdate-init-validation>
-        _check_flags(flags)
+        _check_flags(self.flags)
         # </GSL customizable: CommandUpdate-init-validation>
-        object.__setattr__(self, 'port', port)
-        object.__setattr__(self, 'flags', flags)
-        object.__setattr__(self, 'subscription', subscription)
 
     # <GSL customizable: CommandUpdate-extra-members>
     @property

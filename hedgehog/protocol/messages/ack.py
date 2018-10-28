@@ -16,10 +16,10 @@ class Acknowledgement(SimpleMessage):
     code: int = OK
     message: str = ''
 
-    def __init__(self, code: int=OK, message: str='') -> None:
-        # <default GSL customizable: Acknowledgement-init-validation />
-        object.__setattr__(self, 'code', code)
-        object.__setattr__(self, 'message', message)
+    def __post_init__(self):
+        # <default GSL customizable: Acknowledgement-init-validation>
+        pass
+        # </GSL customizable: Acknowledgement-init-validation>
 
     # <default GSL customizable: Acknowledgement-extra-members />
 

@@ -18,9 +18,14 @@ class ExecuteAction(SimpleMessage):
     working_dir: str = None
 
     def __init__(self, *args: str, working_dir: str=None) -> None:
-        # <default GSL customizable: ExecuteAction-init-validation />
         object.__setattr__(self, 'args', args)
         object.__setattr__(self, 'working_dir', working_dir)
+        self.__post_init__()
+
+    def __post_init__(self):
+        # <default GSL customizable: ExecuteAction-init-validation>
+        pass
+        # </GSL customizable: ExecuteAction-init-validation>
 
     # <default GSL customizable: ExecuteAction-extra-members />
 
@@ -41,9 +46,10 @@ class ExecuteAction(SimpleMessage):
 class ExecuteReply(SimpleMessage):
     pid: int
 
-    def __init__(self, pid: int) -> None:
-        # <default GSL customizable: ExecuteReply-init-validation />
-        object.__setattr__(self, 'pid', pid)
+    def __post_init__(self):
+        # <default GSL customizable: ExecuteReply-init-validation>
+        pass
+        # </GSL customizable: ExecuteReply-init-validation>
 
     # <default GSL customizable: ExecuteReply-extra-members />
 
@@ -63,14 +69,11 @@ class StreamAction(SimpleMessage):
     fileno: int
     chunk: bytes = b''
 
-    def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
+    def __post_init__(self):
         # <GSL customizable: StreamAction-init-validation>
-        if fileno != STDIN:
+        if self.fileno != STDIN:
             raise InvalidCommandError("only STDIN is writable")
         # </GSL customizable: StreamAction-init-validation>
-        object.__setattr__(self, 'pid', pid)
-        object.__setattr__(self, 'fileno', fileno)
-        object.__setattr__(self, 'chunk', chunk)
 
     # <default GSL customizable: StreamAction-extra-members />
 
@@ -96,14 +99,11 @@ class StreamUpdate(SimpleMessage):
     fileno: int
     chunk: bytes = b''
 
-    def __init__(self, pid: int, fileno: int, chunk: bytes=b'') -> None:
+    def __post_init__(self):
         # <GSL customizable: StreamUpdate-init-validation>
-        if fileno not in (STDOUT, STDERR):
+        if self.fileno not in (STDOUT, STDERR):
             raise InvalidCommandError("only STDOUT and STDERR are readable")
         # </GSL customizable: StreamUpdate-init-validation>
-        object.__setattr__(self, 'pid', pid)
-        object.__setattr__(self, 'fileno', fileno)
-        object.__setattr__(self, 'chunk', chunk)
 
     # <default GSL customizable: StreamUpdate-extra-members />
 
@@ -126,10 +126,10 @@ class SignalAction(SimpleMessage):
     pid: int
     signal: int
 
-    def __init__(self, pid: int, signal: int) -> None:
-        # <default GSL customizable: SignalAction-init-validation />
-        object.__setattr__(self, 'pid', pid)
-        object.__setattr__(self, 'signal', signal)
+    def __post_init__(self):
+        # <default GSL customizable: SignalAction-init-validation>
+        pass
+        # </GSL customizable: SignalAction-init-validation>
 
     # <default GSL customizable: SignalAction-extra-members />
 
@@ -152,10 +152,10 @@ class ExitUpdate(SimpleMessage):
     pid: int
     exit_code: int
 
-    def __init__(self, pid: int, exit_code: int) -> None:
-        # <default GSL customizable: ExitUpdate-init-validation />
-        object.__setattr__(self, 'pid', pid)
-        object.__setattr__(self, 'exit_code', exit_code)
+    def __post_init__(self):
+        # <default GSL customizable: ExitUpdate-init-validation>
+        pass
+        # </GSL customizable: ExitUpdate-init-validation>
 
     # <default GSL customizable: ExitUpdate-extra-members />
 
