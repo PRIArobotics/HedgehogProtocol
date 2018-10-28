@@ -1,4 +1,5 @@
-from typing import Union
+from typing import Sequence, Union
+from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import servo_pb2
@@ -11,15 +12,20 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
 
 @RequestMsg.message(servo_pb2.ServoAction, 'servo_action', fields=('port', 'active', 'position',))
+@dataclass(frozen=True)
 class Action(SimpleMessage):
+    port: int
+    active: bool
+    position: int = None
+
     def __init__(self, port: int, active: bool, position: int=None) -> None:
         # <GSL customizable: Action-init-validation>
         if active and position is None:
             raise InvalidCommandError("position must be given when activating servo")
         # </GSL customizable: Action-init-validation>
-        self.port = port
-        self.active = active
-        self.position = position if active else None
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'active', active)
+        object.__setattr__(self, 'position', position if active else None)
 
     # <default GSL customizable: Action-extra-members />
 
@@ -38,10 +44,13 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port',))
+@dataclass(frozen=True)
 class CommandRequest(Message):
+    port: int
+
     def __init__(self, port: int) -> None:
         # <default GSL customizable: CommandRequest-init-validation />
-        self.port = port
+        object.__setattr__(self, 'port', port)
 
     # <default GSL customizable: CommandRequest-extra-members />
 
@@ -50,12 +59,17 @@ class CommandRequest(Message):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position',))
+@dataclass(frozen=True)
 class CommandReply(Message):
+    port: int
+    active: bool
+    position: int
+
     def __init__(self, port: int, active: bool, position: int) -> None:
         # <default GSL customizable: CommandReply-init-validation />
-        self.port = port
-        self.active = active
-        self.position = position if active else None
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'active', active)
+        object.__setattr__(self, 'position', position if active else None)
 
     # <default GSL customizable: CommandReply-extra-members />
 
@@ -67,11 +81,15 @@ class CommandReply(Message):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'subscription',))
+@dataclass(frozen=True)
 class CommandSubscribe(Message):
+    port: int
+    subscription: Subscription
+
     def __init__(self, port: int, subscription: Subscription) -> None:
         # <default GSL customizable: CommandSubscribe-init-validation />
-        self.port = port
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: CommandSubscribe-extra-members />
 
@@ -81,15 +99,21 @@ class CommandSubscribe(Message):
 
 
 @protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position', 'subscription',))
+@dataclass(frozen=True)
 class CommandUpdate(Message):
     is_async = True
 
+    port: int
+    active: bool
+    position: int
+    subscription: Subscription
+
     def __init__(self, port: int, active: bool, position: int, subscription: Subscription) -> None:
         # <default GSL customizable: CommandUpdate-init-validation />
-        self.port = port
-        self.active = active
-        self.position = position if active else None
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'active', active)
+        object.__setattr__(self, 'position', position if active else None)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: CommandUpdate-extra-members />
 

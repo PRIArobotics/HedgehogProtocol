@@ -43,6 +43,31 @@ def generate_module_code(model, mod, root):
             message = messageClass.message
             proto = message.proto
 
+            def message_fields_code():
+                def field_str(name, typ, default=None, repeated=False, optional=False):
+                    if repeated:
+                        return f"    {name}: Sequence[{typ}]"
+                    elif default is not None:
+                        return f"    {name}: {typ} = {default}"
+                    elif optional:
+                        return f"    {name}: {typ} = None"
+                    else:
+                        return f"    {name}: {typ}"
+
+                def mandatory(param):
+                    python = param.field.python_spec
+                    yield field_str(param.name, python.typ, python.default)
+
+                def repeated(param):
+                    python = param.field.python_spec
+                    yield field_str(param.name, python.typ, python.default, repeated=True)
+
+                def optional(param, i):
+                    python = param.fields[i].python_spec
+                    yield field_str(param.options[i], python.typ, python.default, optional=True)
+
+                yield from map_params_code(messageClass, mandatory, repeated, optional)
+
             def message_init_code():
                 def init_param_strs():
                     def param_str(name, typ, default=None, repeated=False, optional=False):
@@ -71,12 +96,13 @@ def generate_module_code(model, mod, root):
                     yield from map_params(messageClass, mandatory, repeated, optional)
 
                 yield from lines(f"""\
+
     def __init__({", ".join(init_param_strs())}) -> None:
         # <default GSL customizable: {messageClass.name}-init-validation />""")
 
                 for name in field_names(messageClass):
                     yield from lines(f"""\
-        self.{name} = {name}""")
+        object.__setattr__(self, {name!r}, {name})""")
 
             def message_parse_code():
                 def init_param_strs():
@@ -145,6 +171,7 @@ def generate_module_code(model, mod, root):
 
 
 @{decorator}.message({proto.name}_pb2.{message.name}, '{message.discriminator}', fields=({fields_str}))
+@dataclass(frozen=True)
 class {messageClass.name}({"Message" if complex else "SimpleMessage"}):""")
 
             if is_async:
@@ -153,6 +180,7 @@ class {messageClass.name}({"Message" if complex else "SimpleMessage"}):""")
 
 """)
 
+            yield from message_fields_code()
             yield from message_init_code()
 
             yield from lines(f"""\
@@ -214,7 +242,8 @@ def {method_name}(msg: {proto.name}_pb2.{message.name}) \
     # </GSL customizable: {method_name}-return>""")
 
         yield from lines(f"""\
-from typing import Union
+from typing import Sequence, Union
+from dataclasses import dataclass
 
 from {'.' * (len(mod.path) + 1)} import RequestMsg, ReplyMsg, Message, SimpleMessage""")
         for protoPath, protoName in unique((proto.path, proto.name)

@@ -1,4 +1,5 @@
-from typing import Union
+from typing import Sequence, Union
+from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import io_pb2
@@ -23,13 +24,17 @@ def _check_flags(flags: int) -> None:
 
 
 @RequestMsg.message(io_pb2.IOAction, 'io_action', fields=('port', 'flags',))
+@dataclass(frozen=True)
 class Action(SimpleMessage):
+    port: int
+    flags: int
+
     def __init__(self, port: int, flags: int) -> None:
         # <GSL customizable: Action-init-validation>
         _check_flags(flags)
         # </GSL customizable: Action-init-validation>
-        self.port = port
-        self.flags = flags
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'flags', flags)
 
     # <GSL customizable: Action-extra-members>
     @property
@@ -61,10 +66,13 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port',))
+@dataclass(frozen=True)
 class CommandRequest(Message):
+    port: int
+
     def __init__(self, port: int) -> None:
         # <default GSL customizable: CommandRequest-init-validation />
-        self.port = port
+        object.__setattr__(self, 'port', port)
 
     # <default GSL customizable: CommandRequest-extra-members />
 
@@ -73,13 +81,17 @@ class CommandRequest(Message):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags',))
+@dataclass(frozen=True)
 class CommandReply(Message):
+    port: int
+    flags: int
+
     def __init__(self, port: int, flags: int) -> None:
         # <GSL customizable: CommandReply-init-validation>
         _check_flags(flags)
         # </GSL customizable: CommandReply-init-validation>
-        self.port = port
-        self.flags = flags
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'flags', flags)
 
     # <GSL customizable: CommandReply-extra-members>
     @property
@@ -105,11 +117,15 @@ class CommandReply(Message):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'subscription',))
+@dataclass(frozen=True)
 class CommandSubscribe(Message):
+    port: int
+    subscription: Subscription
+
     def __init__(self, port: int, subscription: Subscription) -> None:
         # <default GSL customizable: CommandSubscribe-init-validation />
-        self.port = port
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: CommandSubscribe-extra-members />
 
@@ -119,16 +135,21 @@ class CommandSubscribe(Message):
 
 
 @protobuf.message(io_pb2.IOCommandMessage, 'io_command_message', fields=('port', 'flags', 'subscription',))
+@dataclass(frozen=True)
 class CommandUpdate(Message):
     is_async = True
+
+    port: int
+    flags: int
+    subscription: Subscription
 
     def __init__(self, port: int, flags: int, subscription: Subscription) -> None:
         # <GSL customizable: CommandUpdate-init-validation>
         _check_flags(flags)
         # </GSL customizable: CommandUpdate-init-validation>
-        self.port = port
-        self.flags = flags
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'flags', flags)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <GSL customizable: CommandUpdate-extra-members>
     @property

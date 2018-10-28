@@ -1,4 +1,5 @@
-from typing import Union
+from typing import Sequence, Union
+from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import motor_pb2
@@ -12,7 +13,15 @@ from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
 
 @RequestMsg.message(motor_pb2.MotorAction, 'motor_action', fields=('port', 'state', 'amount', 'reached_state', 'relative', 'absolute',))
+@dataclass(frozen=True)
 class Action(SimpleMessage):
+    port: int
+    state: int
+    amount: int = 0
+    reached_state: int = POWER
+    relative: int = None
+    absolute: int = None
+
     def __init__(self, port: int, state: int, amount: int=0, reached_state: int=POWER, relative: int=None, absolute: int=None) -> None:
         # <GSL customizable: Action-init-validation>
         if relative is not None and absolute is not None:
@@ -27,12 +36,12 @@ class Action(SimpleMessage):
             if amount <= 0:
                 raise InvalidCommandError("velocity/power must be positive for positional motor commands")
         # </GSL customizable: Action-init-validation>
-        self.port = port
-        self.state = state
-        self.amount = amount
-        self.reached_state = reached_state
-        self.relative = relative
-        self.absolute = absolute
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'state', state)
+        object.__setattr__(self, 'amount', amount)
+        object.__setattr__(self, 'reached_state', reached_state)
+        object.__setattr__(self, 'relative', relative)
+        object.__setattr__(self, 'absolute', absolute)
 
     # <default GSL customizable: Action-extra-members />
 
@@ -58,10 +67,13 @@ class Action(SimpleMessage):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
+@dataclass(frozen=True)
 class CommandRequest(Message):
+    port: int
+
     def __init__(self, port: int) -> None:
         # <default GSL customizable: CommandRequest-init-validation />
-        self.port = port
+        object.__setattr__(self, 'port', port)
 
     # <default GSL customizable: CommandRequest-extra-members />
 
@@ -70,12 +82,17 @@ class CommandRequest(Message):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount',))
+@dataclass(frozen=True)
 class CommandReply(Message):
+    port: int
+    state: int
+    amount: int
+
     def __init__(self, port: int, state: int, amount: int) -> None:
         # <default GSL customizable: CommandReply-init-validation />
-        self.port = port
-        self.state = state
-        self.amount = amount
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'state', state)
+        object.__setattr__(self, 'amount', amount)
 
     # <default GSL customizable: CommandReply-extra-members />
 
@@ -86,11 +103,15 @@ class CommandReply(Message):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'subscription',))
+@dataclass(frozen=True)
 class CommandSubscribe(Message):
+    port: int
+    subscription: Subscription
+
     def __init__(self, port: int, subscription: Subscription) -> None:
         # <default GSL customizable: CommandSubscribe-init-validation />
-        self.port = port
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: CommandSubscribe-extra-members />
 
@@ -100,15 +121,21 @@ class CommandSubscribe(Message):
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount', 'subscription',))
+@dataclass(frozen=True)
 class CommandUpdate(Message):
     is_async = True
 
+    port: int
+    state: int
+    amount: int
+    subscription: Subscription
+
     def __init__(self, port: int, state: int, amount: int, subscription: Subscription) -> None:
         # <default GSL customizable: CommandUpdate-init-validation />
-        self.port = port
-        self.state = state
-        self.amount = amount
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'state', state)
+        object.__setattr__(self, 'amount', amount)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: CommandUpdate-extra-members />
 
@@ -120,10 +147,13 @@ class CommandUpdate(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port',))
+@dataclass(frozen=True)
 class StateRequest(Message):
+    port: int
+
     def __init__(self, port: int) -> None:
         # <default GSL customizable: StateRequest-init-validation />
-        self.port = port
+        object.__setattr__(self, 'port', port)
 
     # <default GSL customizable: StateRequest-extra-members />
 
@@ -132,12 +162,17 @@ class StateRequest(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position',))
+@dataclass(frozen=True)
 class StateReply(Message):
+    port: int
+    velocity: int
+    position: int
+
     def __init__(self, port: int, velocity: int, position: int) -> None:
         # <default GSL customizable: StateReply-init-validation />
-        self.port = port
-        self.velocity = velocity
-        self.position = position
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'velocity', velocity)
+        object.__setattr__(self, 'position', position)
 
     # <default GSL customizable: StateReply-extra-members />
 
@@ -148,11 +183,15 @@ class StateReply(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'subscription',))
+@dataclass(frozen=True)
 class StateSubscribe(Message):
+    port: int
+    subscription: Subscription
+
     def __init__(self, port: int, subscription: Subscription) -> None:
         # <default GSL customizable: StateSubscribe-init-validation />
-        self.port = port
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: StateSubscribe-extra-members />
 
@@ -162,15 +201,21 @@ class StateSubscribe(Message):
 
 
 @protobuf.message(motor_pb2.MotorStateMessage, 'motor_state_message', fields=('port', 'velocity', 'position', 'subscription',))
+@dataclass(frozen=True)
 class StateUpdate(Message):
     is_async = True
 
+    port: int
+    velocity: int
+    position: int
+    subscription: Subscription
+
     def __init__(self, port: int, velocity: int, position: int, subscription: Subscription) -> None:
         # <default GSL customizable: StateUpdate-init-validation />
-        self.port = port
-        self.velocity = velocity
-        self.position = position
-        self.subscription = subscription
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'velocity', velocity)
+        object.__setattr__(self, 'position', position)
+        object.__setattr__(self, 'subscription', subscription)
 
     # <default GSL customizable: StateUpdate-extra-members />
 
@@ -182,11 +227,15 @@ class StateUpdate(Message):
 
 
 @RequestMsg.message(motor_pb2.MotorSetPositionAction, 'motor_set_position_action', fields=('port', 'position',))
+@dataclass(frozen=True)
 class SetPositionAction(SimpleMessage):
+    port: int
+    position: int
+
     def __init__(self, port: int, position: int) -> None:
         # <default GSL customizable: SetPositionAction-init-validation />
-        self.port = port
-        self.position = position
+        object.__setattr__(self, 'port', port)
+        object.__setattr__(self, 'position', position)
 
     # <default GSL customizable: SetPositionAction-extra-members />
 
