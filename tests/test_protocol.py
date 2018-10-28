@@ -450,6 +450,23 @@ class TestMessages(object):
 
 
 class TestSockets(object):
+    def test_raw_to_from_delimited(self):
+        header = (b'asdf',)
+        raw_payload = (b'foo', b'bar')
+
+        delimited = sockets.raw_to_delimited(header, raw_payload)
+        assert delimited == (b'asdf', b'', b'foo', b'bar')
+        assert sockets.raw_from_delimited(delimited) == (header, raw_payload)
+
+    def test_to_from_delimited(self):
+        header = (b'asdf',)
+        payload = (io.Action(0, io.INPUT_PULLUP), servo.Action(0, False))
+        raw1, raw2 = [ClientSide.serialize(msg) for msg in payload]
+
+        delimited = sockets.to_delimited(header, payload, ClientSide)
+        assert delimited == (b'asdf', b'', raw1, raw2)
+        assert sockets.from_delimited(delimited, ServerSide) == (header, payload)
+
     def test_sockets_msg(self, zmq_ctx):
         endpoint = "inproc://test"
 
