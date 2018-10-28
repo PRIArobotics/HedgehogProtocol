@@ -12,6 +12,28 @@ from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor,
 event_loop, zmq_ctx, zmq_aio_ctx
 
 
+class TestErrors(object):
+    def test_errors(self):
+        error = errors.UnknownCommandError("Unknown")
+
+        msg = error.to_message()
+        assert msg == ack.Acknowledgement(ack.UNKNOWN_COMMAND, "Unknown")
+
+        error2 = errors.error(msg.code, msg.message)
+        assert type(error2) == type(error)
+        assert error2.args == error.args
+
+    def test_emergency_stop(self):
+        error = errors.EmergencyShutdown("Emergency Shutdown activated")
+
+        msg = error.to_message()
+        assert msg == ack.Acknowledgement(ack.FAILED_COMMAND, "Emergency Shutdown activated")
+
+        error2 = errors.error(msg.code, msg.message)
+        assert type(error2) == type(error)
+        assert error2.args == error.args
+
+
 class TestMessages(object):
     def assertTransmission(self, msg: Message, wire: HedgehogMessage, sender: CommSide, receiver: CommSide, is_async: bool=False):
         assert msg.is_async == is_async
