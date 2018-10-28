@@ -61,6 +61,11 @@ class TestMessages(object):
         proto.io_action.flags = io.INPUT_PULLDOWN
         self.assertTransmissionClientServer(msg, proto)
 
+        assert not msg.output
+        assert not msg.pullup
+        assert msg.pulldown
+        assert not msg.level
+
         with pytest.raises(errors.InvalidCommandError):
             io.Action(0, io.OUTPUT | io.PULLUP)
 
@@ -95,6 +100,11 @@ class TestMessages(object):
         proto.io_command_message.flags = io.INPUT_PULLDOWN
         self.assertTransmissionServerClient(msg, proto)
 
+        assert not msg.output
+        assert not msg.pullup
+        assert msg.pulldown
+        assert not msg.level
+
         with pytest.raises(errors.InvalidCommandError):
             io.CommandReply(0, io.OUTPUT | io.PULLUP)
 
@@ -117,6 +127,11 @@ class TestMessages(object):
         proto.io_command_message.subscription.subscribe = True
         proto.io_command_message.subscription.timeout = 10
         self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+        assert not msg.output
+        assert not msg.pullup
+        assert msg.pulldown
+        assert not msg.level
 
         with pytest.raises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.OUTPUT | io.PULLUP, sub)
