@@ -1,9 +1,10 @@
 from typing import Sequence, Tuple
 
+from google.protobuf.message import DecodeError
 from hedgehog.utils import protobuf
 
 from .messages import ContainerMessage, Message, RequestMsg, ReplyMsg
-from .errors import UnknownCommandError
+from .errors import HedgehogCommandError, UnknownCommandError
 
 
 # a single protobuf-encoded message
@@ -39,7 +40,9 @@ class CommSide(object):
         try:
             return self.receiver.parse(data)
         except KeyError as err:
-            raise UnknownCommandError() from err
+            raise UnknownCommandError from err
+        except DecodeError as err:
+            raise UnknownCommandError(f"{err}") from err
 
     def serialize(self, msg: Message) -> RawMessage:
         """Serializes a Message object into a binary protobuf message"""

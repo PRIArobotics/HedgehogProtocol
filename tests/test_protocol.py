@@ -27,6 +27,22 @@ class TestMessages(object):
     def assertTransmissionServerClient(self, msg: Message, wire: HedgehogMessage, is_async: bool=False):
         self.assertTransmission(msg, wire, ServerSide, ClientSide, is_async)
 
+    def test_parse_invalid(self):
+        proto = HedgehogMessage()
+        proto.io_action.flags = io.OUTPUT | io.PULLUP
+        with pytest.raises(errors.InvalidCommandError):
+            ServerSide.parse(proto.SerializeToString())
+
+    def test_parse_unknown(self):
+        proto = HedgehogMessage()
+        proto.io_action.flags = io.OUTPUT | io.PULLUP
+        with pytest.raises(errors.UnknownCommandError):
+            ClientSide.parse(proto.SerializeToString())
+
+    def test_parse_malformed(self):
+        with pytest.raises(errors.UnknownCommandError):
+            ServerSide.parse(b'asdf')
+
     def test_acknowledgement(self):
         msg = ack.Acknowledgement()
         proto = HedgehogMessage()
@@ -366,6 +382,11 @@ class TestMessages(object):
         proto = HedgehogMessage()
         proto.process_execute_action.args.append('cat')
         proto.process_execute_action.working_dir = '/home/pi'
+        self.assertTransmissionClientServer(msg, proto)
+
+        msg = process.ExecuteAction('cat')
+        proto = HedgehogMessage()
+        proto.process_execute_action.args.append('cat')
         self.assertTransmissionClientServer(msg, proto)
 
     def test_process_execute_reply(self):
