@@ -56,7 +56,12 @@ setup(
     },
 
     package_data={
-        'proto': ['*.proto'],
+        'proto': [
+            '*.proto'
+        ],
+        'gsl_protocol_python': [
+            'python.yaml',
+        ],
     },
 
     entry_points={
