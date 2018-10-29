@@ -5,6 +5,11 @@ from hedgehog.utils.zmq.socket import Socket
 from . import RawMessage, Message, RawPayload, Payload, \
     Header, DelimitedMsg, RawMsgs, Msgs, RawMsg, Msg
 
+__all__ = [
+    'raw_to_delimited', 'to_delimited', 'raw_from_delimited', 'from_delimited',
+    'DealerRouterMixin', 'DealerRouterSocket', 'ReqMixin', 'ReqSocket',
+]
+
 
 T = TypeVar('T')
 
@@ -15,7 +20,7 @@ def _rindex(mylist: Sequence[T], x: T) -> int:
 
 
 def raw_to_delimited(header: Header, raw_payload: RawPayload) -> DelimitedMsg:
-    """
+    """\
     Returns a message consisting of header frames, delimiter frame, and payload frames.
     The payload frames may be given as sequences of bytes (raw) or as `Message`s.
     """
@@ -23,7 +28,7 @@ def raw_to_delimited(header: Header, raw_payload: RawPayload) -> DelimitedMsg:
 
 
 def to_delimited(header: Header, payload: Payload, side: CommSide) -> DelimitedMsg:
-    """
+    """\
     Returns a message consisting of header frames, delimiter frame, and payload frames.
     The payload frames may be given as sequences of bytes (raw) or as `Message`s.
     """
@@ -31,7 +36,7 @@ def to_delimited(header: Header, payload: Payload, side: CommSide) -> DelimitedM
 
 
 def raw_from_delimited(msgs: DelimitedMsg) -> RawMsgs:
-    """
+    """\
     From a message consisting of header frames, delimiter frame, and payload frames, return a tuple `(header, payload)`.
     The payload frames may be returned as sequences of bytes (raw) or as `Message`s.
     """
@@ -40,7 +45,7 @@ def raw_from_delimited(msgs: DelimitedMsg) -> RawMsgs:
 
 
 def from_delimited(msgs: DelimitedMsg, side: CommSide) -> Msgs:
-    """
+    """\
     From a message consisting of header frames, delimiter frame, and payload frames, return a tuple `(header, payload)`.
     The payload frames may be returned as sequences of bytes (raw) or as `Message`s.
     """
@@ -49,7 +54,7 @@ def from_delimited(msgs: DelimitedMsg, side: CommSide) -> Msgs:
 
 
 class DealerRouterMixin(object):
-    """
+    """\
     A mixin for ZMQ dealer & router sockets used to send delimited & Hedgehog-encoded messages.
 
     This mixin defines methods to send/receive single/multipart binary/hedgehog messages on dealer & router sockets.
@@ -94,7 +99,7 @@ class DealerRouterSocket(DealerRouterMixin, Socket):
 
 
 class ReqMixin(object):
-    """
+    """\
     A mixin for ZMQ req sockets used to send Hedgehog-encoded messages.
 
     This mixin defines methods to send/receive single/multipart binary/hedgehog messages on req sockets.

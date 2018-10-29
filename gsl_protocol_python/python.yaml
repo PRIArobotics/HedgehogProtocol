@@ -1,0 +1,130 @@
+ack.Acknowledgement:
+  code:
+    typ: int
+    default: OK
+  message:
+    typ: str
+    default: "''"
+
+io.IOAction:
+  port:
+    typ: int
+  flags:
+    typ: int
+
+io.IOCommandMessage:
+  port:
+    typ: int
+  flags:
+    typ: int
+  subscription:
+    typ: Subscription
+
+io.AnalogMessage:
+  port:
+    typ: int
+  value:
+    typ: int
+  subscription:
+    typ: Subscription
+
+io.DigitalMessage:
+  port:
+    typ: int
+  value:
+    typ: bool
+  subscription:
+    typ: Subscription
+
+motor.MotorAction:
+  port:
+    typ: int
+  state:
+    typ: int
+  amount:
+    typ: int
+    default: 0
+  reached_state:
+    typ: int
+    default: POWER
+  relative:
+    typ: int
+  absolute:
+    typ: int
+
+motor.MotorCommandMessage:
+  port:
+    typ: int
+  state:
+    typ: int
+  amount:
+    typ: int
+  subscription:
+    typ: Subscription
+
+motor.MotorStateMessage:
+  port:
+    typ: int
+  velocity:
+    typ: int
+  position:
+    typ: int
+  subscription:
+    typ: Subscription
+
+motor.MotorSetPositionAction:
+  port:
+    typ: int
+  position:
+    typ: int
+
+servo.ServoAction:
+  port:
+    typ: int
+  active:
+    typ: bool
+  position:
+    typ: int
+    default: None
+
+servo.ServoCommandMessage:
+  port:
+    typ: int
+  active:
+    typ: bool
+  position:
+    typ: int
+  subscription:
+    typ: Subscription
+
+process.ProcessExecuteAction:
+  args:
+    typ: str
+  working_dir:
+    typ: str
+    default: None
+
+process.ProcessExecuteReply:
+  pid:
+    typ: int
+
+process.ProcessStreamMessage:
+  pid:
+    typ: int
+  fileno:
+    typ: int
+  chunk:
+    typ: bytes
+    default: b''
+
+process.ProcessSignalAction:
+  pid:
+    typ: int
+  signal:
+    typ: int
+
+process.ProcessExitUpdate:
+  pid:
+    typ: int
+  exit_code:
+    typ: int

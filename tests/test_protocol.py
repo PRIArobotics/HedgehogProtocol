@@ -12,6 +12,28 @@ from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor,
 event_loop, zmq_ctx, zmq_aio_ctx
 
 
+class TestErrors(object):
+    def test_errors(self):
+        error = errors.UnknownCommandError("Unknown")
+
+        msg = error.to_message()
+        assert msg == ack.Acknowledgement(ack.UNKNOWN_COMMAND, "Unknown")
+
+        error2 = errors.error(msg.code, msg.message)
+        assert type(error2) == type(error)
+        assert error2.args == error.args
+
+    def test_emergency_stop(self):
+        error = errors.EmergencyShutdown("Emergency Shutdown activated")
+
+        msg = error.to_message()
+        assert msg == ack.Acknowledgement(ack.FAILED_COMMAND, "Emergency Shutdown activated")
+
+        error2 = errors.error(msg.code, msg.message)
+        assert type(error2) == type(error)
+        assert error2.args == error.args
+
+
 class TestMessages(object):
     def assertTransmission(self, msg: Message, wire: HedgehogMessage, sender: CommSide, receiver: CommSide, is_async: bool=False):
         assert msg.is_async == is_async
@@ -26,6 +48,25 @@ class TestMessages(object):
 
     def assertTransmissionServerClient(self, msg: Message, wire: HedgehogMessage, is_async: bool=False):
         self.assertTransmission(msg, wire, ServerSide, ClientSide, is_async)
+
+    def test_parse_invalid(self):
+        proto = HedgehogMessage()
+        proto.io_action.flags = io.OUTPUT | io.PULLUP
+        with pytest.raises(errors.InvalidCommandError):
+            ServerSide.parse(proto.SerializeToString())
+
+    def test_parse_unknown(self):
+        proto = HedgehogMessage()
+        proto.io_action.flags = io.OUTPUT | io.PULLUP
+        with pytest.raises(errors.UnknownCommandError):
+            ClientSide.parse(proto.SerializeToString())
+
+    def test_parse_malformed(self):
+        with pytest.raises(errors.UnknownCommandError):
+            ServerSide.parse(b'asdf')
+
+    def test_repr(self):
+        assert repr(io.Action(0, io.INPUT_PULLUP)) == f'io.Action(port=0, flags={io.INPUT_PULLUP})'
 
     def test_acknowledgement(self):
         msg = ack.Acknowledgement()
@@ -44,6 +85,11 @@ class TestMessages(object):
         proto = HedgehogMessage()
         proto.io_action.flags = io.INPUT_PULLDOWN
         self.assertTransmissionClientServer(msg, proto)
+
+        assert not msg.output
+        assert not msg.pullup
+        assert msg.pulldown
+        assert not msg.level
 
         with pytest.raises(errors.InvalidCommandError):
             io.Action(0, io.OUTPUT | io.PULLUP)
@@ -79,6 +125,11 @@ class TestMessages(object):
         proto.io_command_message.flags = io.INPUT_PULLDOWN
         self.assertTransmissionServerClient(msg, proto)
 
+        assert not msg.output
+        assert not msg.pullup
+        assert msg.pulldown
+        assert not msg.level
+
         with pytest.raises(errors.InvalidCommandError):
             io.CommandReply(0, io.OUTPUT | io.PULLUP)
 
@@ -101,6 +152,11 @@ class TestMessages(object):
         proto.io_command_message.subscription.subscribe = True
         proto.io_command_message.subscription.timeout = 10
         self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+        assert not msg.output
+        assert not msg.pullup
+        assert msg.pulldown
+        assert not msg.level
 
         with pytest.raises(errors.InvalidCommandError):
             io.CommandUpdate(0, io.OUTPUT | io.PULLUP, sub)
@@ -368,6 +424,11 @@ class TestMessages(object):
         proto.process_execute_action.working_dir = '/home/pi'
         self.assertTransmissionClientServer(msg, proto)
 
+        msg = process.ExecuteAction('cat')
+        proto = HedgehogMessage()
+        proto.process_execute_action.args.append('cat')
+        self.assertTransmissionClientServer(msg, proto)
+
     def test_process_execute_reply(self):
         msg = process.ExecuteReply(123)
         proto = HedgehogMessage()
@@ -414,6 +475,23 @@ class TestMessages(object):
 
 
 class TestSockets(object):
+    def test_raw_to_from_delimited(self):
+        header = (b'asdf',)
+        raw_payload = (b'foo', b'bar')
+
+        delimited = sockets.raw_to_delimited(header, raw_payload)
+        assert delimited == (b'asdf', b'', b'foo', b'bar')
+        assert sockets.raw_from_delimited(delimited) == (header, raw_payload)
+
+    def test_to_from_delimited(self):
+        header = (b'asdf',)
+        payload = (io.Action(0, io.INPUT_PULLUP), servo.Action(0, False))
+        raw1, raw2 = [ClientSide.serialize(msg) for msg in payload]
+
+        delimited = sockets.to_delimited(header, payload, ClientSide)
+        assert delimited == (b'asdf', b'', raw1, raw2)
+        assert sockets.from_delimited(delimited, ServerSide) == (header, payload)
+
     def test_sockets_msg(self, zmq_ctx):
         endpoint = "inproc://test"
 

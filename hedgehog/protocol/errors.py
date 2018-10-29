@@ -8,6 +8,12 @@ from typing import Dict, Type
 
 from .proto.ack_pb2 import UNKNOWN_COMMAND, INVALID_COMMAND, UNSUPPORTED_COMMAND, FAILED_COMMAND
 
+__all__ = [
+    'HedgehogCommandError', 'UnknownCommandError', 'InvalidCommandError', 'UnsupportedCommandError',
+    'FailedCommandError', 'EmergencyShutdown',
+    'error',
+]
+
 
 class HedgehogCommandError(Exception):
     """Superclass of all errors caused by Hedgehog commands."""

@@ -2,10 +2,12 @@ from invoke import run, task
 
 
 @task
-def protoc(context):
-    run("protoc --proto_path=proto --python_out=. `find proto -name '*.proto'`")
+def gsl(context):
+    from gsl_protocol_python import main
+
+    main()
 
 
 @task
-def gsl(context):
-    run("gsl gsl/hedgehog_protocol.xml")
+def protoc(context):
+    run("protoc --proto_path=proto --python_out=. `find proto -name '*.proto'`")
