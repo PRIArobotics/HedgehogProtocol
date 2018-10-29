@@ -51,7 +51,8 @@ setup(
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['invoke', 'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-cov', 'hedgehog-protocol-spec'],
+        'dev': ['invoke', 'hedgehog-protocol-spec',
+                'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-cov', 'pytest-timeout', 'mypy'],
     },
 
     package_data={
