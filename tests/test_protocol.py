@@ -2,7 +2,10 @@ import pytest
 from hedgehog.utils.test_utils import event_loop, zmq_ctx, zmq_aio_ctx
 
 import zmq.asyncio
-from hedgehog.protocol import errors, sockets, async_sockets, CommSide, ServerSide, ClientSide
+from hedgehog.protocol import errors, CommSide, ServerSide, ClientSide
+from hedgehog.protocol import zmq as zmq_sync
+from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delimited, from_delimited
+from hedgehog.protocol.zmq import asyncio as zmq_asyncio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
 from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor, servo, process
@@ -479,24 +482,24 @@ class TestSockets(object):
         header = (b'asdf',)
         raw_payload = (b'foo', b'bar')
 
-        delimited = sockets.raw_to_delimited(header, raw_payload)
+        delimited = raw_to_delimited(header, raw_payload)
         assert delimited == (b'asdf', b'', b'foo', b'bar')
-        assert sockets.raw_from_delimited(delimited) == (header, raw_payload)
+        assert raw_from_delimited(delimited) == (header, raw_payload)
 
     def test_to_from_delimited(self):
         header = (b'asdf',)
         payload = (io.Action(0, io.INPUT_PULLUP), servo.Action(0, False))
         raw1, raw2 = [ClientSide.serialize(msg) for msg in payload]
 
-        delimited = sockets.to_delimited(header, payload, ClientSide)
+        delimited = to_delimited(header, payload, ClientSide)
         assert delimited == (b'asdf', b'', raw1, raw2)
-        assert sockets.from_delimited(delimited, ServerSide) == (header, payload)
+        assert from_delimited(delimited, ServerSide) == (header, payload)
 
     def test_sockets_msg(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -514,8 +517,8 @@ class TestSockets(object):
     def test_sockets_msgs(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -535,8 +538,8 @@ class TestSockets(object):
     def test_sockets_msg_raw(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -554,8 +557,8 @@ class TestSockets(object):
     def test_sockets_msgs_raw(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -576,8 +579,8 @@ class TestSockets(object):
     async def test_async_sockets_msg(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -596,8 +599,8 @@ class TestSockets(object):
     async def test_async_sockets_msgs(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -618,8 +621,8 @@ class TestSockets(object):
     async def test_async_sockets_msg_raw(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -638,8 +641,8 @@ class TestSockets(object):
     async def test_async_sockets_msgs_raw(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
