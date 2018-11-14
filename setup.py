@@ -52,7 +52,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['invoke', 'hedgehog-protocol-spec >=0.7.1, <0.8',
-                'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-cov', 'pytest-timeout', 'mypy'],
+                'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-trio', 'pytest-cov', 'pytest-timeout', 'mypy'],
     },
 
     package_data={
