@@ -36,6 +36,18 @@ io.DigitalMessage:
   subscription:
     typ: Subscription
 
+imu.ImuMessage:
+  kind:
+    typ: ImuKind
+  x:
+    typ: int
+  y:
+    typ: int
+  z:
+    typ: int
+  subscription:
+    typ: Subscription
+
 motor.MotorAction:
   port:
     typ: int

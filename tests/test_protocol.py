@@ -9,7 +9,7 @@ from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delim
 from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor, servo, process
+from hedgehog.protocol.messages import Message, ack, io, analog, digital, imu, motor, servo, process
 
 
 # Pytest fixtures
@@ -242,6 +242,114 @@ class TestMessages(object):
         proto = HedgehogMessage()
         proto.digital_message.value = True
         proto.digital_message.subscription.subscribe = True
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+    def test_imu_rate_request(self):
+        msg = imu.RateRequest()
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_rate_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.RateSubscribe(sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_rate_reply(self):
+        msg = imu.RateReply(0, 0, 0)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_imu_rate_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.RateUpdate(0, 0, 0, sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+    def test_imu_acceleration_request(self):
+        msg = imu.AccelerationRequest()
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_acceleration_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.AccelerationSubscribe(sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_acceleration_reply(self):
+        msg = imu.AccelerationReply(0, 0, 0)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_imu_acceleration_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.AccelerationUpdate(0, 0, 0, sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+    def test_imu_pose_request(self):
+        msg = imu.PoseRequest()
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_pose_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.PoseSubscribe(sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_pose_reply(self):
+        msg = imu.PoseReply(0, 0, 0)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_imu_pose_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.PoseUpdate(0, 0, 0, sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        proto.imu_message.subscription.subscribe = True
         self.assertTransmissionServerClient(msg, proto, is_async=True)
 
     def test_motor_action(self):
