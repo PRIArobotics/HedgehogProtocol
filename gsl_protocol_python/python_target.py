@@ -152,18 +152,22 @@ def generate_module_code(model, mod, root):
                     else:
                         return f"msg.{name} = self.{name}"
 
-                yield from map_params_code(
-                    messageClass,
-                    mandatory=lambda param: lines(f"""\
+                if not messageClass.params:
+                    yield from lines(f"""\
+        pass""")
+                else:
+                    yield from map_params_code(
+                        messageClass,
+                        mandatory=lambda param: lines(f"""\
         {assignment_str(param.name, nested=param.field.nested)}"""),
-                    repeated=lambda param: lines(f"""\
+                        repeated=lambda param: lines(f"""\
         {assignment_str(param.name, nested=param.field.nested, repeated=True)}"""),
-                    optional=lambda param, i: lines(f"""\
+                        optional=lambda param, i: lines(f"""\
         {assignment_str(param.options[i], nested=param.fields[i].nested)}""")
-                    if len(param.options) == 1 else lines(f"""\
+                        if len(param.options) == 1 else lines(f"""\
         if self.{param.options[i]} is not None:
             {assignment_str(param.options[i], nested=param.fields[i].nested)}"""),
-                )
+                    )
 
             request = messageClass.direction == "=>"
             is_async = messageClass.direction == "<-"
