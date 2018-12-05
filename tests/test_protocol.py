@@ -426,20 +426,40 @@ class TestMessages(object):
         self.assertTransmissionClientServer(msg, proto)
 
     def test_motor_command_reply(self):
-        msg = motor.CommandReply(0, motor.POWER, 1000)
+        msg = motor.CommandReply(0, motor.DcConfig(), motor.POWER, 1000)
         proto = HedgehogMessage()
+        proto.motor_command_message.dc.SetInParent()
         proto.motor_command_message.amount = 1000
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = motor.CommandReply(0, motor.EncoderConfig(0, 1), motor.POWER, 1000)
+        proto.motor_command_message.encoder.encoder_a_port = 0
+        proto.motor_command_message.encoder.encoder_b_port = 1
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = motor.CommandReply(0, motor.StepperConfig(), motor.POWER, 1000)
+        proto.motor_command_message.stepper.SetInParent()
         self.assertTransmissionServerClient(msg, proto)
 
     def test_motor_command_update(self):
         sub = Subscription()
         sub.subscribe = True
         sub.timeout = 10
-        msg = motor.CommandUpdate(0, motor.POWER, 1000, sub)
+        msg = motor.CommandUpdate(0, motor.DcConfig(), motor.POWER, 1000, sub)
         proto = HedgehogMessage()
+        proto.motor_command_message.dc.SetInParent()
         proto.motor_command_message.amount = 1000
         proto.motor_command_message.subscription.subscribe = True
         proto.motor_command_message.subscription.timeout = 10
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+        msg = motor.CommandUpdate(0, motor.EncoderConfig(0, 1), motor.POWER, 1000, sub)
+        proto.motor_command_message.encoder.encoder_a_port = 0
+        proto.motor_command_message.encoder.encoder_b_port = 1
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+        msg = motor.CommandUpdate(0, motor.StepperConfig(), motor.POWER, 1000, sub)
+        proto.motor_command_message.stepper.SetInParent()
         self.assertTransmissionServerClient(msg, proto, is_async=True)
 
     def test_motor_state_request(self):

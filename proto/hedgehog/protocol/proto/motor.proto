@@ -71,11 +71,16 @@ message MotorConfigAction {
 // The command may change by a motor action, or by reaching the goal position of a terminating motor action.
 //
 // => (port):                motor command request => motor command reply
-// <= (port, state, amount):  motor command reply
+// <= (port, config, state, amount):  motor command reply
 // => (port, subscription):  motor command subscribe => ack
-// <- (port, state, amount, subscription):  motor command update
+// <- (port, config, state, amount, subscription):  motor command update
 message MotorCommandMessage {
     uint32 port = 1;
+    oneof config {
+        Dummy dc = 5;
+        EncoderConfig encoder = 6;
+        Dummy stepper = 7;
+    }
     MotorState state = 2;
     sint32 amount = 3;
     Subscription subscription = 4;
