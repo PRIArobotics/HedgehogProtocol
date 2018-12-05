@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hedgehog.protocol.proto;
+
+option java_package = "at.pria.hedgehog.protocol.proto";
+option java_outer_classname = "SpeakerP";
+
+// <default GSL customizable: module-extras />
+
+// Set one servo target position
+//
+// => (frequency):           servo action => ack
+message SpeakerAction {
+    uint32 frequency = 1;
+}

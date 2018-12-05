@@ -9,7 +9,7 @@ from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delim
 from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, io, analog, digital, imu, motor, servo, process
+from hedgehog.protocol.messages import Message, ack, io, analog, digital, imu, motor, servo, process, speaker
 
 
 # Pytest fixtures
@@ -601,6 +601,12 @@ class TestMessages(object):
         proto = HedgehogMessage()
         proto.process_exit_update.pid = 123
         self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+    def test_speaker_action(self):
+        msg = speaker.Action(1000)
+        proto = HedgehogMessage()
+        proto.speaker_action.frequency = 1000
+        self.assertTransmissionClientServer(msg, proto)
 
 
 class TestSockets(object):

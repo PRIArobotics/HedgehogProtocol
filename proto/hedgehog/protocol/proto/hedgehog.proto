@@ -11,6 +11,7 @@ import "hedgehog/protocol/proto/imu.proto";
 import "hedgehog/protocol/proto/motor.proto";
 import "hedgehog/protocol/proto/servo.proto";
 import "hedgehog/protocol/proto/process.proto";
+import "hedgehog/protocol/proto/speaker.proto";
 
 // <default GSL customizable: module-extras />
 
@@ -43,5 +44,7 @@ message HedgehogMessage {
         ProcessStreamMessage process_stream_message = 8;
         ProcessSignalAction process_signal_action = 22;
         ProcessExitUpdate process_exit_update = 23;
+        // speaker.proto
+        SpeakerAction speaker_action = 25;
     }
 }

@@ -144,3 +144,7 @@ process.ProcessExitUpdate:
     typ: int
   exit_code:
     typ: int
+
+speaker.SpeakerAction:
+  frequency:
+    typ: int
