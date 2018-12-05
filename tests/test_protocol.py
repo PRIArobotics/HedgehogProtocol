@@ -392,6 +392,23 @@ class TestMessages(object):
         with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, 0, relative=100)
 
+    def test_motor_config_action(self):
+        msg = motor.ConfigAction(0, motor.DcConfig())
+        proto = HedgehogMessage()
+        proto.motor_config_action.dc.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+        msg = motor.ConfigAction(0, motor.EncoderConfig(0, 1))
+        proto = HedgehogMessage()
+        proto.motor_config_action.encoder.encoder_a_port = 0
+        proto.motor_config_action.encoder.encoder_b_port = 1
+        self.assertTransmissionClientServer(msg, proto)
+
+        msg = motor.ConfigAction(0, motor.StepperConfig())
+        proto = HedgehogMessage()
+        proto.motor_config_action.stepper.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
     def test_motor_command_request(self):
         msg = motor.CommandRequest(0)
         proto = HedgehogMessage()

@@ -30,6 +30,7 @@ message HedgehogMessage {
         ImuMessage imu_message = 9;
         // motor.proto
         MotorAction motor_action = 5;
+        MotorConfigAction motor_config_action = 24;
         MotorCommandMessage motor_command_message = 17;
         MotorStateMessage motor_state_message = 6;
         MotorSetPositionAction motor_set_position_action = 18;

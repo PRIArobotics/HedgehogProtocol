@@ -5,14 +5,32 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import motor_pb2
 from hedgehog.utils import protobuf
 
-__all__ = ['Action', 'CommandRequest', 'CommandReply', 'CommandSubscribe', 'CommandUpdate', 'StateRequest', 'StateReply', 'StateSubscribe', 'StateUpdate', 'SetPositionAction']
+__all__ = ['Action', 'ConfigAction', 'CommandRequest', 'CommandReply', 'CommandSubscribe', 'CommandUpdate', 'StateRequest', 'StateReply', 'StateSubscribe', 'StateUpdate', 'SetPositionAction']
 
 # <GSL customizable: module-header>
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
+
+@dataclass
+class DcConfig:
+    pass
+
+
+@dataclass
+class EncoderConfig:
+    encoder_a_port: int
+    encoder_b_port: int
+
+
+@dataclass
+class StepperConfig:
+    pass
+
+
 __all__ += [
+    'DcConfig', 'EncoderConfig', 'StepperConfig',
     'POWER', 'BRAKE', 'VELOCITY',
     'Subscription',
 ]
@@ -65,6 +83,49 @@ class Action(SimpleMessage):
             msg.relative = self.relative
         if self.absolute is not None:
             msg.absolute = self.absolute
+
+
+@RequestMsg.message(motor_pb2.MotorConfigAction, 'motor_config_action', fields=('port', 'config',))
+@dataclass(frozen=True, repr=False)
+class ConfigAction(SimpleMessage):
+    port: int
+    config: Any
+
+    def __post_init__(self):
+        # <default GSL customizable: ConfigAction-init-validation>
+        pass
+        # </GSL customizable: ConfigAction-init-validation>
+
+    # <default GSL customizable: ConfigAction-extra-members />
+
+    @classmethod
+    def _parse(cls, msg: motor_pb2.MotorConfigAction) -> 'ConfigAction':
+        port = msg.port
+        # <GSL customizable: ConfigAction-parse-config>
+        if msg.HasField('dc'):
+            config = DcConfig()
+        elif msg.HasField('encoder'):
+            config = EncoderConfig(msg.encoder.encoder_a_port, msg.encoder.encoder_b_port)
+        elif msg.HasField('stepper'):
+            config = StepperConfig()
+        else:  # pragma: nocover
+            assert False
+        # </GSL customizable: ConfigAction-parse-config>
+        return cls(port, config)
+
+    def _serialize(self, msg: motor_pb2.MotorConfigAction) -> None:
+        msg.port = self.port
+        # <GSL customizable: ConfigAction-serialize-config>
+        if isinstance(self.config, DcConfig):
+            msg.dc.SetInParent()
+        elif isinstance(self.config, EncoderConfig):
+            msg.encoder.encoder_a_port = self.config.encoder_a_port
+            msg.encoder.encoder_b_port = self.config.encoder_b_port
+        elif isinstance(self.config, StepperConfig):
+            msg.stepper.SetInParent()
+        else:  # pragma: nocover
+            assert False
+        # </GSL customizable: ConfigAction-serialize-config>
 
 
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))

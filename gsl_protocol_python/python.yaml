@@ -64,6 +64,10 @@ motor.MotorAction:
   absolute:
     typ: int
 
+motor.MotorConfigAction:
+  port:
+    typ: int
+
 motor.MotorCommandMessage:
   port:
     typ: int
