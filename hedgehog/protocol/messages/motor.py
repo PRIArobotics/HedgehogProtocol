@@ -29,8 +29,11 @@ class StepperConfig:
     pass
 
 
+Config = Union[DcConfig, EncoderConfig, StepperConfig]
+
+
 __all__ += [
-    'DcConfig', 'EncoderConfig', 'StepperConfig',
+    'DcConfig', 'EncoderConfig', 'StepperConfig', 'Config',
     'POWER', 'BRAKE', 'VELOCITY',
     'Subscription',
 ]
