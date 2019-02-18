@@ -46,12 +46,12 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['hedgehog-utils[protobuf,zmq] >=0.6, <0.7'],
+    install_requires=['hedgehog-utils[protobuf,zmq,trio] ~=0.7.0rc1'],
 
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['invoke', 'hedgehog-protocol-spec >=0.7.1, <0.8',
+        'dev': ['invoke', 'hedgehog-protocol-spec ~=0.8.0rc1',
                 'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-trio', 'pytest-cov', 'pytest-timeout', 'mypy'],
     },
 
