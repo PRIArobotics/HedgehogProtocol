@@ -16,6 +16,10 @@ enum ImuKind {
 }
 // </GSL customizable: module-extras>
 
+// Request or reply for Hedgehog's IMU.
+//   A request queries either the `RATE``, `ACCELERATION`, or `POSE` of the IMU,
+//   and the result contains data for all three axes.
+//
 // => ():                    IMU rate request => IMU rate reply
 // <= (x, y, z):             IMU rate reply
 // => (subscription):        IMU rate subscribe => ack

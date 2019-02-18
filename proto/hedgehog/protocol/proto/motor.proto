@@ -53,9 +53,9 @@ message MotorAction {
     }
 }
 
-// Configures one motor of DC, encoder, or stepper operation.
+// Configures one motor for DC, encoder, or stepper operation.
 // Stepper configuration requires two motor ports to be combined into one stepper
-// motor.
+// motor and thus only works for even motor ports (i.e. 0 and 2).
 //
 // => (port, config):        motor config action => ack
 message MotorConfigAction {

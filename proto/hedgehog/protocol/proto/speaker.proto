@@ -7,7 +7,8 @@ option java_outer_classname = "SpeakerP";
 
 // <default GSL customizable: module-extras />
 
-// Set one servo target position
+// Sets the speaker frequency in Hertz; a frequency of zero turns the speaker off.
+// Only a range of frequencies may be valid depending on the Hardware.
 //
 // => (frequency):           servo action => ack
 message SpeakerAction {
