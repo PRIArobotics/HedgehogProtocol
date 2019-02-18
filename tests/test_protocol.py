@@ -1,15 +1,19 @@
 import pytest
-from hedgehog.utils.test_utils import event_loop, zmq_ctx, zmq_aio_ctx
+from hedgehog.utils.test_utils import event_loop, zmq_ctx, zmq_aio_ctx, zmq_trio_ctx
 
+import trio_asyncio
 import zmq.asyncio
-from hedgehog.protocol import errors, sockets, async_sockets, CommSide, ServerSide, ClientSide
+from hedgehog.protocol import errors, CommSide, ServerSide, ClientSide
+from hedgehog.protocol import zmq as zmq_sync
+from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delimited, from_delimited
+from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, io, analog, digital, motor, servo, process
+from hedgehog.protocol.messages import Message, ack, io, analog, digital, imu, motor, servo, process, speaker
 
 
 # Pytest fixtures
-event_loop, zmq_ctx, zmq_aio_ctx
+event_loop, zmq_ctx, zmq_aio_ctx, zmq_trio_ctx
 
 
 class TestErrors(object):
@@ -240,6 +244,114 @@ class TestMessages(object):
         proto.digital_message.subscription.subscribe = True
         self.assertTransmissionServerClient(msg, proto, is_async=True)
 
+    def test_imu_rate_request(self):
+        msg = imu.RateRequest()
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_rate_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.RateSubscribe(sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_rate_reply(self):
+        msg = imu.RateReply(0, 0, 0)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_imu_rate_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.RateUpdate(0, 0, 0, sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.RATE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+    def test_imu_acceleration_request(self):
+        msg = imu.AccelerationRequest()
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_acceleration_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.AccelerationSubscribe(sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_acceleration_reply(self):
+        msg = imu.AccelerationReply(0, 0, 0)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_imu_acceleration_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.AccelerationUpdate(0, 0, 0, sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.ACCELERATION
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+    def test_imu_pose_request(self):
+        msg = imu.PoseRequest()
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_pose_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.PoseSubscribe(sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_imu_pose_reply(self):
+        msg = imu.PoseReply(0, 0, 0)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_imu_pose_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        msg = imu.PoseUpdate(0, 0, 0, sub)
+        proto = HedgehogMessage()
+        proto.imu_message.kind = imu.POSE
+        proto.imu_message.x = 0
+        proto.imu_message.y = 0
+        proto.imu_message.z = 0
+        proto.imu_message.subscription.subscribe = True
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
     def test_motor_action(self):
         msg = motor.Action(0, motor.POWER)
         proto = HedgehogMessage()
@@ -280,6 +392,23 @@ class TestMessages(object):
         with pytest.raises(errors.InvalidCommandError):
             motor.Action(0, motor.POWER, 0, relative=100)
 
+    def test_motor_config_action(self):
+        msg = motor.ConfigAction(0, motor.DcConfig())
+        proto = HedgehogMessage()
+        proto.motor_config_action.dc.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+        msg = motor.ConfigAction(0, motor.EncoderConfig(0, 1))
+        proto = HedgehogMessage()
+        proto.motor_config_action.encoder.encoder_a_port = 0
+        proto.motor_config_action.encoder.encoder_b_port = 1
+        self.assertTransmissionClientServer(msg, proto)
+
+        msg = motor.ConfigAction(0, motor.StepperConfig())
+        proto = HedgehogMessage()
+        proto.motor_config_action.stepper.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
     def test_motor_command_request(self):
         msg = motor.CommandRequest(0)
         proto = HedgehogMessage()
@@ -297,20 +426,40 @@ class TestMessages(object):
         self.assertTransmissionClientServer(msg, proto)
 
     def test_motor_command_reply(self):
-        msg = motor.CommandReply(0, motor.POWER, 1000)
+        msg = motor.CommandReply(0, motor.DcConfig(), motor.POWER, 1000)
         proto = HedgehogMessage()
+        proto.motor_command_message.dc.SetInParent()
         proto.motor_command_message.amount = 1000
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = motor.CommandReply(0, motor.EncoderConfig(0, 1), motor.POWER, 1000)
+        proto.motor_command_message.encoder.encoder_a_port = 0
+        proto.motor_command_message.encoder.encoder_b_port = 1
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = motor.CommandReply(0, motor.StepperConfig(), motor.POWER, 1000)
+        proto.motor_command_message.stepper.SetInParent()
         self.assertTransmissionServerClient(msg, proto)
 
     def test_motor_command_update(self):
         sub = Subscription()
         sub.subscribe = True
         sub.timeout = 10
-        msg = motor.CommandUpdate(0, motor.POWER, 1000, sub)
+        msg = motor.CommandUpdate(0, motor.DcConfig(), motor.POWER, 1000, sub)
         proto = HedgehogMessage()
+        proto.motor_command_message.dc.SetInParent()
         proto.motor_command_message.amount = 1000
         proto.motor_command_message.subscription.subscribe = True
         proto.motor_command_message.subscription.timeout = 10
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+        msg = motor.CommandUpdate(0, motor.EncoderConfig(0, 1), motor.POWER, 1000, sub)
+        proto.motor_command_message.encoder.encoder_a_port = 0
+        proto.motor_command_message.encoder.encoder_b_port = 1
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
+
+        msg = motor.CommandUpdate(0, motor.StepperConfig(), motor.POWER, 1000, sub)
+        proto.motor_command_message.stepper.SetInParent()
         self.assertTransmissionServerClient(msg, proto, is_async=True)
 
     def test_motor_state_request(self):
@@ -473,30 +622,36 @@ class TestMessages(object):
         proto.process_exit_update.pid = 123
         self.assertTransmissionServerClient(msg, proto, is_async=True)
 
+    def test_speaker_action(self):
+        msg = speaker.Action(1000)
+        proto = HedgehogMessage()
+        proto.speaker_action.frequency = 1000
+        self.assertTransmissionClientServer(msg, proto)
+
 
 class TestSockets(object):
     def test_raw_to_from_delimited(self):
         header = (b'asdf',)
         raw_payload = (b'foo', b'bar')
 
-        delimited = sockets.raw_to_delimited(header, raw_payload)
+        delimited = raw_to_delimited(header, raw_payload)
         assert delimited == (b'asdf', b'', b'foo', b'bar')
-        assert sockets.raw_from_delimited(delimited) == (header, raw_payload)
+        assert raw_from_delimited(delimited) == (header, raw_payload)
 
     def test_to_from_delimited(self):
         header = (b'asdf',)
         payload = (io.Action(0, io.INPUT_PULLUP), servo.Action(0, False))
         raw1, raw2 = [ClientSide.serialize(msg) for msg in payload]
 
-        delimited = sockets.to_delimited(header, payload, ClientSide)
+        delimited = to_delimited(header, payload, ClientSide)
         assert delimited == (b'asdf', b'', raw1, raw2)
-        assert sockets.from_delimited(delimited, ServerSide) == (header, payload)
+        assert from_delimited(delimited, ServerSide) == (header, payload)
 
     def test_sockets_msg(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -514,8 +669,8 @@ class TestSockets(object):
     def test_sockets_msgs(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -535,8 +690,8 @@ class TestSockets(object):
     def test_sockets_msg_raw(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -554,8 +709,8 @@ class TestSockets(object):
     def test_sockets_msgs_raw(self, zmq_ctx):
         endpoint = "inproc://test"
 
-        router = sockets.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
-        req = sockets.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_sync.DealerRouterSocket(zmq_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_sync.ReqSocket(zmq_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -573,11 +728,11 @@ class TestSockets(object):
                 assert new == old
 
     @pytest.mark.asyncio
-    async def test_async_sockets_msg(self, zmq_aio_ctx):
+    async def test_asyncio_sockets_msg(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -593,11 +748,11 @@ class TestSockets(object):
             assert new == old
 
     @pytest.mark.asyncio
-    async def test_async_sockets_msgs(self, zmq_aio_ctx):
+    async def test_asyncio_sockets_msgs(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -615,11 +770,11 @@ class TestSockets(object):
                 assert new == old
 
     @pytest.mark.asyncio
-    async def test_async_sockets_msg_raw(self, zmq_aio_ctx):
+    async def test_asyncio_sockets_msg_raw(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -635,11 +790,11 @@ class TestSockets(object):
             assert new == old
 
     @pytest.mark.asyncio
-    async def test_async_sockets_msgs_raw(self, zmq_aio_ctx):
+    async def test_asyncio_sockets_msgs_raw(self, zmq_aio_ctx):
         endpoint = "inproc://test"
 
-        router = async_sockets.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
-        req = async_sockets.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
+        router = zmq_asyncio.DealerRouterSocket(zmq_aio_ctx, zmq.ROUTER, side=ServerSide)
+        req = zmq_asyncio.ReqSocket(zmq_aio_ctx, zmq.REQ, side=ClientSide)
         with router, req:
             router.bind(endpoint)
             req.connect(endpoint)
@@ -655,3 +810,91 @@ class TestSockets(object):
             news = await req.recv_msgs_raw()
             for old, new in zip(olds, news):
                 assert new == old
+
+    @pytest.mark.trio
+    async def test_trio_sockets_msg(self, zmq_trio_ctx, autojump_clock):
+        async with trio_asyncio.open_loop():
+            endpoint = "inproc://test"
+
+            router = zmq_trio.DealerRouterSocket(zmq_trio_ctx, zmq.ROUTER, side=ServerSide)
+            req = zmq_trio.ReqSocket(zmq_trio_ctx, zmq.REQ, side=ClientSide)
+            with router, req:
+                router.bind(endpoint)
+                req.connect(endpoint)
+
+                old = analog.Request(1)  # type: Message
+                await req.send_msg(old)
+                header, new = await router.recv_msg()
+                assert new == old
+
+                old = analog.Reply(1, 200)
+                await router.send_msg(header, old)
+                new = await req.recv_msg()
+                assert new == old
+
+    @pytest.mark.trio
+    async def test_trio_sockets_msgs(self, zmq_trio_ctx, autojump_clock):
+        async with trio_asyncio.open_loop():
+            endpoint = "inproc://test"
+
+            router = zmq_trio.DealerRouterSocket(zmq_trio_ctx, zmq.ROUTER, side=ServerSide)
+            req = zmq_trio.ReqSocket(zmq_trio_ctx, zmq.REQ, side=ClientSide)
+            with router, req:
+                router.bind(endpoint)
+                req.connect(endpoint)
+
+                olds = [analog.Request(0), digital.Request(0)]
+                await req.send_msgs(olds)
+                header, news = await router.recv_msgs()
+                for old, new in zip(olds, news):
+                    assert new == old
+
+                olds = [analog.Reply(0, 100), digital.Reply(0, True)]
+                await router.send_msgs(header, olds)
+                news = await req.recv_msgs()
+                for old, new in zip(olds, news):
+                    assert new == old
+
+    @pytest.mark.trio
+    async def test_trio_sockets_msg_raw(self, zmq_trio_ctx, autojump_clock):
+        async with trio_asyncio.open_loop():
+            endpoint = "inproc://test"
+
+            router = zmq_trio.DealerRouterSocket(zmq_trio_ctx, zmq.ROUTER, side=ServerSide)
+            req = zmq_trio.ReqSocket(zmq_trio_ctx, zmq.REQ, side=ClientSide)
+            with router, req:
+                router.bind(endpoint)
+                req.connect(endpoint)
+
+                old = b'as'
+                await req.send_msg_raw(old)
+                header, new = await router.recv_msg_raw()
+                assert new == old
+
+                old = b'df'
+                await router.send_msg_raw(header, old)
+                new = await req.recv_msg_raw()
+                assert new == old
+
+    @pytest.mark.trio
+    async def test_trio_sockets_msgs_raw(self, zmq_trio_ctx, autojump_clock):
+        async with trio_asyncio.open_loop():
+            endpoint = "inproc://test"
+
+            router = zmq_trio.DealerRouterSocket(zmq_trio_ctx, zmq.ROUTER, side=ServerSide)
+            req = zmq_trio.ReqSocket(zmq_trio_ctx, zmq.REQ, side=ClientSide)
+            with router, req:
+                router.bind(endpoint)
+                req.connect(endpoint)
+
+                olds = [b'as', b'df']
+                await req.send_msgs_raw(olds)
+                header, news = await router.recv_msgs_raw()
+                for old, new in zip(olds, news):
+                    assert new == old
+
+                olds = [b'fd', b'sa']
+                await router.send_msgs_raw(header, olds)
+                news = await req.recv_msgs_raw()
+                for old, new in zip(olds, news):
+                    assert new == old

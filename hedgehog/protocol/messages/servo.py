@@ -1,4 +1,4 @@
-from typing import Sequence, Union
+from typing import Any, Sequence, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage

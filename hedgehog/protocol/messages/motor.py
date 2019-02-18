@@ -1,18 +1,39 @@
-from typing import Sequence, Union
+from typing import Any, Sequence, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import motor_pb2
 from hedgehog.utils import protobuf
 
-__all__ = ['Action', 'CommandRequest', 'CommandReply', 'CommandSubscribe', 'CommandUpdate', 'StateRequest', 'StateReply', 'StateSubscribe', 'StateUpdate', 'SetPositionAction']
+__all__ = ['Action', 'ConfigAction', 'CommandRequest', 'CommandReply', 'CommandSubscribe', 'CommandUpdate', 'StateRequest', 'StateReply', 'StateSubscribe', 'StateUpdate', 'SetPositionAction']
 
 # <GSL customizable: module-header>
 from hedgehog.protocol.errors import InvalidCommandError
 from hedgehog.protocol.proto.motor_pb2 import POWER, BRAKE, VELOCITY
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
 
+
+@dataclass
+class DcConfig:
+    pass
+
+
+@dataclass
+class EncoderConfig:
+    encoder_a_port: int
+    encoder_b_port: int
+
+
+@dataclass
+class StepperConfig:
+    pass
+
+
+Config = Union[DcConfig, EncoderConfig, StepperConfig]
+
+
 __all__ += [
+    'DcConfig', 'EncoderConfig', 'StepperConfig', 'Config',
     'POWER', 'BRAKE', 'VELOCITY',
     'Subscription',
 ]
@@ -67,6 +88,49 @@ class Action(SimpleMessage):
             msg.absolute = self.absolute
 
 
+@RequestMsg.message(motor_pb2.MotorConfigAction, 'motor_config_action', fields=('port', 'config',))
+@dataclass(frozen=True, repr=False)
+class ConfigAction(SimpleMessage):
+    port: int
+    config: Any
+
+    def __post_init__(self):
+        # <default GSL customizable: ConfigAction-init-validation>
+        pass
+        # </GSL customizable: ConfigAction-init-validation>
+
+    # <default GSL customizable: ConfigAction-extra-members />
+
+    @classmethod
+    def _parse(cls, msg: motor_pb2.MotorConfigAction) -> 'ConfigAction':
+        port = msg.port
+        # <GSL customizable: ConfigAction-parse-config>
+        if msg.HasField('dc'):
+            config = DcConfig()
+        elif msg.HasField('encoder'):
+            config = EncoderConfig(msg.encoder.encoder_a_port, msg.encoder.encoder_b_port)
+        elif msg.HasField('stepper'):
+            config = StepperConfig()
+        else:  # pragma: nocover
+            assert False
+        # </GSL customizable: ConfigAction-parse-config>
+        return cls(port, config)
+
+    def _serialize(self, msg: motor_pb2.MotorConfigAction) -> None:
+        msg.port = self.port
+        # <GSL customizable: ConfigAction-serialize-config>
+        if isinstance(self.config, DcConfig):
+            msg.dc.SetInParent()
+        elif isinstance(self.config, EncoderConfig):
+            msg.encoder.encoder_a_port = self.config.encoder_a_port
+            msg.encoder.encoder_b_port = self.config.encoder_b_port
+        elif isinstance(self.config, StepperConfig):
+            msg.stepper.SetInParent()
+        else:  # pragma: nocover
+            assert False
+        # </GSL customizable: ConfigAction-serialize-config>
+
+
 @protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port',))
 @dataclass(frozen=True, repr=False)
 class CommandRequest(Message):
@@ -83,10 +147,11 @@ class CommandRequest(Message):
         msg.port = self.port
 
 
-@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount',))
+@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'config', 'state', 'amount',))
 @dataclass(frozen=True, repr=False)
 class CommandReply(Message):
     port: int
+    config: Any
     state: int
     amount: int
 
@@ -99,6 +164,17 @@ class CommandReply(Message):
 
     def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
         msg.port = self.port
+        # <GSL customizable: CommandReply-serialize-config>
+        if isinstance(self.config, DcConfig):
+            msg.dc.SetInParent()
+        elif isinstance(self.config, EncoderConfig):
+            msg.encoder.encoder_a_port = self.config.encoder_a_port
+            msg.encoder.encoder_b_port = self.config.encoder_b_port
+        elif isinstance(self.config, StepperConfig):
+            msg.stepper.SetInParent()
+        else:  # pragma: nocover
+            assert False
+        # </GSL customizable: CommandReply-serialize-config>
         msg.state = self.state
         msg.amount = self.amount
 
@@ -121,12 +197,13 @@ class CommandSubscribe(Message):
         msg.subscription.CopyFrom(self.subscription)
 
 
-@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'state', 'amount', 'subscription',))
+@protobuf.message(motor_pb2.MotorCommandMessage, 'motor_command_message', fields=('port', 'config', 'state', 'amount', 'subscription',))
 @dataclass(frozen=True, repr=False)
 class CommandUpdate(Message):
     is_async = True
 
     port: int
+    config: Any
     state: int
     amount: int
     subscription: Subscription
@@ -140,6 +217,17 @@ class CommandUpdate(Message):
 
     def _serialize(self, msg: motor_pb2.MotorCommandMessage) -> None:
         msg.port = self.port
+        # <GSL customizable: CommandUpdate-serialize-config>
+        if isinstance(self.config, DcConfig):
+            msg.dc.SetInParent()
+        elif isinstance(self.config, EncoderConfig):
+            msg.encoder.encoder_a_port = self.config.encoder_a_port
+            msg.encoder.encoder_b_port = self.config.encoder_b_port
+        elif isinstance(self.config, StepperConfig):
+            msg.stepper.SetInParent()
+        else:  # pragma: nocover
+            assert False
+        # </GSL customizable: CommandUpdate-serialize-config>
         msg.state = self.state
         msg.amount = self.amount
         msg.subscription.CopyFrom(self.subscription)
@@ -250,6 +338,9 @@ class SetPositionAction(SimpleMessage):
 @RequestMsg.parser('motor_command_message')
 def _parse_motor_command_message_request(msg: motor_pb2.MotorCommandMessage) -> Union[CommandRequest, CommandSubscribe]:
     port = msg.port
+    dc = msg.dc if msg.HasField('dc') else None
+    encoder = msg.encoder if msg.HasField('encoder') else None
+    stepper = msg.stepper if msg.HasField('stepper') else None
     state = msg.state
     amount = msg.amount
     subscription = msg.subscription if msg.HasField('subscription') else None
@@ -264,14 +355,26 @@ def _parse_motor_command_message_request(msg: motor_pb2.MotorCommandMessage) -> 
 @ReplyMsg.parser('motor_command_message')
 def _parse_motor_command_message_reply(msg: motor_pb2.MotorCommandMessage) -> Union[CommandReply, CommandUpdate]:
     port = msg.port
+    dc = msg.dc if msg.HasField('dc') else None
+    encoder = msg.encoder if msg.HasField('encoder') else None
+    stepper = msg.stepper if msg.HasField('stepper') else None
     state = msg.state
     amount = msg.amount
     subscription = msg.subscription if msg.HasField('subscription') else None
     # <GSL customizable: _parse_motor_command_message_reply-return>
+    if dc:
+        config = DcConfig()
+    elif encoder:
+        config = EncoderConfig(msg.encoder.encoder_a_port, msg.encoder.encoder_b_port)
+    elif stepper:
+        config = StepperConfig()
+    else:  # pragma: nocover
+        assert False
+
     if subscription is None:
-        return CommandReply(port, state, amount)
+        return CommandReply(port, config, state, amount)
     else:
-        return CommandUpdate(port, state, amount, subscription)
+        return CommandUpdate(port, config, state, amount, subscription)
     # </GSL customizable: _parse_motor_command_message_reply-return>
 
 

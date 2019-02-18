@@ -19,7 +19,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='hedgehog-protocol',
-    version='0.7.1',
+    version='0.8.0rc1',
     description='Python Protocol definitions for Hedgehog',
     long_description=long_description,
     url="https://github.com/PRIArobotics/HedgehogProtocol",
@@ -46,13 +46,13 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['hedgehog-utils[protobuf,zmq] >=0.6, <0.7'],
+    install_requires=['hedgehog-utils[protobuf,zmq,trio] ~=0.7.0rc1'],
 
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['invoke', 'hedgehog-protocol-spec >=0.7.1, <0.8',
-                'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-cov', 'pytest-timeout', 'mypy'],
+        'dev': ['invoke', 'hedgehog-protocol-spec ~=0.8.0rc1',
+                'pytest', 'pytest-runner', 'pytest-asyncio', 'pytest-trio', 'pytest-cov', 'pytest-timeout', 'mypy'],
     },
 
     package_data={

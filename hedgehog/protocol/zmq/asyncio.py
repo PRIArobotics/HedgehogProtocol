@@ -1,9 +1,9 @@
 from hedgehog.protocol import CommSide
-from hedgehog.utils.zmq.async_socket import Socket
-from . import RawMessage, Message, RawPayload, Payload, \
+from hedgehog.utils.zmq.asyncio import Socket
+from .. import RawMessage, Message, RawPayload, Payload, \
     Header, RawMsgs, Msgs, RawMsg, Msg
 
-from .sockets import raw_to_delimited, to_delimited, raw_from_delimited, from_delimited
+from . import raw_to_delimited, to_delimited, raw_from_delimited, from_delimited
 
 __all__ = [
     'raw_to_delimited', 'to_delimited', 'raw_from_delimited', 'from_delimited',
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-class DealerRouterMixin(object):
+class DealerRouterMixin:
     """\
     A mixin for async ZMQ dealer & router sockets used to send delimited & Hedgehog-encoded messages.
 
@@ -56,7 +56,7 @@ class DealerRouterSocket(DealerRouterMixin, Socket):
         self.side = side
 
 
-class ReqMixin(object):
+class ReqMixin:
     """\
     A mixin for async ZMQ req sockets used to send Hedgehog-encoded messages.
 

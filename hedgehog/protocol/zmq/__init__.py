@@ -1,8 +1,8 @@
 from typing import Sequence, TypeVar
 
 from hedgehog.protocol import CommSide
-from hedgehog.utils.zmq.socket import Socket
-from . import RawMessage, Message, RawPayload, Payload, \
+from hedgehog.utils.zmq import Socket
+from .. import RawMessage, Message, RawPayload, Payload, \
     Header, DelimitedMsg, RawMsgs, Msgs, RawMsg, Msg
 
 __all__ = [
@@ -53,7 +53,7 @@ def from_delimited(msgs: DelimitedMsg, side: CommSide) -> Msgs:
     return header, tuple(side.parse(msg_raw) for msg_raw in raw_payload)
 
 
-class DealerRouterMixin(object):
+class DealerRouterMixin:
     """\
     A mixin for ZMQ dealer & router sockets used to send delimited & Hedgehog-encoded messages.
 
@@ -98,7 +98,7 @@ class DealerRouterSocket(DealerRouterMixin, Socket):
         self.side = side
 
 
-class ReqMixin(object):
+class ReqMixin:
     """\
     A mixin for ZMQ req sockets used to send Hedgehog-encoded messages.
 
