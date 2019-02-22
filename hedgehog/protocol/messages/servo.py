@@ -1,4 +1,4 @@
-from typing import Any, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
@@ -15,19 +15,15 @@ __all__ += ['Subscription']
 # </GSL customizable: module-header>
 
 
-@RequestMsg.message(servo_pb2.ServoAction, 'servo_action', fields=('port', 'active', 'position',))
+@RequestMsg.message(servo_pb2.ServoAction, 'servo_action', fields=('port', 'position',))
 @dataclass(frozen=True, repr=False)
 class Action(SimpleMessage):
     port: int
-    active: bool
-    position: int = None
+    position: Optional[int]
 
     def __post_init__(self):
-        # <GSL customizable: Action-init-validation>
-        if self.active and self.position is None:
-            raise InvalidCommandError("position must be given when activating servo")
-        if not self.active:
-            object.__setattr__(self, 'position', None)
+        # <default GSL customizable: Action-init-validation>
+        pass
         # </GSL customizable: Action-init-validation>
 
     # <default GSL customizable: Action-extra-members />
@@ -37,11 +33,11 @@ class Action(SimpleMessage):
         port = msg.port
         active = msg.active
         position = msg.position
-        return cls(port, active, position)
+        return cls(port, position if active else None)
 
     def _serialize(self, msg: servo_pb2.ServoAction) -> None:
         msg.port = self.port
-        msg.active = self.active
+        msg.active = self.position is not None
         if self.position is not None:
             msg.position = self.position
 
@@ -62,24 +58,22 @@ class CommandRequest(Message):
         msg.port = self.port
 
 
-@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position',))
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'position',))
 @dataclass(frozen=True, repr=False)
 class CommandReply(Message):
     port: int
-    active: bool
-    position: int
+    position: Optional[int]
 
     def __post_init__(self):
-        # <GSL customizable: CommandReply-init-validation>
-        if not self.active:
-            object.__setattr__(self, 'position', None)
+        # <default GSL customizable: CommandReply-init-validation>
+        pass
         # </GSL customizable: CommandReply-init-validation>
 
     # <default GSL customizable: CommandReply-extra-members />
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
-        msg.active = self.active
+        msg.active = self.position is not None
         if self.position is not None:
             msg.position = self.position
 
@@ -102,27 +96,25 @@ class CommandSubscribe(Message):
         msg.subscription.CopyFrom(self.subscription)
 
 
-@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'active', 'position', 'subscription',))
+@protobuf.message(servo_pb2.ServoCommandMessage, 'servo_command_message', fields=('port', 'position', 'subscription',))
 @dataclass(frozen=True, repr=False)
 class CommandUpdate(Message):
     is_async = True
 
     port: int
-    active: bool
-    position: int
+    position: Optional[int]
     subscription: Subscription
 
     def __post_init__(self):
-        # <GSL customizable: CommandUpdate-init-validation>
-        if not self.active:
-            object.__setattr__(self, 'position', None)
+        # <default GSL customizable: CommandUpdate-init-validation>
+        pass
         # </GSL customizable: CommandUpdate-init-validation>
 
     # <default GSL customizable: CommandUpdate-extra-members />
 
     def _serialize(self, msg: servo_pb2.ServoCommandMessage) -> None:
         msg.port = self.port
-        msg.active = self.active
+        msg.active = self.position is not None
         if self.position is not None:
             msg.position = self.position
         msg.subscription.CopyFrom(self.subscription)
@@ -150,7 +142,7 @@ def _parse_servo_command_message_reply(msg: servo_pb2.ServoCommandMessage) -> Un
     subscription = msg.subscription if msg.HasField('subscription') else None
     # <GSL customizable: _parse_servo_command_message_reply-return>
     if subscription is None:
-        return CommandReply(port, active, position)
+        return CommandReply(port, position if active else None)
     else:
-        return CommandUpdate(port, active, position, subscription)
+        return CommandUpdate(port, position if active else None, subscription)
     # </GSL customizable: _parse_servo_command_message_reply-return>
