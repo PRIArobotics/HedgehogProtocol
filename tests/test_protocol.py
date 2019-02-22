@@ -504,19 +504,16 @@ class TestMessages(object):
         self.assertTransmissionClientServer(msg, proto)
 
     def test_servo_action(self):
-        msg = servo.Action(0, True, 512)
+        msg = servo.Action(0, 512)
         proto = HedgehogMessage()
         proto.servo_action.active = True
         proto.servo_action.position = 512
         self.assertTransmissionClientServer(msg, proto)
 
-        msg = servo.Action(0, False)
+        msg = servo.Action(0, None)
         proto = HedgehogMessage()
         proto.servo_action.active = False
         self.assertTransmissionClientServer(msg, proto)
-
-        with pytest.raises(errors.InvalidCommandError):
-            servo.Action(0, True)
 
     def test_servo_command_request(self):
         msg = servo.CommandRequest(0)
@@ -536,13 +533,13 @@ class TestMessages(object):
         self.assertTransmissionClientServer(msg, proto)
 
     def test_servo_command_reply(self):
-        msg = servo.CommandReply(0, True, 1000)
+        msg = servo.CommandReply(0, 1000)
         proto = HedgehogMessage()
         proto.servo_command_message.active = True
         proto.servo_command_message.position = 1000
         self.assertTransmissionServerClient(msg, proto)
 
-        msg = servo.CommandReply(0, False, 0)
+        msg = servo.CommandReply(0, None)
         proto = HedgehogMessage()
         proto.servo_command_message.active = False
         self.assertTransmissionServerClient(msg, proto)
@@ -551,7 +548,7 @@ class TestMessages(object):
         sub = Subscription()
         sub.subscribe = True
         sub.timeout = 10
-        msg = servo.CommandUpdate(0, True, 1000, sub)
+        msg = servo.CommandUpdate(0, 1000, sub)
         proto = HedgehogMessage()
         proto.servo_command_message.active = True
         proto.servo_command_message.position = 1000
@@ -559,7 +556,7 @@ class TestMessages(object):
         proto.servo_command_message.subscription.timeout = 10
         self.assertTransmissionServerClient(msg, proto, is_async=True)
 
-        msg = servo.CommandUpdate(0, False, 0, sub)
+        msg = servo.CommandUpdate(0, None, sub)
         proto = HedgehogMessage()
         proto.servo_command_message.active = False
         proto.servo_command_message.subscription.subscribe = True
