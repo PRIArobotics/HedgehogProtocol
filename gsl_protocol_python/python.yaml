@@ -6,6 +6,18 @@ ack.Acknowledgement:
     typ: str
     default: "''"
 
+version.VersionMessage:
+  uc_id:
+    typ: bytes
+  hardware_version:
+    typ: str
+  firmware_version:
+    typ: str
+  server_version:
+    typ: str
+
+emergency.ReleaseAction:
+
 io.IOAction:
   port:
     typ: int

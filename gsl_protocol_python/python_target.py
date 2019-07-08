@@ -179,7 +179,7 @@ def generate_module_code(model, mod, root):
 
                 if not messageClass.params:
                     yield from lines(f"""\
-        pass""")
+        msg.SetInParent()""")
                 else:
                     yield from map_params_code(
                         messageClass,

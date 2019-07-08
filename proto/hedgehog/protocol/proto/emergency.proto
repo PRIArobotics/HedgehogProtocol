@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hedgehog.protocol.proto;
+
+option java_package = "at.pria.hedgehog.protocol.proto";
+option java_outer_classname = "EmergencyP";
+
+// <default GSL customizable: module-extras />
+
+// Releases the emergency-stop of the HWC, allowing actuators to run again.
+//
+// => ():                    emergency release action => ack
+message ReleaseAction {
+}

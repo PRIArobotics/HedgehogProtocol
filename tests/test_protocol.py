@@ -9,7 +9,7 @@ from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delim
 from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, io, analog, digital, imu, motor, servo, process, speaker
+from hedgehog.protocol.messages import Message, ack, version, emergency, io, analog, digital, imu, motor, servo, process, speaker
 
 
 # Pytest fixtures
@@ -83,6 +83,27 @@ class TestMessages(object):
         proto.acknowledgement.code = ack.FAILED_COMMAND
         proto.acknowledgement.message = 'something went wrong'
         self.assertTransmissionServerClient(msg, proto)
+
+    def test_version_request(self):
+        msg = version.Request()
+        proto = HedgehogMessage()
+        proto.version_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_version_reply(self):
+        msg = version.Reply(b"foo", "3", "0", "0.9.0a2")
+        proto = HedgehogMessage()
+        proto.version_message.uc_id = b"foo"
+        proto.version_message.hardware_version = "3"
+        proto.version_message.firmware_version = "0"
+        proto.version_message.server_version = "0.9.0a2"
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_emergency_release(self):
+        msg = emergency.ReleaseAction()
+        proto = HedgehogMessage()
+        proto.emergency_release.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
 
     def test_io_action(self):
         msg = io.Action(0, io.INPUT_PULLDOWN)
