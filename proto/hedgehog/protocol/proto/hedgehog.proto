@@ -27,7 +27,8 @@ message HedgehogMessage {
         // version.proto
         VersionMessage version_message = 26;
         // emergency.proto
-        ReleaseAction emergency_release = 27;
+        EmergencyAction emergency_action = 27;
+        EmergencyMessage emergency_message = 28;
         // io.proto
         IOAction io_action = 2;
         IOCommandMessage io_command_message = 16;

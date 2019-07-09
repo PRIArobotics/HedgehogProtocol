@@ -99,11 +99,44 @@ class TestMessages(object):
         proto.version_message.server_version = "0.9.0a2"
         self.assertTransmissionServerClient(msg, proto)
 
-    def test_emergency_release(self):
-        msg = emergency.ReleaseAction()
+    def test_emergency_action(self):
+        msg = emergency.Action(True)
         proto = HedgehogMessage()
-        proto.emergency_release.SetInParent()
+        proto.emergency_action.activate = True
         self.assertTransmissionClientServer(msg, proto)
+
+    def test_emergency_request(self):
+        msg = emergency.Request()
+        proto = HedgehogMessage()
+        proto.emergency_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_emergency_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        sub.timeout = 10
+        msg = emergency.Subscribe(sub)
+        proto = HedgehogMessage()
+        proto.emergency_message.subscription.subscribe = True
+        proto.emergency_message.subscription.timeout = 10
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_emergency_reply(self):
+        msg = emergency.Reply(True)
+        proto = HedgehogMessage()
+        proto.emergency_message.active = True
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_emergency_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        sub.timeout = 10
+        msg = emergency.Update(True, sub)
+        proto = HedgehogMessage()
+        proto.emergency_message.active = True
+        proto.emergency_message.subscription.subscribe = True
+        proto.emergency_message.subscription.timeout = 10
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
 
     def test_io_action(self):
         msg = io.Action(0, io.INPUT_PULLDOWN)

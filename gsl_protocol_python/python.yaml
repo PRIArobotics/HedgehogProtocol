@@ -16,7 +16,15 @@ version.VersionMessage:
   server_version:
     typ: str
 
-emergency.ReleaseAction:
+emergency.EmergencyAction:
+  activate:
+    typ: bool
+
+emergency.EmergencyMessage:
+  active:
+    typ: bool
+  subscription:
+    typ: Subscription
 
 io.IOAction:
   port:
