@@ -9,7 +9,7 @@ from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delim
 from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, io, analog, digital, imu, motor, servo, process, speaker
+from hedgehog.protocol.messages import Message, ack, version, emergency, io, analog, digital, imu, motor, servo, process, speaker
 
 
 # Pytest fixtures
@@ -83,6 +83,60 @@ class TestMessages(object):
         proto.acknowledgement.code = ack.FAILED_COMMAND
         proto.acknowledgement.message = 'something went wrong'
         self.assertTransmissionServerClient(msg, proto)
+
+    def test_version_request(self):
+        msg = version.Request()
+        proto = HedgehogMessage()
+        proto.version_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_version_reply(self):
+        msg = version.Reply(b"foo", "3", "0", "0.9.0a2")
+        proto = HedgehogMessage()
+        proto.version_message.uc_id = b"foo"
+        proto.version_message.hardware_version = "3"
+        proto.version_message.firmware_version = "0"
+        proto.version_message.server_version = "0.9.0a2"
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_emergency_action(self):
+        msg = emergency.Action(True)
+        proto = HedgehogMessage()
+        proto.emergency_action.activate = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_emergency_request(self):
+        msg = emergency.Request()
+        proto = HedgehogMessage()
+        proto.emergency_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_emergency_subscribe(self):
+        sub = Subscription()
+        sub.subscribe = True
+        sub.timeout = 10
+        msg = emergency.Subscribe(sub)
+        proto = HedgehogMessage()
+        proto.emergency_message.subscription.subscribe = True
+        proto.emergency_message.subscription.timeout = 10
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_emergency_reply(self):
+        msg = emergency.Reply(True)
+        proto = HedgehogMessage()
+        proto.emergency_message.active = True
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_emergency_update(self):
+        sub = Subscription()
+        sub.subscribe = True
+        sub.timeout = 10
+        msg = emergency.Update(True, sub)
+        proto = HedgehogMessage()
+        proto.emergency_message.active = True
+        proto.emergency_message.subscription.subscribe = True
+        proto.emergency_message.subscription.timeout = 10
+        self.assertTransmissionServerClient(msg, proto, is_async=True)
 
     def test_io_action(self):
         msg = io.Action(0, io.INPUT_PULLDOWN)
