@@ -163,3 +163,7 @@ process.ProcessExitUpdate:
 speaker.SpeakerAction:
   frequency:
     typ: Optional[int]
+
+vision.CameraAction:
+  open:
+    typ: bool

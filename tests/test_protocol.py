@@ -9,7 +9,7 @@ from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delim
 from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, version, emergency, io, analog, digital, imu, motor, servo, process, speaker
+from hedgehog.protocol.messages import Message, ack, version, emergency, io, analog, digital, imu, motor, servo, process, speaker, vision
 
 
 # Pytest fixtures
@@ -682,6 +682,18 @@ class TestMessages(object):
         msg = speaker.Action(None)
         proto = HedgehogMessage()
         proto.speaker_action.frequency = 0
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_camera_action(self):
+        msg = vision.CameraAction(True)
+        proto = HedgehogMessage()
+        proto.camera_action.open = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_read_frame_action(self):
+        msg = vision.ReadFrameAction()
+        proto = HedgehogMessage()
+        proto.read_frame_action.SetInParent()
         self.assertTransmissionClientServer(msg, proto)
 
 
