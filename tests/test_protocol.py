@@ -713,6 +713,19 @@ class TestMessages(object):
         proto.vision_retrieve_frame_action.SetInParent()
         self.assertTransmissionClientServer(msg, proto)
 
+    def test_vision_frame_request(self):
+        msg = vision.FrameRequest(-1)
+        proto = HedgehogMessage()
+        proto.vision_frame_message.highlight = -1
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_frame_reply(self):
+        msg = vision.FrameReply(-1, bytes())
+        proto = HedgehogMessage()
+        proto.vision_frame_message.highlight = -1
+        proto.vision_frame_message.frame = bytes()
+        self.assertTransmissionServerClient(msg, proto)
+
 
 class TestSockets(object):
     def test_raw_to_from_delimited(self):

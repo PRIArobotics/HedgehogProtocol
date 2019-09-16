@@ -5,7 +5,7 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import vision_pb2
 from hedgehog.utils import protobuf
 
-__all__ = ['OpenCameraAction', 'CloseCameraAction', 'RetrieveFrameAction']
+__all__ = ['OpenCameraAction', 'CloseCameraAction', 'RetrieveFrameAction', 'FrameRequest', 'FrameReply']
 
 # <GSL customizable: module-header>
 from typing import Tuple
@@ -115,6 +115,51 @@ class RetrieveFrameAction(SimpleMessage):
 
     def _serialize(self, msg: vision_pb2.VisionRetrieveFrameAction) -> None:
         msg.SetInParent()
+
+
+@RequestMsg.message(vision_pb2.VisionFrameMessage, 'vision_frame_message', fields=('highlight',))
+@dataclass(frozen=True, repr=False)
+class FrameRequest(SimpleMessage):
+    highlight: int
+
+    def __post_init__(self):
+        # <default GSL customizable: FrameRequest-init-validation>
+        pass
+        # </GSL customizable: FrameRequest-init-validation>
+
+    # <default GSL customizable: FrameRequest-extra-members />
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.VisionFrameMessage) -> 'FrameRequest':
+        highlight = msg.highlight
+        return cls(highlight)
+
+    def _serialize(self, msg: vision_pb2.VisionFrameMessage) -> None:
+        msg.highlight = self.highlight
+
+
+@ReplyMsg.message(vision_pb2.VisionFrameMessage, 'vision_frame_message', fields=('highlight', 'frame',))
+@dataclass(frozen=True, repr=False)
+class FrameReply(SimpleMessage):
+    highlight: int
+    frame: bytes
+
+    def __post_init__(self):
+        # <default GSL customizable: FrameReply-init-validation>
+        pass
+        # </GSL customizable: FrameReply-init-validation>
+
+    # <default GSL customizable: FrameReply-extra-members />
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.VisionFrameMessage) -> 'FrameReply':
+        highlight = msg.highlight
+        frame = msg.frame
+        return cls(highlight, frame)
+
+    def _serialize(self, msg: vision_pb2.VisionFrameMessage) -> None:
+        msg.highlight = self.highlight
+        msg.frame = self.frame
 
 
 @RequestMsg.parser('vision_camera_action')

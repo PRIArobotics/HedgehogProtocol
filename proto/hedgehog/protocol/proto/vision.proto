@@ -47,3 +47,17 @@ message VisionCameraAction {
 // => ():                    read frame action => ack
 message VisionRetrieveFrameAction {
 }
+
+// Request or reply for the current frame,
+// optionally with highlighting for one of the channels added in the image.
+// A highlight value of -1 means no highlighting,
+// a different value means the index of the channel when opening the camera.
+// 
+// The frame itself is a jpg encoded image.
+//
+// => (highlight):           frame request => frame reply
+// <= (highlight, frame):    frame reply
+message VisionFrameMessage {
+    int32 highlight = 1;
+    bytes frame = 2;
+}

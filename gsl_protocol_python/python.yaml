@@ -171,3 +171,9 @@ vision.VisionCameraAction:
     typ: Channel
 
 vision.VisionRetrieveFrameAction:
+
+vision.VisionFrameMessage:
+  highlight:
+    typ: int
+  frame:
+    typ: bytes
