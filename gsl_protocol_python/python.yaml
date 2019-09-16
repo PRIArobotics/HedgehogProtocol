@@ -167,3 +167,5 @@ speaker.SpeakerAction:
 vision.CameraAction:
   open:
     typ: bool
+  channels:
+    typ: Channel
