@@ -1,4 +1,4 @@
-from typing import Any, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
@@ -13,7 +13,7 @@ __all__ = ['Action']
 @RequestMsg.message(speaker_pb2.SpeakerAction, 'speaker_action', fields=('frequency',))
 @dataclass(frozen=True, repr=False)
 class Action(SimpleMessage):
-    frequency: int
+    frequency: Optional[int]
 
     def __post_init__(self):
         # <default GSL customizable: Action-init-validation>
@@ -25,7 +25,7 @@ class Action(SimpleMessage):
     @classmethod
     def _parse(cls, msg: speaker_pb2.SpeakerAction) -> 'Action':
         frequency = msg.frequency
-        return cls(frequency)
+        return cls(frequency if frequency != 0 else None)
 
     def _serialize(self, msg: speaker_pb2.SpeakerAction) -> None:
-        msg.frequency = self.frequency
+        msg.frequency = self.frequency if self.frequency is not None else 0
