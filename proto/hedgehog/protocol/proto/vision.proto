@@ -31,7 +31,8 @@ message Channel {
 // except if no channels are specified. In that case the previous configuration is preserved.
 // When closing, channels are ignored and should remain empty.
 //
-// => (open, *channels):     camera action => ack
+// => (*channels):           open camera action => ack
+// => ():                    close camera action => ack
 message VisionCameraAction {
     bool open = 1;
     repeated Channel channels = 2;
