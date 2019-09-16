@@ -1,4 +1,4 @@
-from typing import Any, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
@@ -120,7 +120,7 @@ class RetrieveFrameAction(SimpleMessage):
 @RequestMsg.message(vision_pb2.VisionFrameMessage, 'vision_frame_message', fields=('highlight',))
 @dataclass(frozen=True, repr=False)
 class FrameRequest(SimpleMessage):
-    highlight: int
+    highlight: Optional[int]
 
     def __post_init__(self):
         # <default GSL customizable: FrameRequest-init-validation>
@@ -132,16 +132,16 @@ class FrameRequest(SimpleMessage):
     @classmethod
     def _parse(cls, msg: vision_pb2.VisionFrameMessage) -> 'FrameRequest':
         highlight = msg.highlight
-        return cls(highlight)
+        return cls(highlight if highlight != -1 else None)
 
     def _serialize(self, msg: vision_pb2.VisionFrameMessage) -> None:
-        msg.highlight = self.highlight
+        msg.highlight = self.highlight if self.highlight is not None else -1
 
 
 @ReplyMsg.message(vision_pb2.VisionFrameMessage, 'vision_frame_message', fields=('highlight', 'frame',))
 @dataclass(frozen=True, repr=False)
 class FrameReply(SimpleMessage):
-    highlight: int
+    highlight: Optional[int]
     frame: bytes
 
     def __post_init__(self):
@@ -155,10 +155,10 @@ class FrameReply(SimpleMessage):
     def _parse(cls, msg: vision_pb2.VisionFrameMessage) -> 'FrameReply':
         highlight = msg.highlight
         frame = msg.frame
-        return cls(highlight, frame)
+        return cls(highlight if highlight != -1 else None, frame)
 
     def _serialize(self, msg: vision_pb2.VisionFrameMessage) -> None:
-        msg.highlight = self.highlight
+        msg.highlight = self.highlight if self.highlight is not None else -1
         msg.frame = self.frame
 
 

@@ -694,6 +694,8 @@ class TestMessages(object):
             vision.FacesChannel(),
             vision.ContoursChannel((0x11, 0x11, 0x11), (0x33, 0x33, 0x33))
         )
+        proto = HedgehogMessage()
+        proto.vision_camera_action.open = True
         channel = proto.vision_camera_action.channels.add()
         channel.faces.SetInParent()
         channel = proto.vision_camera_action.channels.add()
@@ -714,15 +716,26 @@ class TestMessages(object):
         self.assertTransmissionClientServer(msg, proto)
 
     def test_vision_frame_request(self):
-        msg = vision.FrameRequest(-1)
+        msg = vision.FrameRequest(None)
         proto = HedgehogMessage()
         proto.vision_frame_message.highlight = -1
         self.assertTransmissionClientServer(msg, proto)
 
+        msg = vision.FrameRequest(0)
+        proto = HedgehogMessage()
+        proto.vision_frame_message.highlight = 0
+        self.assertTransmissionClientServer(msg, proto)
+
     def test_vision_frame_reply(self):
-        msg = vision.FrameReply(-1, bytes())
+        msg = vision.FrameReply(None, bytes())
         proto = HedgehogMessage()
         proto.vision_frame_message.highlight = -1
+        proto.vision_frame_message.frame = bytes()
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FrameReply(0, bytes())
+        proto = HedgehogMessage()
+        proto.vision_frame_message.highlight = 0
         proto.vision_frame_message.frame = bytes()
         self.assertTransmissionServerClient(msg, proto)
 
