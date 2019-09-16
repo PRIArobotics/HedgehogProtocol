@@ -684,10 +684,10 @@ class TestMessages(object):
         proto.speaker_action.frequency = 0
         self.assertTransmissionClientServer(msg, proto)
 
-    def test_camera_action(self):
+    def test_vision_camera_action(self):
         msg = vision.CameraAction(True)
         proto = HedgehogMessage()
-        proto.camera_action.open = True
+        proto.vision_camera_action.open = True
         self.assertTransmissionClientServer(msg, proto)
 
         msg = vision.CameraAction(
@@ -695,17 +695,17 @@ class TestMessages(object):
             vision.FacesChannel(),
             vision.ContoursChannel((0x11, 0x11, 0x11), (0x33, 0x33, 0x33))
         )
-        channel = proto.camera_action.channels.add()
+        channel = proto.vision_camera_action.channels.add()
         channel.faces.SetInParent()
-        channel = proto.camera_action.channels.add()
+        channel = proto.vision_camera_action.channels.add()
         channel.contours.hsv_min = 0x111111
         channel.contours.hsv_max = 0x333333
         self.assertTransmissionClientServer(msg, proto)
 
-    def test_read_frame_action(self):
-        msg = vision.ReadFrameAction()
+    def test_vision_retrieve_frame_action(self):
+        msg = vision.RetrieveFrameAction()
         proto = HedgehogMessage()
-        proto.read_frame_action.SetInParent()
+        proto.vision_retrieve_frame_action.SetInParent()
         self.assertTransmissionClientServer(msg, proto)
 
 

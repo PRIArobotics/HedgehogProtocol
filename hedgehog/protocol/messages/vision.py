@@ -5,7 +5,7 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import vision_pb2
 from hedgehog.utils import protobuf
 
-__all__ = ['CameraAction', 'ReadFrameAction']
+__all__ = ['CameraAction', 'RetrieveFrameAction']
 
 # <GSL customizable: module-header>
 from typing import Tuple
@@ -52,7 +52,7 @@ __all__ += ['FacesChannel', 'ContoursChannel', 'Channel']
 # </GSL customizable: module-header>
 
 
-@RequestMsg.message(vision_pb2.CameraAction, 'camera_action', fields=('open', 'channels',))
+@RequestMsg.message(vision_pb2.VisionCameraAction, 'vision_camera_action', fields=('open', 'channels',))
 @dataclass(frozen=True, repr=False)
 class CameraAction(SimpleMessage):
     open: bool
@@ -80,31 +80,31 @@ class CameraAction(SimpleMessage):
     # </GSL customizable: CameraAction-extra-members>
 
     @classmethod
-    def _parse(cls, msg: vision_pb2.CameraAction) -> 'CameraAction':
+    def _parse(cls, msg: vision_pb2.VisionCameraAction) -> 'CameraAction':
         open = msg.open
         channels = (CameraAction._parse_channel(channel) for channel in msg.channels)
         return cls(open, *channels)
 
-    def _serialize(self, msg: vision_pb2.CameraAction) -> None:
+    def _serialize(self, msg: vision_pb2.VisionCameraAction) -> None:
         msg.open = self.open
         for channel in self.channels:
             channel._serialize(msg.channels.add())
 
 
-@RequestMsg.message(vision_pb2.ReadFrameAction, 'read_frame_action', fields=())
+@RequestMsg.message(vision_pb2.VisionRetrieveFrameAction, 'vision_retrieve_frame_action', fields=())
 @dataclass(frozen=True, repr=False)
-class ReadFrameAction(SimpleMessage):
+class RetrieveFrameAction(SimpleMessage):
 
     def __post_init__(self):
-        # <default GSL customizable: ReadFrameAction-init-validation>
+        # <default GSL customizable: RetrieveFrameAction-init-validation>
         pass
-        # </GSL customizable: ReadFrameAction-init-validation>
+        # </GSL customizable: RetrieveFrameAction-init-validation>
 
-    # <default GSL customizable: ReadFrameAction-extra-members />
+    # <default GSL customizable: RetrieveFrameAction-extra-members />
 
     @classmethod
-    def _parse(cls, msg: vision_pb2.ReadFrameAction) -> 'ReadFrameAction':
+    def _parse(cls, msg: vision_pb2.VisionRetrieveFrameAction) -> 'RetrieveFrameAction':
         return cls()
 
-    def _serialize(self, msg: vision_pb2.ReadFrameAction) -> None:
+    def _serialize(self, msg: vision_pb2.VisionRetrieveFrameAction) -> None:
         msg.SetInParent()

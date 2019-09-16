@@ -32,7 +32,7 @@ message Channel {
 // When closing, channels are ignored and should remain empty.
 //
 // => (open, *channels):     camera action => ack
-message CameraAction {
+message VisionCameraAction {
     bool open = 1;
     repeated Channel channels = 2;
 }
@@ -44,5 +44,5 @@ message CameraAction {
 // This action is therefore a relatively expensive operation.
 //
 // => ():                    read frame action => ack
-message ReadFrameAction {
+message VisionRetrieveFrameAction {
 }

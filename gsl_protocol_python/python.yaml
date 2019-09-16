@@ -164,8 +164,10 @@ speaker.SpeakerAction:
   frequency:
     typ: Optional[int]
 
-vision.CameraAction:
+vision.VisionCameraAction:
   open:
     typ: bool
   channels:
     typ: Channel
+
+vision.VisionRetrieveFrameAction:
