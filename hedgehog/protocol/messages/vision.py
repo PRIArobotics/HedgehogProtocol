@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Tuple, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
@@ -8,9 +8,6 @@ from hedgehog.utils import protobuf
 __all__ = ['OpenCameraAction', 'CloseCameraAction', 'RetrieveFrameAction', 'FrameRequest', 'FrameReply']
 
 # <GSL customizable: module-header>
-from typing import Tuple
-
-
 @dataclass
 class FacesChannel:
     @classmethod
