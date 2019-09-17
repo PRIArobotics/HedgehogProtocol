@@ -5,7 +5,7 @@ from . import RequestMsg, ReplyMsg, Message, SimpleMessage
 from hedgehog.protocol.proto import vision_pb2
 from hedgehog.utils import protobuf
 
-__all__ = ['OpenCameraAction', 'CloseCameraAction', 'RetrieveFrameAction', 'FrameRequest', 'FrameReply']
+__all__ = ['OpenCameraAction', 'CloseCameraAction', 'CaptureFrameAction', 'FrameRequest', 'FrameReply']
 
 # <GSL customizable: module-header>
 @dataclass
@@ -95,22 +95,22 @@ class CloseCameraAction(Message):
         msg.open = False
 
 
-@RequestMsg.message(vision_pb2.VisionRetrieveFrameAction, 'vision_retrieve_frame_action', fields=())
+@RequestMsg.message(vision_pb2.VisionCaptureFrameAction, 'vision_capture_frame_action', fields=())
 @dataclass(frozen=True, repr=False)
-class RetrieveFrameAction(SimpleMessage):
+class CaptureFrameAction(SimpleMessage):
 
     def __post_init__(self):
-        # <default GSL customizable: RetrieveFrameAction-init-validation>
+        # <default GSL customizable: CaptureFrameAction-init-validation>
         pass
-        # </GSL customizable: RetrieveFrameAction-init-validation>
+        # </GSL customizable: CaptureFrameAction-init-validation>
 
-    # <default GSL customizable: RetrieveFrameAction-extra-members />
+    # <default GSL customizable: CaptureFrameAction-extra-members />
 
     @classmethod
-    def _parse(cls, msg: vision_pb2.VisionRetrieveFrameAction) -> 'RetrieveFrameAction':
+    def _parse(cls, msg: vision_pb2.VisionCaptureFrameAction) -> 'CaptureFrameAction':
         return cls()
 
-    def _serialize(self, msg: vision_pb2.VisionRetrieveFrameAction) -> None:
+    def _serialize(self, msg: vision_pb2.VisionCaptureFrameAction) -> None:
         msg.SetInParent()
 
 

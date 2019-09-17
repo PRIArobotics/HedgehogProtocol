@@ -709,10 +709,10 @@ class TestMessages(object):
         proto.vision_camera_action.open = False
         self.assertTransmissionClientServer(msg, proto)
 
-    def test_vision_retrieve_frame_action(self):
-        msg = vision.RetrieveFrameAction()
+    def test_vision_capture_frame_action(self):
+        msg = vision.CaptureFrameAction()
         proto = HedgehogMessage()
-        proto.vision_retrieve_frame_action.SetInParent()
+        proto.vision_capture_frame_action.SetInParent()
         self.assertTransmissionClientServer(msg, proto)
 
     def test_vision_frame_request(self):
