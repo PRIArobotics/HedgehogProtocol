@@ -17,7 +17,7 @@ def generate_module_code(model, mod, root):
 
     @generate(out_file)
     def code():
-        def map_params(messageClass, mandatory, repeated, optional, custom=None):
+        def map_params(messageClass, mandatory, repeated, optional, custom=None, custom_optional=None):
             def has(attr_caller):
                 try:
                     attr_caller()
@@ -34,13 +34,18 @@ def generate_module_code(model, mod, root):
                 elif isinstance(param, OptionalParam) and has(lambda: [field.python_spec for field in param.fields]):
                     for i in range(len(param.options)):
                         yield optional(param, i)
-                elif custom:
-                    yield custom(param)
+                elif isinstance(param, OptionalParam):
+                    if not custom_optional:
+                        raise RuntimeError(f"Unexpected custom optional parameter: {param}")
+                    for i in range(len(param.options)):
+                        yield custom_optional(param, i)
                 else:
-                    raise RuntimeError(f"Unexpected custom parameter: {param}")
+                    if not custom:
+                        raise RuntimeError(f"Unexpected custom parameter: {param}")
+                    yield custom(param)
 
-        def map_params_code(messageClass, mandatory, repeated, optional, custom=None):
-            for generator in map_params(messageClass, mandatory, repeated, optional, custom):
+        def map_params_code(messageClass, mandatory, repeated, optional, custom=None, custom_optional=None):
+            for generator in map_params(messageClass, mandatory, repeated, optional, custom, custom_optional):
                 yield from generator
 
         def field_names(messageClass):
@@ -50,6 +55,7 @@ def generate_module_code(model, mod, root):
                 repeated=lambda param: param.name,
                 optional=lambda param, i: param.options[i],
                 custom=lambda param: param.name,
+                custom_optional=lambda param, i: param.options[i],
             )
 
         def message_class_code(messageClass):
@@ -82,7 +88,10 @@ def generate_module_code(model, mod, root):
                 def custom(param):
                     yield field_str(param.name, 'Any')
 
-                yield from map_params_code(messageClass, mandatory, repeated, optional, custom)
+                def custom_optional(param, i):
+                    yield field_str(param.options[i], 'Any')
+
+                yield from map_params_code(messageClass, mandatory, repeated, optional, custom, custom_optional)
 
             def message_init_code():
                 # only generate an __init__ method if the dataclass __init__ is not enough
@@ -115,8 +124,11 @@ def generate_module_code(model, mod, root):
                     def custom(param):
                         return param.name
 
+                    def custom_optional(param, i):
+                        return param.options[i]
+
                     yield "self"
-                    yield from map_params(messageClass, mandatory, repeated, optional, custom)
+                    yield from map_params(messageClass, mandatory, repeated, optional, custom, custom_optional)
 
                 yield from lines(f"""\
 
@@ -137,6 +149,7 @@ def generate_module_code(model, mod, root):
                         repeated=lambda param: f"*{param.name}",
                         optional=lambda param, i: f"{param.options[i]}={param.options[i]}",
                         custom=lambda param: param.name,
+                        custom_optional=lambda param, i: param.options[i],
                     )
 
                 yield from lines(f"""\
@@ -159,6 +172,11 @@ def generate_module_code(model, mod, root):
         # TODO parse custom field '{param.name}'
         {param.name} = msg.{param.name}
         # </GSL customizable: {messageClass.name}-parse-{param.name}>"""),
+                    custom_optional=lambda param, i: lines(f"""\
+        # <default GSL customizable: {messageClass.name}-parse-{param.options[i]}>
+        # TODO parse custom field '{param.options[i]}'
+        {param.options[i]} = msg.{param.options[i]}
+        # </GSL customizable: {messageClass.name}-parse-{param.options[i]}>"""),
                 )
 
                 yield from lines(f"""\
@@ -197,6 +215,11 @@ def generate_module_code(model, mod, root):
         # TODO serialize custom field '{param.name}'
         {assignment_str(param.name)}
         # </GSL customizable: {messageClass.name}-serialize-{param.name}>"""),
+                        custom_optional=lambda param, i: lines(f"""\
+        # <default GSL customizable: {messageClass.name}-serialize-{param.options[i]}>
+        # TODO serialize custom field '{param.options[i]}'
+        {assignment_str(param.options[i])}
+        # </GSL customizable: {messageClass.name}-serialize-{param.options[i]}>"""),
                     )
 
             request = messageClass.direction == "=>"
@@ -247,6 +270,7 @@ class {messageClass.name}({"Message" if complex else "SimpleMessage"}):""")
                     repeated=lambda param: f"*{param.name}",
                     optional=lambda param, i: f"{param.options[i]}={param.options[i]}",
                     custom=lambda param: param.name,
+                    custom_optional=lambda param, i: param.options[i],
                 )
 
             messageClasses = message.requestClasses if request else message.replyClasses
