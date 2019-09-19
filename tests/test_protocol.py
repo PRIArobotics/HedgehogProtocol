@@ -777,6 +777,38 @@ class TestMessages(object):
         proto.vision_frame_message.frame = bytes()
         self.assertTransmissionServerClient(msg, proto)
 
+    def test_vision_feature_request(self):
+        msg = vision.FeatureRequest('foo')
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_feature_reply(self):
+        msg = vision.FeatureReply('foo', vision.FacesFeature([
+            vision.Face((0, 10, 100, 50)),
+        ]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        face = proto.vision_feature_message.feature.faces.faces.add()
+        face.y = 10
+        face.width = 100
+        face.height = 50
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FeatureReply('foo', vision.BlobsFeature([
+            vision.Blob((0, 10, 100, 50), (50, 35), 0.5),
+        ]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        blob = proto.vision_feature_message.feature.blobs.blobs.add()
+        blob.y = 10
+        blob.width = 100
+        blob.height = 50
+        blob.cx = 50
+        blob.cy = 35
+        blob.confidence = 0.5
+        self.assertTransmissionServerClient(msg, proto)
+
 
 class TestSockets(object):
     def test_raw_to_from_delimited(self):

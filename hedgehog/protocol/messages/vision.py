@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
@@ -56,6 +56,77 @@ def _parse_channel(msg: vision_pb2.Channel) -> Tuple[str, Channel]:
         return FacesChannel._parse(msg)
     elif msg.HasField('blobs'):
         return BlobsChannel._parse(msg)
+    else:  # pragma: nocover
+        assert False
+
+
+@dataclass
+class Face:
+    boundingRect: Tuple[int, int, int, int]
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.Face) -> 'Face':
+        return cls(
+            (msg.x, msg.y, msg.width, msg.height),
+        )
+
+    def _serialize(self, msg: vision_pb2.Face) -> None:
+        msg.x, msg.y, msg.width, msg.height = self.boundingRect
+
+@dataclass
+class FacesFeature:
+    faces: List[Face]
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.Feature) -> 'FacesFeature':
+        return cls([Face._parse(face) for face in msg.faces.faces])
+
+    def _serialize(self, msg: vision_pb2.Feature) -> None:
+        for face in self.faces:
+            face._serialize(msg.faces.faces.add())
+
+
+@dataclass
+class Blob:
+    boundingRect: Tuple[int, int, int, int]
+    centroid: Tuple[int, int]
+    confidence: float
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.Blob) -> 'Blob':
+        return cls(
+            (msg.x, msg.y, msg.width, msg.height),
+            (msg.cx, msg.cy),
+            msg.confidence,
+        )
+
+    def _serialize(self, msg: vision_pb2.Face) -> None:
+        msg.x, msg.y, msg.width, msg.height = self.boundingRect
+        msg.cx, msg.cy = self.centroid
+        msg.confidence = self.confidence
+
+
+@dataclass
+class BlobsFeature:
+    blobs: List[Blob]
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.Feature) -> 'BlobsFeature':
+        return cls([Blob._parse(blob) for blob in msg.blobs.blobs])
+
+    def _serialize(self, msg: vision_pb2.Feature) -> None:
+        for blob in self.blobs:
+            blob._serialize(msg.blobs.blobs.add())
+
+
+Feature = Union[FacesFeature, BlobsFeature]
+
+
+def _parse_feature(msg: vision_pb2.Feature) -> Feature:
+    if msg.HasField('faces'):
+        return FacesFeature._parse(msg)
+    elif msg.HasField('blobs'):
+        return BlobsFeature._parse(msg)
     else:  # pragma: nocover
         assert False
 
@@ -267,6 +338,55 @@ class FrameReply(SimpleMessage):
     def _serialize(self, msg: vision_pb2.VisionFrameMessage) -> None:
         msg.highlight = self.highlight if self.highlight is not None else ''
         msg.frame = self.frame
+
+
+@RequestMsg.message(vision_pb2.VisionFeatureMessage, 'vision_feature_message', fields=('channel',))
+@dataclass(frozen=True, repr=False)
+class FeatureRequest(SimpleMessage):
+    channel: str
+
+    def __post_init__(self):
+        # <default GSL customizable: FeatureRequest-init-validation>
+        pass
+        # </GSL customizable: FeatureRequest-init-validation>
+
+    # <default GSL customizable: FeatureRequest-extra-members />
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.VisionFeatureMessage) -> 'FeatureRequest':
+        channel = msg.channel
+        return cls(channel)
+
+    def _serialize(self, msg: vision_pb2.VisionFeatureMessage) -> None:
+        msg.channel = self.channel
+
+
+@ReplyMsg.message(vision_pb2.VisionFeatureMessage, 'vision_feature_message', fields=('channel', 'feature',))
+@dataclass(frozen=True, repr=False)
+class FeatureReply(SimpleMessage):
+    channel: str
+    feature: Feature
+
+    def __post_init__(self):
+        # <default GSL customizable: FeatureReply-init-validation>
+        pass
+        # </GSL customizable: FeatureReply-init-validation>
+
+    # <default GSL customizable: FeatureReply-extra-members />
+
+    @classmethod
+    def _parse(cls, msg: vision_pb2.VisionFeatureMessage) -> 'FeatureReply':
+        channel = msg.channel
+        # <GSL customizable: FeatureReply-parse-feature>
+        feature = _parse_feature(msg.feature)
+        # </GSL customizable: FeatureReply-parse-feature>
+        return cls(channel, feature)
+
+    def _serialize(self, msg: vision_pb2.VisionFeatureMessage) -> None:
+        msg.channel = self.channel
+        # <GSL customizable: FeatureReply-serialize-feature>
+        self.feature._serialize(msg.feature)
+        # </GSL customizable: FeatureReply-serialize-feature>
 
 
 @RequestMsg.parser('vision_camera_action')

@@ -179,3 +179,7 @@ vision.VisionFrameMessage:
     typ: Optional[str]
   frame:
     typ: bytes
+
+vision.VisionFeatureMessage:
+  channel:
+    typ: str
