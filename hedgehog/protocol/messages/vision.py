@@ -62,7 +62,7 @@ def _parse_channel(msg: vision_pb2.Channel) -> Tuple[str, Channel]:
 
 @dataclass
 class Face:
-    boundingRect: Tuple[int, int, int, int]
+    bounding_rect: Tuple[int, int, int, int]
 
     @classmethod
     def _parse(cls, msg: vision_pb2.Face) -> 'Face':
@@ -71,7 +71,8 @@ class Face:
         )
 
     def _serialize(self, msg: vision_pb2.Face) -> None:
-        msg.x, msg.y, msg.width, msg.height = self.boundingRect
+        msg.x, msg.y, msg.width, msg.height = self.bounding_rect
+
 
 @dataclass
 class FacesFeature:
@@ -88,7 +89,7 @@ class FacesFeature:
 
 @dataclass
 class Blob:
-    boundingRect: Tuple[int, int, int, int]
+    bounding_rect: Tuple[int, int, int, int]
     centroid: Tuple[int, int]
     confidence: float
 
@@ -101,7 +102,7 @@ class Blob:
         )
 
     def _serialize(self, msg: vision_pb2.Face) -> None:
-        msg.x, msg.y, msg.width, msg.height = self.boundingRect
+        msg.x, msg.y, msg.width, msg.height = self.bounding_rect
         msg.cx, msg.cy = self.centroid
         msg.confidence = self.confidence
 
