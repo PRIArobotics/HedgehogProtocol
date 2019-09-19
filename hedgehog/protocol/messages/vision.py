@@ -51,7 +51,7 @@ class BlobsChannel:
 Channel = Union[FacesChannel, BlobsChannel]
 
 
-def _parse_channel(msg: vision_pb2.Channel) -> Optional[Tuple[str, Channel]]:
+def _parse_channel(msg: vision_pb2.Channel) -> Tuple[str, Channel]:
     if msg.HasField('faces'):
         return FacesChannel._parse(msg)
     elif msg.HasField('blobs'):
