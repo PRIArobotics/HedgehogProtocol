@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Optional, Set, Tuple, Union
 from dataclasses import dataclass
 
 from . import RequestMsg, ReplyMsg, Message, SimpleMessage
@@ -141,7 +141,7 @@ class UpdateChannelAction(Message):
 @protobuf.message(vision_pb2.VisionChannelMessage, 'vision_channel_message', fields=('keys',))
 @dataclass(frozen=True, repr=False)
 class DeleteChannelAction(Message):
-    keys: Sequence[str]
+    keys: Set[str]
 
     def __post_init__(self):
         # <default GSL customizable: DeleteChannelAction-init-validation>
@@ -161,7 +161,7 @@ class DeleteChannelAction(Message):
 @protobuf.message(vision_pb2.VisionChannelMessage, 'vision_channel_message', fields=('keys',))
 @dataclass(frozen=True, repr=False)
 class ChannelRequest(Message):
-    keys: Sequence[str]
+    keys: Set[str]
 
     def __post_init__(self):
         # <default GSL customizable: ChannelRequest-init-validation>
