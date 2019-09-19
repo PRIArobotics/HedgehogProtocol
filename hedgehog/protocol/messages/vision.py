@@ -24,7 +24,7 @@ class FacesChannel:
 
 
 @dataclass
-class ContoursChannel:
+class BlobsChannel:
     hsv_min: Tuple[int, int, int]
     hsv_max: Tuple[int, int, int]
 
@@ -37,25 +37,25 @@ class ContoursChannel:
         return tuple(hsv.to_bytes(3, 'big'))
 
     @classmethod
-    def _parse(cls, msg: vision_pb2.Channel) -> Tuple[str, 'ContoursChannel']:
-        hsv_min = ContoursChannel._unpack(msg.contours.hsv_min)
-        hsv_max = ContoursChannel._unpack(msg.contours.hsv_max)
+    def _parse(cls, msg: vision_pb2.Channel) -> Tuple[str, 'BlobsChannel']:
+        hsv_min = BlobsChannel._unpack(msg.blobs.hsv_min)
+        hsv_max = BlobsChannel._unpack(msg.blobs.hsv_max)
         return msg.key, cls(hsv_min, hsv_max)
 
     def _serialize(self, msg: vision_pb2.Channel, key: str) -> None:
         msg.key = key
-        msg.contours.hsv_min = ContoursChannel._pack(self.hsv_min)
-        msg.contours.hsv_max = ContoursChannel._pack(self.hsv_max)
+        msg.blobs.hsv_min = BlobsChannel._pack(self.hsv_min)
+        msg.blobs.hsv_max = BlobsChannel._pack(self.hsv_max)
 
 
-Channel = Union[FacesChannel, ContoursChannel]
+Channel = Union[FacesChannel, BlobsChannel]
 
 
 def _parse_channel(msg: vision_pb2.Channel) -> Optional[Tuple[str, Channel]]:
     if msg.HasField('faces'):
         return FacesChannel._parse(msg)
-    elif msg.HasField('contours'):
-        return ContoursChannel._parse(msg)
+    elif msg.HasField('blobs'):
+        return BlobsChannel._parse(msg)
     else:  # pragma: nocover
         assert False
 
@@ -63,7 +63,7 @@ def _parse_channel(msg: vision_pb2.Channel) -> Optional[Tuple[str, Channel]]:
 __all__ += [
     'ChannelOperation',
     'CREATE', 'READ', 'UPDATE', 'DELETE',
-    'FacesChannel', 'ContoursChannel', 'Channel',
+    'FacesChannel', 'BlobsChannel', 'Channel',
 ]
 # </GSL customizable: module-header>
 

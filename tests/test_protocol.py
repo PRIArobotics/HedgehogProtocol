@@ -709,14 +709,14 @@ class TestMessages(object):
 
     def test_vision_update_channel_action(self):
         msg = vision.UpdateChannelAction({
-            'foo': vision.ContoursChannel((0x22, 0x22, 0x22), (0x88, 0x88, 0x88)),
+            'foo': vision.BlobsChannel((0x22, 0x22, 0x22), (0x88, 0x88, 0x88)),
         })
         proto = HedgehogMessage()
         proto.vision_channel_message.op = vision.UPDATE
         channel = proto.vision_channel_message.channels.add()
         channel.key = 'foo'
-        channel.contours.hsv_min = 0x222222
-        channel.contours.hsv_max = 0x888888
+        channel.blobs.hsv_min = 0x222222
+        channel.blobs.hsv_max = 0x888888
         self.assertTransmissionClientServer(msg, proto)
 
     def test_vision_delete_channel_action(self):
