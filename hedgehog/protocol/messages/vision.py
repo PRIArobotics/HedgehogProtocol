@@ -83,6 +83,7 @@ class FacesFeature:
         return cls([Face._parse(face) for face in msg.faces.faces])
 
     def _serialize(self, msg: vision_pb2.Feature) -> None:
+        msg.faces.SetInParent()
         for face in self.faces:
             face._serialize(msg.faces.faces.add())
 
@@ -116,6 +117,7 @@ class BlobsFeature:
         return cls([Blob._parse(blob) for blob in msg.blobs.blobs])
 
     def _serialize(self, msg: vision_pb2.Feature) -> None:
+        msg.blobs.SetInParent()
         for blob in self.blobs:
             blob._serialize(msg.blobs.blobs.add())
 

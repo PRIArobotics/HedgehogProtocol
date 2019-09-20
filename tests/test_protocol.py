@@ -795,6 +795,12 @@ class TestMessages(object):
         face.height = 50
         self.assertTransmissionServerClient(msg, proto)
 
+        msg = vision.FeatureReply('foo', vision.FacesFeature([]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        face = proto.vision_feature_message.feature.faces.SetInParent()
+        self.assertTransmissionServerClient(msg, proto)
+
         msg = vision.FeatureReply('foo', vision.BlobsFeature([
             vision.Blob((0, 10, 100, 50), (50, 35), 0.5),
         ]))
@@ -807,6 +813,12 @@ class TestMessages(object):
         blob.cx = 50
         blob.cy = 35
         blob.confidence = 0.5
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FeatureReply('foo', vision.BlobsFeature([]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        blob = proto.vision_feature_message.feature.blobs.SetInParent()
         self.assertTransmissionServerClient(msg, proto)
 
 
