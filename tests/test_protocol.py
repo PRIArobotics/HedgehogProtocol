@@ -679,6 +679,11 @@ class TestMessages(object):
         proto.speaker_action.frequency = 1000
         self.assertTransmissionClientServer(msg, proto)
 
+        msg = speaker.Action(None)
+        proto = HedgehogMessage()
+        proto.speaker_action.frequency = 0
+        self.assertTransmissionClientServer(msg, proto)
+
 
 class TestSockets(object):
     def test_raw_to_from_delimited(self):
