@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package hedgehog.protocol.proto;
+
+option java_package = "at.pria.hedgehog.protocol.proto";
+option java_outer_classname = "VisionP";
+
+// <GSL customizable: module-extras>
+enum ChannelOperation {
+    READ = 0;
+    CREATE = 1;
+    UPDATE = 2;
+    DELETE = 3;
+}
+
+message FacesChannel {}
+
+message BlobsChannel {
+    fixed32 hsv_min = 1;
+    fixed32 hsv_max = 2;
+}
+
+message Channel {
+    string key = 1;
+    oneof channel {
+        FacesChannel faces = 2;
+        BlobsChannel blobs = 3;
+    }
+}
+
+message Face {
+    uint32 x = 1;
+    uint32 y = 2;
+    uint32 width = 3;
+    uint32 height = 4;
+}
+
+message FacesFeature {
+    repeated Face faces = 1;
+}
+
+message Blob {
+    uint32 x = 1;
+    uint32 y = 2;
+    uint32 width = 3;
+    uint32 height = 4;
+    uint32 cx = 5;
+    uint32 cy = 6;
+    float confidence = 7;
+}
+
+message BlobsFeature {
+    repeated Blob blobs = 1;
+}
+
+message Feature {
+    oneof feature {
+        FacesFeature faces = 1;
+        BlobsFeature blobs = 2;
+    }
+}
+// </GSL customizable: module-extras>
+
+// Opens or closes the camera. When the camera is open,
+// frames will be read at the camera's speed and captured at the caller's speed.
+// Similar to a subscription, the camera must be closed as many times as it was opened.
+// It will remain open until it is closed the appropriate number of times.
+//
+// => ():                    open camera action => ack
+// => ():                    close camera action => ack
+message VisionCameraAction {
+    bool open = 1;
+}
+
+// Creates, reads, updates or deletes channels. Using an existing key when creating,
+// or using a nonexistent key unless creating a channel, will result in the command to fail.
+// On a failure, no change will have been processed.
+// When reading or deleting a channel, only the key is used and specifying the channel details
+// is not necessary.
+// 
+// Not specifying any keys in a channel request will list all existing channels.
+//
+// => (channels):            create channel action => ack
+// => (channels):            update channel action => ack
+// => (keys):                delete channel action => ack
+// => (keys):                channel request => channel reply
+// <= (channels):            channel reply
+message VisionChannelMessage {
+    ChannelOperation op = 1;
+    repeated Channel channels = 2;
+}
+
+// Decodes and retrieved the latest grabbed frame.
+// While frames arrive regularly, they are only retrieved on demand with this command.
+// Subsequent processing is done on this frame, until a newer one is captured.
+//
+// => ():                    capture frame action => ack
+message VisionCaptureFrameAction {
+}
+
+// Request or reply for the last captured frame, as a jpg encoded image,
+// optionally with highlighting for one of the channels added in the image.
+//
+// => (highlight):           frame request => frame reply
+// <= (highlight, frame):    frame reply
+message VisionFrameMessage {
+    string highlight = 1;
+    bytes frame = 2;
+}
+
+// Request or reply for the last captured frame's features corresponding to one channel..
+//
+// => (channel):             feature request => feature reply
+// <= (channel, feature):    feature reply
+message VisionFeatureMessage {
+    string channel = 1;
+    Feature feature = 2;
+}

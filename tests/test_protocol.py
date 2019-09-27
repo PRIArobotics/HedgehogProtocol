@@ -9,7 +9,7 @@ from hedgehog.protocol.zmq import raw_to_delimited, raw_from_delimited, to_delim
 from hedgehog.protocol.zmq import asyncio as zmq_asyncio, trio as zmq_trio
 from hedgehog.protocol.proto.hedgehog_pb2 import HedgehogMessage
 from hedgehog.protocol.proto.subscription_pb2 import Subscription
-from hedgehog.protocol.messages import Message, ack, version, emergency, io, analog, digital, imu, motor, servo, process, speaker
+from hedgehog.protocol.messages import Message, ack, version, emergency, io, analog, digital, imu, motor, servo, process, speaker, vision
 
 
 # Pytest fixtures
@@ -683,6 +683,143 @@ class TestMessages(object):
         proto = HedgehogMessage()
         proto.speaker_action.frequency = 0
         self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_open_camera_action(self):
+        msg = vision.OpenCameraAction()
+        proto = HedgehogMessage()
+        proto.vision_camera_action.open = True
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_close_camera_action(self):
+        msg = vision.CloseCameraAction()
+        proto = HedgehogMessage()
+        proto.vision_camera_action.open = False
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_create_channel_action(self):
+        msg = vision.CreateChannelAction({
+            'foo': vision.FacesChannel(),
+        })
+        proto = HedgehogMessage()
+        proto.vision_channel_message.op = vision.CREATE
+        channel = proto.vision_channel_message.channels.add()
+        channel.key = 'foo'
+        channel.faces.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_update_channel_action(self):
+        msg = vision.UpdateChannelAction({
+            'foo': vision.BlobsChannel((0x22, 0x22, 0x22), (0x88, 0x88, 0x88)),
+        })
+        proto = HedgehogMessage()
+        proto.vision_channel_message.op = vision.UPDATE
+        channel = proto.vision_channel_message.channels.add()
+        channel.key = 'foo'
+        channel.blobs.hsv_min = 0x222222
+        channel.blobs.hsv_max = 0x888888
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_delete_channel_action(self):
+        msg = vision.DeleteChannelAction({
+            'foo',
+        })
+        proto = HedgehogMessage()
+        proto.vision_channel_message.op = vision.DELETE
+        proto.vision_channel_message.channels.add().key = 'foo'
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_channel_request(self):
+        msg = vision.ChannelRequest({
+            'foo',
+        })
+        proto = HedgehogMessage()
+        proto.vision_channel_message.op = vision.READ
+        proto.vision_channel_message.channels.add().key = 'foo'
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_channel_reply(self):
+        msg = vision.ChannelReply({
+            'foo': vision.FacesChannel(),
+        })
+        proto = HedgehogMessage()
+        proto.vision_channel_message.op = vision.READ
+        channel = proto.vision_channel_message.channels.add()
+        channel.key = 'foo'
+        channel.faces.SetInParent()
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_vision_capture_frame_action(self):
+        msg = vision.CaptureFrameAction()
+        proto = HedgehogMessage()
+        proto.vision_capture_frame_action.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_frame_request(self):
+        msg = vision.FrameRequest(None)
+        proto = HedgehogMessage()
+        proto.vision_frame_message.SetInParent()
+        self.assertTransmissionClientServer(msg, proto)
+
+        msg = vision.FrameRequest('foo')
+        proto = HedgehogMessage()
+        proto.vision_frame_message.highlight = 'foo'
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_frame_reply(self):
+        msg = vision.FrameReply(None, bytes())
+        proto = HedgehogMessage()
+        proto.vision_frame_message.frame = bytes()
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FrameReply('foo', bytes())
+        proto = HedgehogMessage()
+        proto.vision_frame_message.highlight = 'foo'
+        proto.vision_frame_message.frame = bytes()
+        self.assertTransmissionServerClient(msg, proto)
+
+    def test_vision_feature_request(self):
+        msg = vision.FeatureRequest('foo')
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        self.assertTransmissionClientServer(msg, proto)
+
+    def test_vision_feature_reply(self):
+        msg = vision.FeatureReply('foo', vision.FacesFeature([
+            vision.Face((0, 10, 100, 50)),
+        ]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        face = proto.vision_feature_message.feature.faces.faces.add()
+        face.y = 10
+        face.width = 100
+        face.height = 50
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FeatureReply('foo', vision.FacesFeature([]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        face = proto.vision_feature_message.feature.faces.SetInParent()
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FeatureReply('foo', vision.BlobsFeature([
+            vision.Blob((0, 10, 100, 50), (50, 35), 0.5),
+        ]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        blob = proto.vision_feature_message.feature.blobs.blobs.add()
+        blob.y = 10
+        blob.width = 100
+        blob.height = 50
+        blob.cx = 50
+        blob.cy = 35
+        blob.confidence = 0.5
+        self.assertTransmissionServerClient(msg, proto)
+
+        msg = vision.FeatureReply('foo', vision.BlobsFeature([]))
+        proto = HedgehogMessage()
+        proto.vision_feature_message.channel = 'foo'
+        blob = proto.vision_feature_message.feature.blobs.SetInParent()
+        self.assertTransmissionServerClient(msg, proto)
 
 
 class TestSockets(object):
